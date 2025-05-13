@@ -1,9 +1,10 @@
 var express = require('express');
-var router = express.Router();
+var routes = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+// Import all routers
+var userRouter = require('./users/index');
 
-module.exports = router;
+// Attach all routers to the main router
+routes.use('/user', userRouter);
+
+module.exports = routes;
