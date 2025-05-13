@@ -3,6 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const result = require('dotenv').config()
+if (result.error) {
+  console.log("Unable to load \".env\" file.");
+  process.exit(-1);
+}
 
 var routes = require('./routes/index');
 
