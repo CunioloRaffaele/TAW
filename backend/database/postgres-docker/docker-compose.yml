@@ -1,0 +1,13 @@
+# version: '3.8'
+
+services:
+  db:
+    build: .
+    container_name: postdb
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5431:5432"
+
