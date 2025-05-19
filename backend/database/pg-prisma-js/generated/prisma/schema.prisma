@@ -14,7 +14,7 @@ model aircrafts {
   model          String?   @default("Boeing 747") @db.VarChar(100)
   seats_capacity Int?      @default(120)
   owner_name     String    @db.VarChar(255)
-  airlines       airlines  @relation(fields: [owner_name], references: [name], onDelete: NoAction)
+  airlines       airlines  @relation(fields: [owner_name], references: [name], onDelete: Cascade)
   flights        flights[]
   seats          seats[]
 }
@@ -41,14 +41,14 @@ model airports {
 
 model bookings {
   id          Int      @id @default(autoincrement())
-  ticket_code String?  @db.VarChar(255)
+  ticket_code String?  @db.Uuid
   seat_id     Int?
   trip_id     Int?
   extras_id   Int?
-  extras      extras?  @relation(fields: [extras_id], references: [id], onDelete: NoAction)
-  seats       seats?   @relation(fields: [seat_id], references: [id], onDelete: NoAction)
-  tickets     tickets? @relation(fields: [ticket_code], references: [code], onDelete: NoAction)
-  trips       trips?   @relation(fields: [trip_id], references: [id], onDelete: NoAction)
+  extras      extras?  @relation(fields: [extras_id], references: [id])
+  seats       seats?   @relation(fields: [seat_id], references: [id])
+  tickets     tickets? @relation(fields: [ticket_code], references: [code])
+  trips       trips?   @relation(fields: [trip_id], references: [id])
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -67,8 +67,8 @@ model flights {
   liftoff_date      DateTime?  @db.Date
   route_departure   Int?
   route_destination Int?
-  aircrafts         aircrafts? @relation(fields: [aircraft_id], references: [id], onDelete: NoAction)
-  routes            routes?    @relation(fields: [route_departure, route_destination], references: [departure, destination], onDelete: NoAction)
+  aircrafts         aircrafts? @relation(fields: [aircraft_id], references: [id])
+  routes            routes?    @relation(fields: [route_departure, route_destination], references: [departure, destination])
   tickets           tickets[]
 }
 
@@ -90,17 +90,17 @@ model seats {
   postion     String?    @db.VarChar(4)
   aircraft_id Int?
   bookings    bookings[]
-  aircrafts   aircrafts? @relation(fields: [aircraft_id], references: [id], onDelete: NoAction)
+  aircrafts   aircrafts? @relation(fields: [aircraft_id], references: [id], onDelete: Cascade)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model tickets {
-  code       String     @id @db.VarChar(255)
+  code       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type       String?    @db.VarChar(50)
   price      Float?
   fligt_code String?    @db.Uuid
   bookings   bookings[]
-  flights    flights?   @relation(fields: [fligt_code], references: [code], onDelete: NoAction)
+  flights    flights?   @relation(fields: [fligt_code], references: [code], onDelete: Cascade)
 }
 
 model trips {
@@ -108,7 +108,7 @@ model trips {
   creation_date DateTime?  @db.Date
   user_id       Int?
   bookings      bookings[]
-  users         users?     @relation(fields: [user_id], references: [id], onDelete: NoAction)
+  users         users?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -126,6 +126,6 @@ model uses {
   airline_name      String?   @db.VarChar(255)
   route_departure   Int?
   route_destination Int?
-  airlines          airlines? @relation(fields: [airline_name], references: [name], onDelete: NoAction)
-  routes            routes?   @relation(fields: [route_departure, route_destination], references: [departure, destination], onDelete: NoAction)
+  airlines          airlines? @relation(fields: [airline_name], references: [name], onDelete: Cascade)
+  routes            routes?   @relation(fields: [route_departure, route_destination], references: [departure, destination], onDelete: Cascade)
 }

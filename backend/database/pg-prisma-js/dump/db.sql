@@ -87,7 +87,9 @@ CREATE TABLE IF NOT EXISTS Users (
 -- Create Tickets Table
 -- what are the standardized classes of a ticket? (arbitrary for us)
 CREATE TABLE IF NOT EXISTS Tickets (
-    code VARCHAR(255) PRIMARY KEY,
+    --    code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     type VARCHAR(50),
     price DOUBLE PRECISION,
     fligt_code UUID,
@@ -117,7 +119,7 @@ CREATE TABLE IF NOT EXISTS Extras (
 -- Create Bookings Table
 CREATE TABLE IF NOT EXISTS Bookings (
     id SERIAL PRIMARY KEY,
-    ticket_code VARCHAR(255),
+    ticket_code UUID,
     seat_id INTEGER,
     trip_id INTEGER,
     extras_id INTEGER,
@@ -276,19 +278,19 @@ INSERT INTO Flights ( duration, aircraft_id, liftoff_date, route_departure, rout
 
 -- 9. Inserimento Tickets (dipende da Flights)
 WITH 
-user_data1 AS (
+ticket_data1 AS (
   SELECT code AS c1 FROM Flights WHERE duration = 368 LIMIT 1
 ),
-user_data2 AS (
+ticket_data2 AS (
   SELECT code AS c2 FROM Flights WHERE duration = 728 LIMIT 1
 ),
 ticket_data AS (
-  SELECT 'TK001' AS code, 'ECONOMY' AS type, 500.00 AS price, c1 AS flight_code FROM user_data1
+  SELECT 'ECONOMY' AS type, 500.00 AS price, c1 AS flight_code FROM ticket_data1
   UNION ALL
-  SELECT 'TK002', 'BUSINESS', 1200.00, c2 FROM user_data2
+  SELECT 'BUSINESS', 1200.00, c2 FROM ticket_data2
 )
-INSERT INTO Tickets (code, type, price, fligt_code)
-SELECT code, type, price, flight_code FROM ticket_data;
+INSERT INTO Tickets (type, price, fligt_code)
+SELECT type, price, flight_code FROM ticket_data;
 
 -- 10. Inserimento Trips (dipende da Users)
 INSERT INTO Trips (creation_date, user_id) VALUES
@@ -301,9 +303,22 @@ INSERT INTO Extras (description, price) VALUES
 ('Airport Lounge', 75.00);
 
 -- 12. Inserimento Bookings (dipende da Tickets, Seats, Trips, Extras)
-INSERT INTO Bookings (ticket_code, seat_id, trip_id, extras_id) VALUES
-('TK001', 1, 1, 1),
-('TK002', 2, 2, 2);
+WITH 
+booking_data1 AS (
+  SELECT code AS c1 FROM Tickets WHERE type = 'ECONOMY' LIMIT 1
+),
+booking_data2 AS (
+  SELECT code AS c2 FROM Tickets WHERE type = 'BUSINESS' LIMIT 1
+),
+booking_data AS (
+  SELECT c1 as code, 1 AS seat, 1 AS trip, 1 AS extra FROM booking_data1
+  UNION ALL
+  SELECT c2, 2, 2, 2 FROM booking_data2
+)
+
+INSERT INTO Bookings (ticket_code, seat_id, trip_id, extras_id)
+SELECT code, seat, trip, extra FROM booking_data;
+
 
 -- Funzione generica per creare una funzione trigger se non esiste già
 -- Esempio di utilizzo: SELECT create_trigger_function_if_not_exists('filter_zombies', 'RETURN NEW;');
@@ -387,6 +402,37 @@ BEGIN
         END IF;
     END LOOP;
     
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- < Limit two bookings (flights and therefore tickets bought) per trip
+-- create function first
+SELECT create_trigger_function_if_not_exists('limit_bookings_per_trip', 'RETURN NEW;');
+-- define then
+CREATE TRIGGER limit_bookings_per_trip_trigger
+BEFORE INSERT OR UPDATE ON Bookings
+FOR EACH ROW
+EXECUTE FUNCTION limit_bookings_per_trip();
+
+CREATE OR REPLACE FUNCTION limit_bookings_per_trip() RETURNS TRIGGER AS $$
+DECLARE
+    bookings_count INTEGER;
+BEGIN
+    IF NEW.trip_id IS NOT NULL THEN
+        SELECT COUNT(*) INTO bookings_count FROM Bookings WHERE trip_id = NEW.trip_id;
+        IF TG_OP = 'INSERT' THEN
+            IF bookings_count >= 2 THEN
+                RAISE EXCEPTION 'Non puoi avere più di 2 bookings per lo stesso trip_id (%).', NEW.trip_id;
+            END IF;
+        ELSIF TG_OP = 'UPDATE' THEN
+            -- Se si cambia trip_id, controlla il nuovo valore
+            IF (NEW.trip_id <> OLD.trip_id) AND (bookings_count >= 2) THEN
+                RAISE EXCEPTION 'Non puoi avere più di 2 bookings per lo stesso trip_id (%).', NEW.trip_id;
+            END IF;
+        END IF;
+    END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

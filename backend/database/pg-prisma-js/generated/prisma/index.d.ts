@@ -12187,7 +12187,7 @@ export namespace Prisma {
     /**
      * The data needed to create a tickets.
      */
-    data: XOR<ticketsCreateInput, ticketsUncheckedCreateInput>
+    data?: XOR<ticketsCreateInput, ticketsUncheckedCreateInput>
   }
 
   /**
@@ -16184,7 +16184,7 @@ export namespace Prisma {
     OR?: bookingsWhereInput[]
     NOT?: bookingsWhereInput | bookingsWhereInput[]
     id?: IntFilter<"bookings"> | number
-    ticket_code?: StringNullableFilter<"bookings"> | string | null
+    ticket_code?: UuidNullableFilter<"bookings"> | string | null
     seat_id?: IntNullableFilter<"bookings"> | number | null
     trip_id?: IntNullableFilter<"bookings"> | number | null
     extras_id?: IntNullableFilter<"bookings"> | number | null
@@ -16211,7 +16211,7 @@ export namespace Prisma {
     AND?: bookingsWhereInput | bookingsWhereInput[]
     OR?: bookingsWhereInput[]
     NOT?: bookingsWhereInput | bookingsWhereInput[]
-    ticket_code?: StringNullableFilter<"bookings"> | string | null
+    ticket_code?: UuidNullableFilter<"bookings"> | string | null
     seat_id?: IntNullableFilter<"bookings"> | number | null
     trip_id?: IntNullableFilter<"bookings"> | number | null
     extras_id?: IntNullableFilter<"bookings"> | number | null
@@ -16239,7 +16239,7 @@ export namespace Prisma {
     OR?: bookingsScalarWhereWithAggregatesInput[]
     NOT?: bookingsScalarWhereWithAggregatesInput | bookingsScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"bookings"> | number
-    ticket_code?: StringNullableWithAggregatesFilter<"bookings"> | string | null
+    ticket_code?: UuidNullableWithAggregatesFilter<"bookings"> | string | null
     seat_id?: IntNullableWithAggregatesFilter<"bookings"> | number | null
     trip_id?: IntNullableWithAggregatesFilter<"bookings"> | number | null
     extras_id?: IntNullableWithAggregatesFilter<"bookings"> | number | null
@@ -16466,7 +16466,7 @@ export namespace Prisma {
     AND?: ticketsWhereInput | ticketsWhereInput[]
     OR?: ticketsWhereInput[]
     NOT?: ticketsWhereInput | ticketsWhereInput[]
-    code?: StringFilter<"tickets"> | string
+    code?: UuidFilter<"tickets"> | string
     type?: StringNullableFilter<"tickets"> | string | null
     price?: FloatNullableFilter<"tickets"> | number | null
     fligt_code?: UuidNullableFilter<"tickets"> | string | null
@@ -16511,7 +16511,7 @@ export namespace Prisma {
     AND?: ticketsScalarWhereWithAggregatesInput | ticketsScalarWhereWithAggregatesInput[]
     OR?: ticketsScalarWhereWithAggregatesInput[]
     NOT?: ticketsScalarWhereWithAggregatesInput | ticketsScalarWhereWithAggregatesInput[]
-    code?: StringWithAggregatesFilter<"tickets"> | string
+    code?: UuidWithAggregatesFilter<"tickets"> | string
     type?: StringNullableWithAggregatesFilter<"tickets"> | string | null
     price?: FloatNullableWithAggregatesFilter<"tickets"> | number | null
     fligt_code?: UuidNullableWithAggregatesFilter<"tickets"> | string | null
@@ -17090,7 +17090,7 @@ export namespace Prisma {
   }
 
   export type ticketsCreateInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
     bookings?: bookingsCreateNestedManyWithoutTicketsInput
@@ -17098,7 +17098,7 @@ export namespace Prisma {
   }
 
   export type ticketsUncheckedCreateInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
     fligt_code?: string | null
@@ -17122,7 +17122,7 @@ export namespace Prisma {
   }
 
   export type ticketsCreateManyInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
     fligt_code?: string | null
@@ -17548,6 +17548,18 @@ export namespace Prisma {
     time_zone?: SortOrder
   }
 
+  export type UuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+
   export type ExtrasNullableScalarRelationFilter = {
     is?: extrasWhereInput | null
     isNot?: extrasWhereInput | null
@@ -17604,6 +17616,21 @@ export namespace Prisma {
     seat_id?: SortOrder
     trip_id?: SortOrder
     extras_id?: SortOrder
+  }
+
+  export type UuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type FloatNullableFilter<$PrismaModel = never> = {
@@ -17847,18 +17874,6 @@ export namespace Prisma {
     aircraft_id?: SortOrder
   }
 
-  export type UuidNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
-  }
-
   export type FlightsNullableScalarRelationFilter = {
     is?: flightsWhereInput | null
     isNot?: flightsWhereInput | null
@@ -17891,21 +17906,6 @@ export namespace Prisma {
 
   export type ticketsSumOrderByAggregateInput = {
     price?: SortOrder
-  }
-
-  export type UuidNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type UsersNullableScalarRelationFilter = {
@@ -19003,6 +19003,31 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type NestedUuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -19067,31 +19092,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
-  export type NestedUuidNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type airlinesCreateWithoutAircraftsInput = {
@@ -19457,14 +19457,14 @@ export namespace Prisma {
   }
 
   export type ticketsCreateWithoutBookingsInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
     flights?: flightsCreateNestedOneWithoutTicketsInput
   }
 
   export type ticketsUncheckedCreateWithoutBookingsInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
     fligt_code?: string | null
@@ -19626,7 +19626,7 @@ export namespace Prisma {
     OR?: bookingsScalarWhereInput[]
     NOT?: bookingsScalarWhereInput | bookingsScalarWhereInput[]
     id?: IntFilter<"bookings"> | number
-    ticket_code?: StringNullableFilter<"bookings"> | string | null
+    ticket_code?: UuidNullableFilter<"bookings"> | string | null
     seat_id?: IntNullableFilter<"bookings"> | number | null
     trip_id?: IntNullableFilter<"bookings"> | number | null
     extras_id?: IntNullableFilter<"bookings"> | number | null
@@ -19670,14 +19670,14 @@ export namespace Prisma {
   }
 
   export type ticketsCreateWithoutFlightsInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
     bookings?: bookingsCreateNestedManyWithoutTicketsInput
   }
 
   export type ticketsUncheckedCreateWithoutFlightsInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
     bookings?: bookingsUncheckedCreateNestedManyWithoutTicketsInput
@@ -19762,7 +19762,7 @@ export namespace Prisma {
     AND?: ticketsScalarWhereInput | ticketsScalarWhereInput[]
     OR?: ticketsScalarWhereInput[]
     NOT?: ticketsScalarWhereInput | ticketsScalarWhereInput[]
-    code?: StringFilter<"tickets"> | string
+    code?: UuidFilter<"tickets"> | string
     type?: StringNullableFilter<"tickets"> | string | null
     price?: FloatNullableFilter<"tickets"> | number | null
     fligt_code?: UuidNullableFilter<"tickets"> | string | null
@@ -20509,7 +20509,7 @@ export namespace Prisma {
   }
 
   export type ticketsCreateManyFlightsInput = {
-    code: string
+    code?: string
     type?: string | null
     price?: number | null
   }

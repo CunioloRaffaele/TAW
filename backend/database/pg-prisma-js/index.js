@@ -10,17 +10,22 @@ async function main() {
     const departure = 1 // ID aeroporto di partenza esistente
     const destination = 2 // ID aeroporto di destinazione esistente
     const aircraft = 1 // ID aereo esistente
-
-    const ress = await remove('6447d0e0-7854-4f89-8c13-37c015b1ab99')
-    console.log(ress)
+    //await create(liftoffDate, duration, 1, aircraft)
+    await create(1,1,2,1)
+    //const ress = await setTripIdNullForBooking(3)
+    //console.log(ress)
 }
-async function remove(code) {
-    return await prisma.flights.delete({
-        where: {
-            code: code
+async function create(ticketCode, seatId, tripId, extraId) {
+    return await prisma.bookings.create({
+        data: {
+            //ticket_code: ticketCode,
+            //seat_id: seatId,
+            trip_id: tripId,
+            //extra_id: extraId
         }
     })
 }
+
 
 
 
@@ -35,6 +40,13 @@ main()
 
 
 /*
+---------------
+CAREFUL: TRIGGER THAT DELETE RECORDS WON'T RETURN THEM IN A return statement
+        on server side, so carefult and plans with try catches
+---------------
+
+
+
 --------------- USER
 async function getAdmin() {
     return await prisma.users.findFirst({
@@ -185,4 +197,35 @@ async function create(liftoffDate, duration, departure, destination, aircraft) {
         }
     })
 }
+
+--------------- TICKETS
+async function remove(code) {
+    return await prisma.tickets.delete({
+        where: {
+            code: code
+        }
+    })
+}
+
+--------------- BOOKINGS
+
+async function create(ticketCode, seatId, tripId, extraId) {
+    return await prisma.bookings.create({
+        data: {
+            ticket_code: ticketCode,
+            seat_id: seatId,
+            trip_id: tripId,
+            extra_id: extraId
+        }
+    })
+}
+async function remove(id) {
+    return await prisma.bookings.delete({
+        where: {
+            id: id
+        }
+    })
+}
+
+
 */
