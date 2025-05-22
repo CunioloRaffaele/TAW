@@ -1,10 +1,15 @@
 var express = require('express');
+const controller = require('./controller');
+const authMiddleware = require('../../middleware/auth');
+const validateJsonRequest = require('../../middleware/validateJsonRequest');
 var userRouter = express.Router();
 
-/* GET users listing. */
-userRouter.get('/auth', function(req, res, next) {
-  res.status(200);
-  res.send('respond with a resource');
-});
+userRouter.post('/newAccount', validateJsonRequest, controller.createNewAccount);
+
+userRouter.get('/login', validateJsonRequest, controller.logUserIn);
+
+userRouter.get('/getAccountInfo', authMiddleware, controller.getAccountInfo);
+
+userRouter.delete('/deleteAccount', authMiddleware, controller.deleteAccount);
 
 module.exports = userRouter;
