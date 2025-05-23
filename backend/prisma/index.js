@@ -1,27 +1,14 @@
-const { PrismaClient } = require('.')
+const { PrismaClient } = require('./generated/prisma')
 
 const prisma = new PrismaClient()
 
 async function main() {
-    // Esempio di inserimento coerente di un volo
-    // Assicurati che questi ID esistano già nel tuo database!
-    const liftoffDate = new Date('2024-07-01T10:00:00Z')
-    const duration = 149 // durata in minuti
-    const departure = 1 // ID aeroporto di partenza esistente
-    const destination = 2 // ID aeroporto di destinazione esistente
-    const aircraft = 1 // ID aereo esistente
-    //await create(liftoffDate, duration, 1, aircraft)
-    await create(1,1,2,1)
-    //const ress = await setTripIdNullForBooking(3)
-    //console.log(ress)
+    console.log(await removeById(4))
 }
-async function create(ticketCode, seatId, tripId, extraId) {
-    return await prisma.bookings.create({
-        data: {
-            //ticket_code: ticketCode,
-            //seat_id: seatId,
-            trip_id: tripId,
-            //extra_id: extraId
+async function removeById(id) {
+    return await prisma.bljwts.delete({
+        where: {
+            id: id
         }
     })
 }
@@ -227,5 +214,21 @@ async function remove(id) {
     })
 }
 
+--- blJWTs
 
+async function create(bannedJWT) {
+    return await prisma.bljwts.create({
+        data: {
+           jwt: bannedJWT
+        }
+    })
+}
+
+async function removeById(id) {
+    return await prisma.bljwts.delete({
+        where: {
+            id: id
+        }
+    })
+}
 */

@@ -1,6 +1,13 @@
 -- extension for UUID generation
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+
+-- Create blJWTs Table
+CREATE TABLE IF NOT EXISTS blJWTs (
+    id SERIAL PRIMARY KEY,
+    jwt VARCHAR(255) NOT NULL
+);
+
 -- Create Airlines Table
 CREATE TABLE IF NOT EXISTS Airlines (
     name VARCHAR(255) PRIMARY KEY,
@@ -319,6 +326,13 @@ booking_data AS (
 INSERT INTO Bookings (ticket_code, seat_id, trip_id, extras_id)
 SELECT code, seat, trip, extra FROM booking_data;
 
+-- 13. Inserimento blJWTs (tabella indipendente)
+INSERT INTO blJWTs (jwt) VALUES
+('jwt1'),
+('jwt2'),
+('jwt3'),
+('jwt4');
+
 
 -- Funzione generica per creare una funzione trigger se non esiste già
 -- Esempio di utilizzo: SELECT create_trigger_function_if_not_exists('filter_zombies', 'RETURN NEW;');
@@ -436,3 +450,4 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+

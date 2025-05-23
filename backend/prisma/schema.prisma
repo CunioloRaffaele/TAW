@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -128,4 +128,9 @@ model uses {
   route_destination Int?
   airlines          airlines? @relation(fields: [airline_name], references: [name], onDelete: Cascade)
   routes            routes?   @relation(fields: [route_departure, route_destination], references: [departure, destination], onDelete: Cascade)
+}
+
+model bljwts {
+  id  Int    @id @default(autoincrement())
+  jwt String @db.VarChar(255)
 }
