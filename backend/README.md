@@ -30,7 +30,7 @@ The Postgres server will be running on port 5431 by default.
 
 1. Navigate to the server directory:
 ```bash
-cd server
+cd backend
 ```
 
 2. Install dependencies:
@@ -38,7 +38,12 @@ cd server
 npm install
 ```
 
-3. Start the server:
+3. Generate Prisma client locally
+```bash
+npx prisma generate
+```
+
+4. Start the server:
 ```bash
 npm start
 ```

@@ -1,6 +1,6 @@
 const { generateToken } = require('../../utils/jwt');
 const bcrypt = require('bcrypt');
-const { PrismaClient } = require('../../prisma');
+const { PrismaClient } = require('../../prisma/generated');
 const prisma = new PrismaClient()
 
 exports.createNewAccount = async (req, res) => {
