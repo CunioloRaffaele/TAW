@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('../prisma/generated/prisma');
+const prisma = new PrismaClient()
 
 if (!process.env.JWT_SECRET || !process.env.JWT_EXPIRATION) {
     console.error('JWT_SECRET or JWT_EXPIRATION is not defined in the environment variables');
@@ -21,3 +23,16 @@ exports.verifyToken = (token) => {
         throw new Error('Invalid or expired token');
     }
 };
+
+exports.isTokenBlacklisted = async (token) => {
+    // Check if jwt token is blacklisted
+    const user = await prisma.bljwts.findFirst({
+        where: {
+            jwt: token
+        }
+    });
+    if (user) {
+        return true;
+    }
+    return false;
+}

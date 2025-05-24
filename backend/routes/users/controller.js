@@ -1,6 +1,6 @@
 const { generateToken } = require('../../utils/jwt');
 const bcrypt = require('bcrypt');
-const { PrismaClient } = require('../../prisma/generated');
+const { PrismaClient } = require('../../prisma/generated/prisma');
 const prisma = new PrismaClient()
 
 exports.createNewAccount = async (req, res) => {
@@ -110,21 +110,75 @@ exports.deleteAccount = async (req, res) => {
         });
     }
     const userId = req.userToken.userId;
-    // Delete user account
+    const token = req.jwt;
+
     try {
-        await prisma.users.delete({
-            where: {
-                id: userId
-            }
+        // Execute a transaction to delete the user and add the token to the blacklist
+        await prisma.$transaction([
+            // Delete the user account
+            prisma.users.delete({
+                where: {
+                    id: userId
+                }
+            }),
+            // Add the token to the blacklist
+            prisma.bljwts.create({
+                data: {
+                    jwt: token
+                }
+            }),
+        ]);
+
+        res.status(200).json({
+            message: 'Account deleted and token blacklisted successfully'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: 'Error deleting account or blacklisting token: ' + error.message
         });
     }
-    catch (error) {
-        return res.status(400).json({ 
-            error: 'Error deleting account ' + error.message 
+}
+
+exports.sudoDeleteAccount = async (req, res) => {
+    // Validate required fields
+    if (!req.userToken || req.userToken.role !== 1) {
+        return res.status(403).json({ 
+            error: 'Only admin (role = 1) can delete accounts' 
+        });
+    }
+    const accountToDelete = parseInt(req.params.id, 10); // Convert to integer (base 10)
+
+    if (isNaN(accountToDelete)) {
+        return res.status(500).json({
+            error: 'Invalid account ID number'
         });
     }
 
-    res.status(200).json({
-        message: 'Account deleted successfully'
-    });
+    try {
+        // Check if the user exists
+        const user = await prisma.users.findUnique({
+            where: {
+                id: accountToDelete
+            }
+        });
+
+        if (!user) {
+            return res.status(500).json({
+                error: 'User not found'
+            });
+        }
+        // Delete the user account
+        await prisma.users.delete({
+            where: {
+                id: accountToDelete
+            }
+        }),
+        res.status(200).json({
+            message: 'Account deleted identified by ID: ' + accountToDelete + ' successfully'
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: 'Error deleting account: ' + error.message
+        });
+    }
 }

@@ -327,11 +327,11 @@ INSERT INTO Bookings (ticket_code, seat_id, trip_id, extras_id)
 SELECT code, seat, trip, extra FROM booking_data;
 
 -- 13. Inserimento blJWTs (tabella indipendente)
-INSERT INTO blJWTs (jwt) VALUES
+/*INSERT INTO blJWTs (jwt) VALUES
 ('jwt1'),
 ('jwt2'),
 ('jwt3'),
-('jwt4');
+('jwt4');*/
 
 
 -- Funzione generica per creare una funzione trigger se non esiste già
