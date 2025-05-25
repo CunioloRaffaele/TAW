@@ -3,16 +3,19 @@ const { PrismaClient } = require('./generated/prisma')
 const prisma = new PrismaClient()
 
 async function main() {
-    console.log(await removeById(4))
+    console.log(await create('Airline2', 'NewAirlineName', 'USA', 'Fly High!', true))
 }
-async function removeById(id) {
-    return await prisma.bljwts.delete({
-        where: {
-            id: id
+async function create(name, password, country, motto, enrolled = false) {
+    return await prisma.airlines.create({
+        data: {
+            name: name,
+            password:password,
+            country: country,
+            motto: motto,
+            enrolled: enrolled
         }
     })
 }
-
 
 
 
@@ -126,18 +129,19 @@ async function getAll() {
     return await prisma.airlines.findMany({})
 }
 
-async function create(name, password, country, motto) {
+async function create(name, password, country, motto, enrolled = false) {
     return await prisma.airlines.create({
         data: {
             name: name,
             password:password,
             country: country,
             motto: motto,
+            enrolled: enrolled
         }
     })
 }
 
-async function updateInfo(name, newName, country, motto) {
+async function updateInfo(name, newName, country, motto, enrolled) {
     return await prisma.airlines.update({
         where:{
             name: name
@@ -145,7 +149,8 @@ async function updateInfo(name, newName, country, motto) {
         data: {
             name: newName,
             country: country,
-            motto: motto
+            motto: motto,
+            enrolled: enrolled
         }
     })
 }

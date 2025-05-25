@@ -24,6 +24,7 @@ model airlines {
   password  String      @db.VarChar(255)
   country   String      @db.VarChar(100)
   motto     String?     @default("Fly with us, fly safe and snug <3") @db.VarChar(300)
+  enrolled  Boolean?    @default(false)
   aircrafts aircrafts[]
   uses      uses[]
 }
