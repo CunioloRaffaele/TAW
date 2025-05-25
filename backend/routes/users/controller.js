@@ -182,3 +182,32 @@ exports.sudoDeleteAccount = async (req, res) => {
         });
     }
 }
+
+exports.sudoListAccount = async (req, res) => {
+    // Validate required fields
+    if (!req.userToken || req.userToken.role !== 1) {
+        return res.status(403).json({ 
+            error: 'Only admin (role = 1) can list accounts' 
+        });
+    }
+
+    try {
+        // List all user accounts
+        const users = await prisma.users.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true
+            }
+        });
+
+        res.status(200).json({
+            users: users
+        });
+    } catch (error) {
+        return res.status(500).json({
+            error: 'Error listing accounts: ' + error.message
+        });
+    }
+}

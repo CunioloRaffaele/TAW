@@ -12,6 +12,8 @@ userRouter.get('/getAccountInfo', authMiddleware, controller.getAccountInfo);
 
 userRouter.delete('/deleteAccount', authMiddleware, controller.deleteAccount);
 
+userRouter.get('/sudoListAccounts', authMiddleware, controller.sudoListAccount);
+
 userRouter.delete('/sudoDeleteAccount/:id', authMiddleware, controller.sudoDeleteAccount);
 
 module.exports = userRouter;
