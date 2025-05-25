@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS Airlines (
     name VARCHAR(255) PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
     country VARCHAR(100) NOT NULL,
-    motto VARCHAR(300) DEFAULT 'Fly with us, fly safe and snug <3'
+    motto VARCHAR(300) DEFAULT 'Fly with us, fly safe and snug <3',
+    enrolled BOOLEAN DEFAULT FALSE
 );
 
 -- Create Airports Table
@@ -228,10 +229,10 @@ $$ LANGUAGE plpgsql;
 -- new values; prisma can't keep up with the autoincremented values
 
 -- 1. Inserimento Airlines (tabella indipendente)
-INSERT INTO Airlines (name, password, country, motto) VALUES
-('Emirates', 'em1r@t3s2024', 'United Arab Emirates', 'Fly Better'),
-('Lufthansa', 'luft2024!secure', 'Germany', 'Say yes to the world'),
-('Singapore Airlines', 'sing@p0r32024', 'Singapore', 'A Great Way to Fly');
+INSERT INTO Airlines (name, password, country, motto, enrolled) VALUES
+('Emirates', 'em1r@t3s2024', 'United Arab Emirates', 'Fly Better', FALSE),
+('Lufthansa', 'luft2024!secure', 'Germany', 'Say yes to the world', TRUE),
+('Singapore Airlines', 'sing@p0r32024', 'Singapore', 'A Great Way to Fly', FALSE);
 
 -- 2. Inserimento Airports (tabella indipendente)
 INSERT INTO Airports ( name, city, country, time_zone) VALUES
@@ -327,11 +328,11 @@ INSERT INTO Bookings (ticket_code, seat_id, trip_id, extras_id)
 SELECT code, seat, trip, extra FROM booking_data;
 
 -- 13. Inserimento blJWTs (tabella indipendente)
-/*INSERT INTO blJWTs (jwt) VALUES
+INSERT INTO blJWTs (jwt) VALUES
 ('jwt1'),
 ('jwt2'),
 ('jwt3'),
-('jwt4');*/
+('jwt4');
 
 
 -- Funzione generica per creare una funzione trigger se non esiste già
