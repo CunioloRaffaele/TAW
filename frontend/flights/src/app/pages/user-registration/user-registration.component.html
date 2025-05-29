@@ -1,0 +1,56 @@
+<div class="registration-container">
+  <mat-card class="registration-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon color="primary" class="registration-icon">person_add</mat-icon>
+        Crea un nuovo account utente
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="registrationForm" (ngSubmit)="onRegister()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nome</mat-label>
+          <input matInput formControlName="name" required />
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="registrationForm.get('name')?.hasError('required')">
+            Il nome è obbligatorio
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" required />
+          <mat-icon matPrefix>mail</mat-icon>
+          <mat-error *ngIf="registrationForm.get('email')?.hasError('required')">
+            L'email è obbligatoria
+          </mat-error>
+          <mat-error *ngIf="registrationForm.get('email')?.hasError('email')">
+            Inserisci un indirizzo email valido
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password" required />
+          <mat-icon matPrefix>lock</mat-icon>
+          <mat-error *ngIf="registrationForm.get('password')?.hasError('required')">
+            La password è obbligatoria
+          </mat-error>
+          <mat-error *ngIf="registrationForm.get('password')?.hasError('minlength')">
+            Minimo 6 caratteri
+          </mat-error>
+        </mat-form-field>
+        <button mat-raised-button color="primary" class="full-width" type="submit" [disabled]="registrationForm.invalid || loading">
+          <mat-progress-spinner *ngIf="loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+          <span *ngIf="!loading">Registrati</span>
+        </button>
+        <div *ngIf="error" class="error-message">
+          <mat-icon color="warn">error</mat-icon>
+          {{ error }}
+        </div>
+        <div *ngIf="success" class="success-message">
+          <mat-icon color="primary">check_circle</mat-icon>
+          {{ success }}
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

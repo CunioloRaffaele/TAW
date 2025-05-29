@@ -1,0 +1,11 @@
+.dashboard-container {
+  height: 100vh;
+}
+
+.dashboard-sidenav {
+  width: 220px;
+}
+
+.dashboard-content {
+  padding: 32px;
+}

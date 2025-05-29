@@ -1,0 +1,47 @@
+<div class="enrollment-container">
+  <mat-card class="enrollment-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon color="primary">how_to_reg</mat-icon>
+        Completa la registrazione della compagnia
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="enrollmentForm" (ngSubmit)="onEnroll()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nuova password</mat-label>
+          <input matInput formControlName="password" type="password" required />
+          <mat-icon matPrefix>lock</mat-icon>
+          <mat-error *ngIf="enrollmentForm.get('password')?.hasError('required')">
+            La password è obbligatoria
+          </mat-error>
+          <mat-error *ngIf="enrollmentForm.get('password')?.hasError('minlength')">
+            Minimo 6 caratteri
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Paese</mat-label>
+          <input matInput formControlName="country" required />
+          <mat-icon matPrefix>public</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Motto</mat-label>
+          <input matInput formControlName="motto" required />
+          <mat-icon matPrefix>emoji_objects</mat-icon>
+        </mat-form-field>
+        <button mat-raised-button color="primary" class="full-width" type="submit" [disabled]="enrollmentForm.invalid || loading">
+          <mat-progress-spinner *ngIf="loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+          <span *ngIf="!loading">Completa registrazione</span>
+        </button>
+        <div *ngIf="error" class="error-message">
+          <mat-icon color="warn">error</mat-icon>
+          {{ error }}
+        </div>
+        <div *ngIf="success" class="success-message">
+          <mat-icon color="primary">check_circle</mat-icon>
+          Registrazione completata! Reindirizzamento al login...
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

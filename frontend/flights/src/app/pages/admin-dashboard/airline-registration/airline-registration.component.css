@@ -1,0 +1,46 @@
+.signup-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 24px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.signup-icon {
+  vertical-align: middle;
+  margin-right: 8px;
+  font-size: 32px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.invite-result {
+  margin-top: 16px;
+  color: #388e3c;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.copied-msg {
+  color: #388e3c;
+  font-size: 0.95em;
+  margin-left: 8px;
+}
+
+.error-message {
+  margin-top: 16px;
+  color: #e53935;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
