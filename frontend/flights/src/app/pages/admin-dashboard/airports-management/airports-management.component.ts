@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-airports-management',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, MatCardModule],
   templateUrl: './airports-management.component.html',
-  styleUrl: './airports-management.component.css'
+  styleUrls: ['./airports-management.component.css']
 })
-export class AirportsManagementComponent {
-
-}
+export class AirportsManagementComponent { }

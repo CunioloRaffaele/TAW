@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-signin',
@@ -32,11 +33,21 @@ export class SigninComponent {
   loading = false;
   error: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+  }
+
+  // Funzione per estrarre il ruolo dal token JWT
+  private getRoleFromToken(token: string): number | null {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role;
+    } catch {
+      return null;
+    }
   }
 
   onLogin() {
@@ -44,19 +55,25 @@ export class SigninComponent {
     this.loading = true;
     this.error = null;
 
-    this.http.post<{ message: string, token: string }>(
+    const params = new HttpParams()
+      .set('email', this.loginForm.value.email)
+      .set('password', this.loginForm.value.password);
+
+    this.http.get<{ message: string, token: string }>(
       `${environment.apiUrl}/api/user/login`,
-      this.loginForm.value
+      { params }
     ).subscribe({
       next: (res) => {
-        console.log("Data received when invoking the /login endpoint:");
-        console.log(JSON.stringify(res));
-        localStorage.setItem('userToken', res.token); // salva il token
+        localStorage.setItem('postmessages_token', res.token);
+        const role = this.getRoleFromToken(res.token);
         this.loading = false;
-        // qui puoi aggiungere redirect o altre azioni post-login
+        if (role === 1) {
+          this.router.navigate(['/admin-dashboard']);
+        } else {
+          this.router.navigate(['/']);
+        }
       },
       error: (err) => {
-        console.log("Errore dal backend:", err);
         this.error = err.error?.message || 'Credenziali non valide';
         this.loading = false;
       }

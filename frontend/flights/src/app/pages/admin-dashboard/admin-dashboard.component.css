@@ -9,3 +9,15 @@
 .dashboard-content {
   padding: 32px;
 }
+
+.dashboard-sidenav .active {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  font-weight: bold;
+}
+
+a.mat-list-item.active {
+  background-color: #e3f2fd !important;
+  color: #1976d2 !important;
+  font-weight: bold;
+}

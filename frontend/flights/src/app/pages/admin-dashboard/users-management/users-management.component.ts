@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-users-management',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, MatCardModule],
   templateUrl: './users-management.component.html',
-  styleUrl: './users-management.component.css'
+  styleUrls: ['./users-management.component.css']
 })
-export class UsersManagementComponent {
-
-}
+export class UsersManagementComponent { }
