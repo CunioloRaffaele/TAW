@@ -29,3 +29,39 @@
   align-items: center;
   gap: 8px;
 }
+
+.login-links {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.login-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 1.05em;
+  transition: color 0.2s;
+}
+
+.login-link:hover {
+  color: #0d47a1;
+  text-decoration: underline;
+}
+
+.login-link mat-icon {
+  font-size: 20px;
+  vertical-align: middle;
+}
+
+.login-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.3em;
+  margin-bottom: 24px; /* aggiungi spazio sotto il titolo */
+}

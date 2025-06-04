@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-signin',
@@ -23,7 +23,8 @@ import { Router } from '@angular/router';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    RouterModule
   ],
   templateUrl: './signin.component.html',
   styleUrls: ['./signin.component.css']
@@ -55,13 +56,12 @@ export class SigninComponent {
     this.loading = true;
     this.error = null;
 
-    const params = new HttpParams()
-      .set('email', this.loginForm.value.email)
-      .set('password', this.loginForm.value.password);
-
-    this.http.get<{ message: string, token: string }>(
+    this.http.post<{ message: string, token: string }>(
       `${environment.apiUrl}/api/user/login`,
-      { params }
+      {
+        email: this.loginForm.value.email,
+        password: this.loginForm.value.password
+      }
     ).subscribe({
       next: (res) => {
         localStorage.setItem('postmessages_token', res.token);
@@ -74,7 +74,28 @@ export class SigninComponent {
         }
       },
       error: (err) => {
-        this.error = err.error?.message || 'Credenziali non valide';
+        // Stampa sempre la risposta del backend in console per debug
+        console.error('Errore dal backend:', err);
+
+        // Mostra il messaggio corretto a schermo
+        if (err.error) {
+          if (typeof err.error === 'string') {
+            try {
+              const parsed = JSON.parse(err.error);
+              this.error = parsed.message || parsed.error || 'Errore sconosciuto';
+            } catch {
+              this.error = err.error;
+            }
+          } else if (typeof err.error === 'object') {
+            this.error = err.error.message || err.error.error || 'Errore sconosciuto';
+          } else {
+            this.error = 'Errore sconosciuto';
+          }
+        } else if (err.message) {
+          this.error = err.message;
+        } else {
+          this.error = 'Errore di comunicazione con il server';
+        }
         this.loading = false;
       }
     });
