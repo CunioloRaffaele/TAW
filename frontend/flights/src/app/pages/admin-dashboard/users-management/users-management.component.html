@@ -3,5 +3,27 @@
   <mat-card-content>
     <!-- Qui puoi aggiungere la tabella o la lista degli utenti -->
     <p>Qui verrà gestita la lista degli utenti.</p>
+
+
+    <app-user-card 
+      [name]="'mario'" 
+      [email]="'email'"
+      [password]="'password'"
+      (deleteUser)="'delete'">
+    </app-user-card>
+
+    <app-user-card 
+      [name]="'gianni'" 
+      [email]="'email'"
+      [password]="'password'"
+      (deleteUser)="'delete'">
+    </app-user-card>
+
+    <app-user-card 
+      [name]="'luigi'" 
+      [email]="'email'"
+      [password]="'password'"
+      (deleteUser)="'delete'">
+    </app-user-card>
   </mat-card-content>
 </mat-card>
