@@ -2,6 +2,7 @@ const { PrismaClient } = require('../../prisma/generated/prisma');
 const prisma = new PrismaClient()
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../../utils/jwt');
+const { parse } = require('dotenv');
 
 exports.createAirlineNewAccount = async (req, res) => {
     // This operation is only accessibe to admin
@@ -142,17 +143,17 @@ exports.logAirlineIn = async (req, res) => {
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, airline.password);
     if (!isPasswordValid) {
-        return res.status(400).json({ 
+        return res.status(403).json({ 
             error: 'Invalid password' 
         });
     }
 
     // create JWT token
     const token = generateToken({
-        airlineId: airline.id,
-        name: airline.name,
+        airlineName: airline.name,
         country: airline.country,
         motto: airline.motto,
+        role: 2
     });
 
     res.status(200).json({
@@ -185,3 +186,150 @@ exports.listAirlines = async (req, res) => {
         });
     }
 }
+
+exports.addAircraft = async (req, res) => {
+    const user = req.userToken;
+    const { aircraftType, capacity } = req.body;
+
+    // Validate required fields
+    const parsedCapacity = parseInt(capacity, 10);
+    if (!aircraftType || isNaN(parsedCapacity)) {
+        return res.status(400).json({ 
+            error: 'Missing required fields: aircraftType, capacity' 
+        });
+    }
+
+    try {
+        // Create new aircraft
+        await prisma.aircrafts.create({
+            data: {
+                model: aircraftType,
+                seats_capacity: parsedCapacity,
+                owner_name: user.airlineName // middleware verifies that user is an airline so it's safe to use user.name
+            }
+        });
+
+        res.status(200).json({
+            message: 'Aircraft added successfully',
+            aircraftType: aircraftType,
+            capacity: capacity
+        });
+    } catch (error) {
+        console.error('Error adding aircraft:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while adding aircraft' 
+        });
+    }
+};
+
+exports.listAircrafts = async (req, res) => {
+    const airlineName = req.params.airlineName;
+
+    // Validate required fields
+    if (!airlineName) {
+        return res.status(400).json({ 
+            error: 'Missing required param: airlineName' 
+        });
+    }
+
+    try {
+        // List aircrafts for the specified airline
+        const aircrafts = await prisma.aircrafts.findMany({
+            where: {
+                owner_name: airlineName
+            },
+            select: {
+                id: true,
+                model: true,
+                seats_capacity: true
+            }
+        });
+
+        res.status(200).json({
+            message: 'List of aircrafts retrieved successfully',
+            aircrafts: aircrafts
+        });
+    } catch (error) {
+        console.error('Error retrieving aircrafts:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while retrieving aircrafts' 
+        });
+    }
+};
+
+exports.deleteAircraft = async (req, res) => {
+    const user = req.userToken;
+    const aircraftId = req.params.aircraftId;
+
+    // Validate required fields
+    const parsedAircraftId = parseInt(aircraftId, 10);
+    if (isNaN(parsedAircraftId)) {
+        return res.status(400).json({ 
+            error: 'Missing required param: aircraftId' 
+        });
+    }
+
+    try {
+        // Check if the aircraft belongs to the airline
+        const aircraft = await prisma.aircrafts.findUnique({
+            where: {
+                id: parsedAircraftId,
+                owner_name: user.airlineName // middleware verifies that user is an airline so it's safe to use user.name
+            }
+        });
+
+        if (!aircraft) {
+            return res.status(404).json({ 
+                error: 'Aircraft not found or does not belong to this airline and cannot be deleted' 
+            });
+        }
+
+        // Delete the aircraft
+        await prisma.aircrafts.delete({
+            where: {
+                id: parseInt(aircraftId, 10)
+            }
+        });
+
+        res.status(200).json({
+            message: 'Aircraft deleted successfully',
+            aircraftId: aircraftId
+        });
+    } catch (error) {
+        console.error('Error deleting aircraft:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while deleting aircraft' 
+        });
+    }
+}
+
+exports.addRoute = async (req, res) => {
+    const user = req.userToken;
+    const { departureAirport, destinationAirport } = req.body;
+
+    // Validate required fields
+    if (!source || !destination || !distance) {
+        return res.status(400).json({ 
+            error: 'Missing required fields: source, destination, distance' 
+        });
+    }
+
+    try {
+        // Create new route
+        await prisma.routes.create({
+            data: {
+                departure: departureAirport,
+                destination: destinationAirport,
+            }
+        });
+
+        res.status(200).json({
+            message: 'Route added successfully',
+        });
+    } catch (error) {
+        console.error('Error adding route:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while adding route' 
+        });
+    }
+};

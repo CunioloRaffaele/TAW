@@ -6,7 +6,7 @@ var userRouter = require('./users/index');
 var airlineRouter = require('./airlines/index');
 
 // Attach all routers to the main router
-routes.use('/user', userRouter);
+routes.use('/users', userRouter);
 routes.use('/airlines', airlineRouter);
 
 module.exports = routes;
