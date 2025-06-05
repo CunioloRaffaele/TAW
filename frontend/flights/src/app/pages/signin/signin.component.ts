@@ -57,7 +57,7 @@ export class SigninComponent {
     this.error = null;
 
     this.http.post<{ message: string, token: string }>(
-      `${environment.apiUrl}/api/user/login`,
+      `${environment.apiUrl}/api/users/login`,
       {
         email: this.loginForm.value.email,
         password: this.loginForm.value.password

@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-airline-login',
@@ -44,7 +45,7 @@ export class AirlineLoginComponent {
     this.error = null;
 
     this.http.post<{ message: string, token: string }>(
-      'http://localhost:3000/api/airlines/login',
+      `${environment.apiUrl}/api/airlines/login`,
       this.loginForm.value
     ).subscribe({
       next: (res) => {

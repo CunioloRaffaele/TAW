@@ -47,7 +47,7 @@ export class UserRegistrationComponent {
     this.error = null;
     this.success = null;
 
-    const endpoint = `${environment.apiUrl}/api/user/newAccount`;
+    const endpoint = `${environment.apiUrl}/api/users/user`;
     this.http.post<{ message: string, token: string }>(
       endpoint,
       this.registrationForm.value

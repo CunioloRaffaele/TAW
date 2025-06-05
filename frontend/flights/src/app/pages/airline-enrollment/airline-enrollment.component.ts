@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-airline-enrollment',
@@ -56,7 +57,7 @@ export class AirlineEnrollmentComponent {
     this.loading = true;
     this.error = null;
 
-    const endpoint = `http://localhost:3000/api/airlines/enroll/${this.invitationCode}/${this.airlineName}`;
+    const endpoint = `${environment.apiUrl}/api/airlines/enroll/${this.invitationCode}/${this.airlineName}`;
     this.http.post(endpoint, this.enrollmentForm.value).subscribe({
       next: () => {
         this.success = true;
