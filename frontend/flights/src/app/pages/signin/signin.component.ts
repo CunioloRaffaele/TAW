@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-signin',
@@ -22,7 +23,8 @@ import { environment } from '../../../environments/environment';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    RouterModule
   ],
   templateUrl: './signin.component.html',
   styleUrls: ['./signin.component.css']
@@ -32,11 +34,21 @@ export class SigninComponent {
   loading = false;
   error: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+  }
+
+  // Funzione per estrarre il ruolo dal token JWT
+  private getRoleFromToken(token: string): number | null {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role;
+    } catch {
+      return null;
+    }
   }
 
   onLogin() {
@@ -46,18 +58,44 @@ export class SigninComponent {
 
     this.http.post<{ message: string, token: string }>(
       `${environment.apiUrl}/api/user/login`,
-      this.loginForm.value
+      {
+        email: this.loginForm.value.email,
+        password: this.loginForm.value.password
+      }
     ).subscribe({
       next: (res) => {
-        console.log("Data received when invoking the /login endpoint:");
-        console.log(JSON.stringify(res));
-        localStorage.setItem('userToken', res.token); // salva il token
+        localStorage.setItem('postmessages_token', res.token);
+        const role = this.getRoleFromToken(res.token);
         this.loading = false;
-        // qui puoi aggiungere redirect o altre azioni post-login
+        if (role === 1) {
+          this.router.navigate(['/admin-dashboard']);
+        } else {
+          this.router.navigate(['/']);
+        }
       },
       error: (err) => {
-        console.log("Errore dal backend:", err);
-        this.error = err.error?.message || 'Credenziali non valide';
+        // Stampa sempre la risposta del backend in console per debug
+        console.error('Errore dal backend:', err);
+
+        // Mostra il messaggio corretto a schermo
+        if (err.error) {
+          if (typeof err.error === 'string') {
+            try {
+              const parsed = JSON.parse(err.error);
+              this.error = parsed.message || parsed.error || 'Errore sconosciuto';
+            } catch {
+              this.error = err.error;
+            }
+          } else if (typeof err.error === 'object') {
+            this.error = err.error.message || err.error.error || 'Errore sconosciuto';
+          } else {
+            this.error = 'Errore sconosciuto';
+          }
+        } else if (err.message) {
+          this.error = err.message;
+        } else {
+          this.error = 'Errore di comunicazione con il server';
+        }
         this.loading = false;
       }
     });

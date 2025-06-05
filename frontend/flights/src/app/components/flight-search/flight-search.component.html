@@ -1,0 +1,46 @@
+<div class="flight-search-container">
+  <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="flight-search-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Aeroporto di partenza</mat-label>
+      <input matInput formControlName="from" placeholder="Es. Milano MXP" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Aeroporto di arrivo</mat-label>
+      <input matInput formControlName="to" placeholder="Es. Roma FCO" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Data di partenza</mat-label>
+      <input matInput [matDatepicker]="picker1" formControlName="departureDate" required>
+      <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+      <mat-datepicker #picker1></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Data di ritorno</mat-label>
+      <input matInput [matDatepicker]="picker2" formControlName="returnDate">
+      <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+      <mat-datepicker #picker2></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Viaggiatori</mat-label>
+      <mat-select formControlName="travelers">
+        <mat-option *ngFor="let n of travelers" [value]="n">{{ n }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Classe</mat-label>
+      <mat-select formControlName="travelClass">
+        <mat-option *ngFor="let c of classes" [value]="c">{{ c }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="searchForm.invalid">
+      <mat-icon>search</mat-icon>
+      Cerca voli
+    </button>
+  </form>
+</div>

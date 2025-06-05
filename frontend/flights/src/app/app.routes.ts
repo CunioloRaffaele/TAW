@@ -8,8 +8,10 @@ import { UsersManagementComponent } from './pages/admin-dashboard/users-manageme
 import { AirlineEnrollmentComponent } from './pages/airline-enrollment/airline-enrollment.component';
 import { AirlineLoginComponent } from './pages/airline-login/airline-login.component';
 import { UserRegistrationComponent } from './pages/user-registration/user-registration.component';
+import { HomepageComponent } from './pages/homepage/homepage.component';
 
 export const routes: Routes = [
+  { path: '', component: HomepageComponent }, // homepage come root
   { path: 'signin', component: SigninComponent },
   {
     path: 'admin-dashboard',
@@ -22,7 +24,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'airline-registration', pathMatch: 'full' }
     ]
   },
-  { path: '', redirectTo: 'signin', pathMatch: 'full' },
+  { path: 'homepage', component: HomepageComponent }, // opzionale, puoi anche rimuoverla
   { path: 'airline-enrollment/:invitationCode/:airlineName', component: AirlineEnrollmentComponent },
   { path: 'airline-login', component: AirlineLoginComponent },
   { path: 'user-registration', component: UserRegistrationComponent }

@@ -1,12 +1,10 @@
 <div class="login-container">
   <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon color="primary" class="login-icon">login</mat-icon>
-        Accedi al sistema
-      </mat-card-title>
-    </mat-card-header>
     <mat-card-content>
+      <div class="login-title">
+        <mat-icon>login</mat-icon>
+        Accedi al sistema
+      </div>
       <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
@@ -39,6 +37,17 @@
           {{ error }}
         </div>
       </form>
+
+      <div class="login-links">
+        <a routerLink="/user-registration" class="login-link">
+          <mat-icon>person_add</mat-icon>
+          Non sei registrato? <b>Registrati</b>
+        </a>
+        <a routerLink="/airline-login" class="login-link">
+          <mat-icon>flight</mat-icon>
+          Sei una compagnia aerea? <b>Login compagnia aerea</b>
+        </a>
+      </div>
     </mat-card-content>
   </mat-card>
 </div>

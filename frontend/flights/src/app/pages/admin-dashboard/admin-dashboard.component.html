@@ -2,19 +2,31 @@
   <mat-sidenav mode="side" opened class="dashboard-sidenav">
     <mat-toolbar color="primary">Admin</mat-toolbar>
     <mat-nav-list>
-      <a mat-list-item routerLink="/airline-registration" routerLinkActive="active">
+      <a mat-list-item
+         routerLink="airline-registration"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
         <mat-icon>person_add</mat-icon>
         Invita Compagnia
       </a>
-      <a mat-list-item routerLink="/airlines-management" routerLinkActive="active">
+      <a mat-list-item
+         routerLink="airlines-management"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
         <mat-icon>flight</mat-icon>
         Gestione Compagnie
       </a>
-      <a mat-list-item routerLink="/users-management" routerLinkActive="active">
+      <a mat-list-item
+         routerLink="users-management"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
         <mat-icon>group</mat-icon>
         Gestione Utenti
       </a>
-      <a mat-list-item routerLink="/airports-management" routerLinkActive="active">
+      <a mat-list-item
+         routerLink="airports-management"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
         <mat-icon>location_on</mat-icon>
         Gestione Aeroporti
       </a>

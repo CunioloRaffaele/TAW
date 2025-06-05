@@ -58,7 +58,28 @@ export class UserRegistrationComponent {
         // Puoi salvare il token se vuoi: localStorage.setItem('userToken', res.token);
       },
       error: (err) => {
-        this.error = err.error?.message || 'Errore durante la registrazione';
+        // Stampa sempre la risposta del backend in console per debug
+        console.error('Errore dal backend:', err);
+
+        // Mostra il messaggio corretto a schermo
+        if (err.error) {
+          if (typeof err.error === 'string') {
+            try {
+              const parsed = JSON.parse(err.error);
+              this.error = parsed.message || parsed.error || 'Errore durante la registrazione';
+            } catch {
+              this.error = err.error;
+            }
+          } else if (typeof err.error === 'object') {
+            this.error = err.error.message || err.error.error || 'Errore durante la registrazione';
+          } else {
+            this.error = 'Errore durante la registrazione';
+          }
+        } else if (err.message) {
+          this.error = err.message;
+        } else {
+          this.error = 'Errore di comunicazione con il server';
+        }
         this.loading = false;
       }
     });
