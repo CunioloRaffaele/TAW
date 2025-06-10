@@ -1,29 +1,30 @@
 <mat-card>
   <mat-card-title>Gestione Utenti</mat-card-title>
   <mat-card-content>
-    <!-- Qui puoi aggiungere la tabella o la lista degli utenti -->
-    <p>Qui verrà gestita la lista degli utenti.</p>
+    <!-- Indicatore di caricamento -->
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
 
+    <!-- Messaggio di errore -->
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
 
-    <app-user-card 
-      [name]="'mario'" 
-      [email]="'email'"
-      [password]="'password'"
-      (deleteUser)="'delete'">
-    </app-user-card>
+    <!-- Lista utenti vuota -->
+    <div *ngIf="!loading && !error && users.length === 0" class="empty-list">
+      Nessun utente trovato.
+    </div>
 
-    <app-user-card 
-      [name]="'gianni'" 
-      [email]="'email'"
-      [password]="'password'"
-      (deleteUser)="'delete'">
-    </app-user-card>
-
-    <app-user-card 
-      [name]="'luigi'" 
-      [email]="'email'"
-      [password]="'password'"
-      (deleteUser)="'delete'">
-    </app-user-card>
+    <!-- Lista di utenti -->
+    <div *ngIf="!loading && users.length > 0" class="users-list">
+      <app-user-card 
+        *ngFor="let user of users"
+        [name]="user.name" 
+        [email]="user.email"
+        [password]="'********'"
+        (deleteUser)="deleteUser(user.id)">
+      </app-user-card>
+    </div>
   </mat-card-content>
 </mat-card>

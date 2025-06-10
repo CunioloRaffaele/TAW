@@ -1,7 +1,26 @@
-:host {
-  display: block;
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
 }
 
-mat-card {
-  margin: 16px 0;
+.error-message {
+  color: #f44336;
+  padding: 15px;
+  margin: 10px 0;
+  background-color: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
+}
+
+.empty-list {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
 }
