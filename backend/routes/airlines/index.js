@@ -9,7 +9,7 @@ airlineRouter.post('/invite', validateJsonRequest, authMiddleware, controller.cr
 
 airlineRouter.post('/enroll/:invitationCode/:airlineName', validateJsonRequest, controller.newAirlineAccountEnrollment);
 
-airlineRouter.get('/login', validateJsonRequest, controller.logAirlineIn);
+airlineRouter.post('/login', validateJsonRequest, controller.logAirlineIn);
 
 airlineRouter.get('/airlines', controller.listAirlines);
 

@@ -6,7 +6,7 @@ var userRouter = express.Router();
 
 userRouter.post('/user', validateJsonRequest, controller.createNewAccount);
 
-userRouter.get('/login', validateJsonRequest, controller.logUserIn);
+userRouter.post('/login', validateJsonRequest, controller.logUserIn);
 
 userRouter.get('/user', authMiddleware, controller.getAccountInfo);
 
