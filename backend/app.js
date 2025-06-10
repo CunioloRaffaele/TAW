@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const result = require('dotenv').config()
+const cors = require('cors');
 if (result.error) {
   console.log("Unable to load \".env\" file.");
   process.exit(-1);
@@ -13,6 +14,10 @@ var routes = require('./routes/index');
 
 var app = express();
 
+app.use(cors({
+  origin: '*', // consenti solo il frontend Angular
+  credentials: true
+}));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
