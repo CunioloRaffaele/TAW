@@ -1,7 +1,23 @@
 <mat-card>
-  <mat-card-title>Gestione Compagnie</mat-card-title>
+  <mat-card-title>Gestione Compagnie Aeree</mat-card-title>
   <mat-card-content>
-    <!-- Qui puoi aggiungere la tabella o la lista delle compagnie aeree -->
-    <p>Qui verrà gestita la lista delle compagnie aeree.</p>
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+    <div *ngIf="!loading && !error && airlines.length === 0" class="empty-list">
+      Nessuna compagnia trovata.
+    </div>
+    <div *ngIf="!loading && airlines.length > 0" class="airlines-list">
+      <app-airline-card
+        *ngFor="let airline of airlines"
+        [name]="airline.name"
+        [country]="airline.country"
+        [motto]="airline.motto"
+        (deleteAirline)="deleteAirline(airline.name)">
+      </app-airline-card>
+    </div>
   </mat-card-content>
 </mat-card>
