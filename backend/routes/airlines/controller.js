@@ -302,34 +302,3 @@ exports.deleteAircraft = async (req, res) => {
         });
     }
 }
-
-exports.addRoute = async (req, res) => {
-    const user = req.userToken;
-    const { departureAirport, destinationAirport } = req.body;
-
-    // Validate required fields
-    if (!source || !destination || !distance) {
-        return res.status(400).json({ 
-            error: 'Missing required fields: source, destination, distance' 
-        });
-    }
-
-    try {
-        // Create new route
-        await prisma.routes.create({
-            data: {
-                departure: departureAirport,
-                destination: destinationAirport,
-            }
-        });
-
-        res.status(200).json({
-            message: 'Route added successfully',
-        });
-    } catch (error) {
-        console.error('Error adding route:', error);
-        res.status(500).json({ 
-            error: 'Internal server error while adding route' 
-        });
-    }
-};
