@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-registration',
@@ -33,12 +34,25 @@ export class UserRegistrationComponent {
   error: string | null = null;
   success: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router // <--- aggiungi il Router
+  ) {
     this.registrationForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+
+  private getRoleFromToken(token: string): number | null {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role;
+    } catch {
+      return null;
+    }
   }
 
   onRegister() {
@@ -53,9 +67,18 @@ export class UserRegistrationComponent {
       this.registrationForm.value
     ).subscribe({
       next: (res) => {
-        this.success = res.message || 'Registrazione avvenuta con successo!';
+        // Login automatico
+        localStorage.setItem('postmessages_token', res.token);
+        const role = this.getRoleFromToken(res.token);
         this.loading = false;
-        // Puoi salvare il token se vuoi: localStorage.setItem('userToken', res.token);
+        // Redirect in base al ruolo
+        if (role === 1) {
+          this.router.navigate(['/admin-dashboard']);
+        } else if (role === 2) {
+          this.router.navigate(['/homepage-airline']);
+        } else {
+          this.router.navigate(['/']);
+        }
       },
       error: (err) => {
         // Stampa sempre la risposta del backend in console per debug

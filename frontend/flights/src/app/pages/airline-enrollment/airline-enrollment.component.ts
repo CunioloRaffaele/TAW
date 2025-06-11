@@ -50,6 +50,11 @@ export class AirlineEnrollmentComponent {
 
     this.invitationCode = this.route.snapshot.paramMap.get('invitationCode') || '';
     this.airlineName = this.route.snapshot.paramMap.get('airlineName') || '';
+
+    // Se i parametri non ci sono, redirect a forbidden
+    if (!this.invitationCode || !this.airlineName) {
+      this.router.navigate(['/forbidden']);
+    }
   }
 
   onEnroll() {
@@ -62,7 +67,8 @@ export class AirlineEnrollmentComponent {
       next: () => {
         this.success = true;
         this.loading = false;
-        setTimeout(() => this.router.navigate(['/signin']), 2000);
+        // Redirect alla pagina di login airline
+        this.router.navigate(['/airline-login']);
       },
       error: (err) => {
         this.error = err.error?.message || 'Errore durante l\'enrollment';

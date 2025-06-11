@@ -35,6 +35,7 @@ export class AirlineRegistrationComponent {
   error: string | null = null;
   loading = false;
   copied = false;
+  enrollmentUrl: string | null = null;
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.inviteForm = this.fb.group({
@@ -49,12 +50,15 @@ export class AirlineRegistrationComponent {
     this.inviteCode = null;
     this.copied = false;
 
-    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsIm5hbWUiOiJUZXN0QWNjb3VudCIsImVtYWlsIjoidGVzdGFjY291bnRAZ21haWwuY29tIiwicm9sZSI6MSwiaWF0IjoxNzQ4MTY1NDMwLCJleHAiOjE3NDgxNjkwMzB9.6514JqZUinA_pq8kIzdzgWOXKg-pBM4wotSMiwi-PUo';
-    const endpoint = `${environment.apiUrl}/api/airlines/invite`; // Sostituisci con il tuo endpoint reale
+    // Prendi il token dell'admin dal localStorage
+    const token = localStorage.getItem('postmessages_token') || '';
+    const endpoint = `${environment.apiUrl}/api/airlines/invite`;
+
+    const airlineName = this.inviteForm.value.name;
 
     this.http.post<{ invitationCode: string }>(
       endpoint,
-      { name: this.inviteForm.value.name },
+      { name: airlineName },
       {
         headers: new HttpHeaders({
           'Authorization': `Bearer ${token}`,
@@ -64,6 +68,9 @@ export class AirlineRegistrationComponent {
     ).subscribe({
       next: (res) => {
         this.inviteCode = res.invitationCode;
+        const airlineName = this.inviteForm.value.name;
+        // Genera l’URL per la compagnia
+        this.enrollmentUrl = `${window.location.origin}/airline-enrollment/${this.inviteCode}/${encodeURIComponent(airlineName)}`;
         this.loading = false;
       },
       error: (err) => {
@@ -76,6 +83,14 @@ export class AirlineRegistrationComponent {
   copyCode() {
     if (this.inviteCode) {
       navigator.clipboard.writeText(this.inviteCode);
+      this.copied = true;
+      setTimeout(() => this.copied = false, 1500);
+    }
+  }
+
+  copyEnrollmentUrl() {
+    if (this.enrollmentUrl) {
+      navigator.clipboard.writeText(this.enrollmentUrl);
       this.copied = true;
       setTimeout(() => this.copied = false, 1500);
     }
