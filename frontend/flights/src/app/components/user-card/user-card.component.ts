@@ -2,12 +2,14 @@ import { Component, input, signal, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-user-card',
   imports: [
     CommonModule,
     MatIconModule,
+    MatCardModule,
     MatButtonModule
   ],
   templateUrl: './user-card.component.html',

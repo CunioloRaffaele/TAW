@@ -1,0 +1,43 @@
+<mat-toolbar color="primary">
+  <span class="logo" routerLink="/">TAW Flights</span>
+  <span class="spacer"></span>
+  <ng-container *ngIf="isLoggedIn(); else loginBtn">
+    <button mat-button [matMenuTriggerFor]="userMenu">
+      <mat-icon>account_circle</mat-icon>
+      {{ getUserName() || 'Profilo' }}
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item routerLink="/user-profile">
+        <mat-icon>person</mat-icon>
+        Profilo
+      </button>
+      <!-- SOLO per admin -->
+      <button
+        *ngIf="getRoleFromToken() === 1 && !isCurrentRoute('/')"
+        mat-menu-item
+        routerLink="/"
+      >
+        <mat-icon>home</mat-icon>
+        Homepage
+      </button>
+      <button
+        *ngIf="getRoleFromToken() === 1 && !isCurrentRoute('/admin-dashboard')"
+        mat-menu-item
+        routerLink="/admin-dashboard"
+      >
+        <mat-icon>admin_panel_settings</mat-icon>
+        Dashboard Admin
+      </button>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    </mat-menu>
+  </ng-container>
+  <ng-template #loginBtn>
+    <a mat-raised-button color="accent" routerLink="/signin">
+      <mat-icon>login</mat-icon>
+      Accedi al sistema
+    </a>
+  </ng-template>
+</mat-toolbar>

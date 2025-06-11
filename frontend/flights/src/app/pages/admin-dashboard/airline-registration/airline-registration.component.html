@@ -10,25 +10,29 @@
       <p>
         Solo un amministratore può invitare una nuova compagnia aerea. Inserisci il nome della compagnia per generare un invito.
       </p>
-      <form *ngIf="!inviteCode" [formGroup]="inviteForm" (ngSubmit)="onInvite()">
+      <!-- Mostra il box per inserire il nome -->
+      <form [formGroup]="inviteForm" (ngSubmit)="onInvite()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nome compagnia aerea</mat-label>
           <input matInput formControlName="name" required />
         </mat-form-field>
-        <button mat-raised-button color="primary" type="submit" [disabled]="inviteForm.invalid || loading">
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
           <mat-progress-spinner *ngIf="loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
           <span *ngIf="!loading">Invia invito</span>
         </button>
       </form>
-      <div *ngIf="inviteCode" class="invite-result">
-        <mat-icon color="primary">check_circle</mat-icon>
-        <span>Codice invito generato:</span>
-        <strong>{{ inviteCode }}</strong>
-        <button mat-icon-button (click)="copyCode()" [matTooltip]="'Copia'">
-          <mat-icon>content_copy</mat-icon>
-        </button>
-        <span *ngIf="copied" class="copied-msg">Copiato!</span>
+
+      <!-- Mostra l’URL generato -->
+      <div *ngIf="enrollmentUrl" class="enrollment-url-box">
+        <p>Invia questo link alla compagnia:</p>
+        <mat-form-field>
+          <input matInput [value]="enrollmentUrl" readonly>
+          <button mat-icon-button matSuffix (click)="copyEnrollmentUrl()" [matTooltip]="copied ? 'Copiato!' : 'Copia'">
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </mat-form-field>
       </div>
+
       <div *ngIf="error" class="error-message">
         <mat-icon color="warn">error</mat-icon>
         {{ error }}
