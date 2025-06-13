@@ -10,8 +10,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { debounceTime, switchMap, catchError } from 'rxjs/operators';
+import { debounceTime, switchMap, catchError, tap, map } from 'rxjs/operators';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-flight-search',
@@ -50,19 +51,63 @@ export class FlightSearchComponent {
       travelClass: ['Economy', Validators.required]
     });
 
+    // Autocomplete per "from"
     this.filteredFromAirports = this.searchForm.get('from')!.valueChanges.pipe(
       debounceTime(300),
-      switchMap(value => this.searchAirports(value))
+      switchMap(value => {
+        const toValue = this.searchForm.get('to')!.value;
+        if (toValue && toValue.length > 0) {
+          // Se c'è già una destinazione, filtra le partenze disponibili per quella destinazione
+          return this.searchAvailableDepartures(toValue, value);
+        }
+        // Altrimenti mostra tutti gli aeroporti
+        return this.searchAirports(value);
+      })
     );
+
+    // Autocomplete per "to"
     this.filteredToAirports = this.searchForm.get('to')!.valueChanges.pipe(
       debounceTime(300),
-      switchMap(value => this.searchAirports(value))
+      switchMap(value => {
+        const fromValue = this.searchForm.get('from')!.value;
+        if (fromValue && fromValue.id) {
+          return this.searchAvailableDestinations(fromValue.id, value);
+        }
+        return this.searchAirports(value);
+      })
     );
   }
 
+  // Cerca tutti gli aeroporti (autocomplete base)
   searchAirports(query: string): Observable<any[]> {
     if (!query || query.length < 2) return of([]);
-    return this.http.get<any[]>(`/api/navigate/airports/${encodeURIComponent(query)}`).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(query)}`).pipe(
+      map(res => Array.isArray(res) ? res : res.airports ?? []),
+      catchError(() => of([]))
+    );
+  }
+
+  // Cerca partenze disponibili dato una destinazione
+  searchAvailableDepartures(destination: string, query: string): Observable<any[]> {
+    if (!query || query.length < 2) return of([]);
+    return this.http.get<any>(`${environment.apiUrl}/api/navigate/routes/airports/destination/${encodeURIComponent(destination)}?query=${encodeURIComponent(query)}`).pipe(
+      map(res => Array.isArray(res) ? res : res.airports ?? []),
+      catchError(() => of([]))
+    );
+  }
+
+  // Cerca destinazioni disponibili dato una partenza
+  searchAvailableDestinations(departure: string, query: string): Observable<any[]> {
+    if (!query || query.length < 2) return of([]);
+    return this.http.get<any>(`${environment.apiUrl}/api/navigate/routes/airports/departure/${encodeURIComponent(departure)}?query=${encodeURIComponent(query)}`).pipe(
+      map(res => {
+        // Se la risposta è un array di oggetti con destinationAirport, estrai solo gli aeroporti
+        if (Array.isArray(res.airports) && res.airports.length && res.airports[0].destinationAirport) {
+          return res.airports.map((r: any) => r.destinationAirport);
+        }
+        // Altrimenti fallback classico
+        return Array.isArray(res) ? res : res.airports ?? [];
+      }),
       catchError(() => of([]))
     );
   }
@@ -70,5 +115,9 @@ export class FlightSearchComponent {
   onSearch() {
     if (this.searchForm.invalid) return;
     console.log('Ricerca voli:', this.searchForm.value);
+  }
+
+  displayAirport(airport: any): string {
+    return airport ? `${airport.name} (${airport.city}, ${airport.country})` : '';
   }
 }

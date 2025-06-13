@@ -34,6 +34,10 @@ button[type="submit"] {
   box-shadow: 0 2px 6px rgba(25, 118, 210, 0.08);
 }
 
+.mat-autocomplete-panel {
+  z-index: 10000 !important;
+}
+
 @media (max-width: 900px) {
   .flight-search-form {
     flex-direction: column;

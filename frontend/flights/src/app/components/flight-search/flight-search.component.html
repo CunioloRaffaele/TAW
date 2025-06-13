@@ -2,20 +2,34 @@
   <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="flight-search-form">
     <mat-form-field appearance="outline">
       <mat-label>Da</mat-label>
-      <input matInput formControlName="from" [matAutocomplete]="autoFrom" placeholder="Es. Milano MXP" required>
-      <mat-autocomplete #autoFrom="matAutocomplete">
-        <mat-option *ngFor="let option of filteredFromAirports | async" [value]="option.name">
-          {{ option.name }} ({{ option.code }})
+      <input
+        matInput
+        formControlName="from"
+        [matAutocomplete]="autoFrom"
+        placeholder="Es. Milano MXP"
+        required
+        autocomplete="off"
+      />
+      <mat-autocomplete #autoFrom="matAutocomplete" [displayWith]="displayAirport">
+        <mat-option *ngFor="let option of filteredFromAirports | async" [value]="option">
+          {{ option.name }} ({{ option.city }}, {{ option.country }})
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
       <mat-label>A</mat-label>
-      <input matInput formControlName="to" [matAutocomplete]="autoTo" placeholder="Es. Roma FCO" required>
-      <mat-autocomplete #autoTo="matAutocomplete">
-        <mat-option *ngFor="let option of filteredToAirports | async" [value]="option.name">
-          {{ option.name }} ({{ option.code }})
+      <input
+        matInput
+        formControlName="to"
+        [matAutocomplete]="autoTo"
+        placeholder="Es. Roma FCO"
+        required
+        autocomplete="off"
+      />
+      <mat-autocomplete #autoTo="matAutocomplete" [displayWith]="displayAirport">
+        <mat-option *ngFor="let option of filteredToAirports | async" [value]="option">
+          {{ option.name }} ({{ option.city }}, {{ option.country }})
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
