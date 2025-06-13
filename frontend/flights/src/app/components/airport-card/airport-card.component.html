@@ -1,0 +1,20 @@
+<div class="airport-card">
+  <div class="airport-info">
+    <div class="info-item">
+      <span class="label">Nome:</span>
+      <span class="value">{{ name() }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Città:</span>
+      <span class="value">{{ city() }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Nazione:</span>
+      <span class="value">{{ country() }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Fuso orario:</span>
+      <span class="value">UTC{{ timeZone() >= 0 ? '+' : '' }}{{ timeZone() }}</span>
+    </div>
+  </div>
+</div>

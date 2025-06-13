@@ -226,13 +226,13 @@ exports.getAirports = async (req, res) => {
                     OR: [
                         {
                             name: {
-                                contains: query,
+                                startsWith: query,
                                 mode: 'insensitive'
                             }
                         },
                         {
                             city: {
-                                contains: query,
+                                startsWith: query,
                                 mode: 'insensitive'
                             }
                         }
