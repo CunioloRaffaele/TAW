@@ -241,7 +241,18 @@ INSERT INTO Airports ( name, city, country, time_zone) VALUES
 ( 'Changi Airport', 'Singapore', 'Singapore', 8),
 ( 'Malpensa', 'Milano', 'Italy', 1),
 ( 'Charles de Gaulle', 'Paris', 'France', 1),
-( 'Heathrow', 'London', 'UK', 0);
+( 'Heathrow', 'London', 'UK', 0),
+('John F. Kennedy International', 'New York', 'United States', -5),
+('Los Angeles International', 'Los Angeles', 'United States', -8),
+('Tokyo Haneda', 'Tokyo', 'Japan', 9),
+('Sydney Kingsford Smith', 'Sydney', 'Australia', 10),
+('Madrid Barajas', 'Madrid', 'Spain', 1),
+('Toronto Pearson', 'Toronto', 'Canada', -5),
+('Beijing Capital', 'Beijing', 'China', 8),
+('Istanbul Airport', 'Istanbul', 'Turkey', 3),
+('Amsterdam Schiphol', 'Amsterdam', 'Netherlands', 1),
+('Zurich Airport', 'Zurich', 'Switzerland', 1);
+
 -- 3. Inserimento Routes (dipende da Airports)
 INSERT INTO Routes (departure, destination) VALUES
 (1, 2), -- Dubai -> Frankfurt
@@ -249,7 +260,23 @@ INSERT INTO Routes (departure, destination) VALUES
 (1, 3), -- Dubai -> Singapore
 (4, 5), -- Milano -> Parigi
 (5, 6), -- Parigi -> Londra
-(4, 6); -- Milano -> Londra
+(4, 6), -- Milano -> Londra
+(1, 7),   -- Dubai -> New York JFK
+(7, 8),   -- New York JFK -> Los Angeles LAX
+(8, 9),   -- Los Angeles LAX -> Tokyo Haneda
+(9, 10),  -- Tokyo Haneda -> Sydney Kingsford Smith
+(10, 11), -- Sydney -> Madrid Barajas
+(11, 12), -- Madrid -> Toronto Pearson
+(12, 13), -- Toronto -> Beijing Capital
+(13, 14), -- Beijing -> Istanbul
+(14, 15), -- Istanbul -> Amsterdam Schiphol
+(15, 16), -- Amsterdam -> Zurich
+(16, 1),  -- Zurich -> Dubai
+(3, 9),   -- Singapore -> Tokyo Haneda
+(2, 12),  -- Frankfurt -> Toronto Pearson
+(5, 13),  -- Paris -> Beijing Capital
+(6, 7);   -- London Heathrow -> New York JFK
+
 -- 4. Inserimento Aircrafts (dipende da Airlines)
 INSERT INTO Aircrafts (model, seats_capacity, owner_name) VALUES
 ('Airbus A380', 550, 'Emirates'),
