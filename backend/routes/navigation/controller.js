@@ -1,6 +1,7 @@
 const { parse } = require('dotenv');
 const { PrismaClient } = require('../../prisma/generated/prisma');
 const prisma = new PrismaClient()
+const findRoute = require('./alg');
 
 exports.createRoute = async (req, res) => {
     const { origin, destination } = req.body;
@@ -270,3 +271,28 @@ exports.getAirports = async (req, res) => {
         });
     }
 }
+
+exports.getRouteBetweenAirports = async (req, res) => {
+    const { from, to } = req.query; // e.g. /routes/path?from=1&to=10
+    if (!from || !to) {
+        return res.status(400).json({ error: 'Missing required query params: from, to' });
+    }
+    try {
+        const path = await findRoute(from, to);
+        if (!path || path.length === 0) {
+            return res.status(404).json({ error: 'No route found between these airports' });
+        }
+        // Format the response with path information
+        return res.status(200).json({
+            message: 'Route found',
+            stepsCount: path.length,
+            steps: path.map(step => step.id || step),
+            from: parseInt(from, 10),
+            to: parseInt(to, 10),
+            path: path
+        });
+    } catch (error) {
+        console.error('Error finding route:', error);
+        return res.status(500).json({ error: 'Internal server error while finding route' });
+    }
+};
