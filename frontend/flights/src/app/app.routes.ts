@@ -12,6 +12,9 @@ import { HomepageComponent } from './pages/homepage/homepage.component';
 import { roleAuthGuard } from './guards/role-auth.guard';
 import { HomepageAirlineComponent } from './pages/homepage-airline/homepage-airline.component';
 import { ForbiddenComponent } from './pages/forbidden/forbidden.component';
+import { RoutesManagementComponent } from './pages/homepage-airline/routes-management/routes-management.component';
+import { AircraftsManagementComponent } from './pages/homepage-airline/aircrafts-management/aircrafts-management.component';
+import { FlightsManagementComponent } from './pages/homepage-airline/flights-management/flights-management.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent }, // homepage pubblica
@@ -44,9 +47,15 @@ export const routes: Routes = [
   { path: 'user-registration', component: UserRegistrationComponent },
   {
     path: 'homepage-airline',
-    component: HomepageAirlineComponent, // o il componente giusto per la dashboard airline
+    component: HomepageAirlineComponent,
     canActivate: [roleAuthGuard],
-    data: { roles: [2] } // solo airline (role 2)
+    data: { roles: [2] },
+    children: [
+      { path: 'routes-management', component: RoutesManagementComponent },
+      { path: 'aircrafts-management', component: AircraftsManagementComponent },
+      { path: 'flights-management', component: FlightsManagementComponent },
+      { path: '', redirectTo: 'routes-management', pathMatch: 'full' }
+    ]
   },
   // ...altre rotte...
 ];

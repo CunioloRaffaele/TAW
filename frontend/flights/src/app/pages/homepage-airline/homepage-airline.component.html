@@ -1,1 +1,36 @@
-<p>homepage-airline works!</p>
+<mat-sidenav-container class="dashboard-container">
+  <mat-sidenav mode="side" opened class="dashboard-sidenav">
+    <mat-toolbar color="primary">Compagnia Aerea</mat-toolbar>
+    <mat-nav-list>
+      <a mat-list-item
+         routerLink="routes-management"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>alt_route</mat-icon>
+        Gestione Rotte
+      </a>
+      <a mat-list-item
+         routerLink="aircrafts-management"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>airplanemode_active</mat-icon>
+        Gestione Aerei
+      </a>
+      <a mat-list-item
+         routerLink="flights-management"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>flight_takeoff</mat-icon>
+        Gestione Voli
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <span>Dashboard Compagnia</span>
+    </mat-toolbar>
+    <div class="dashboard-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
