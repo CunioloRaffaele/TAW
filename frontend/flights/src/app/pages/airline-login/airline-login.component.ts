@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-airline-login',
@@ -22,7 +23,8 @@ import { environment } from '../../../environments/environment';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    RouterModule
   ],
   templateUrl: './airline-login.component.html',
   styleUrls: ['./airline-login.component.css']
@@ -32,7 +34,7 @@ export class AirlineLoginComponent {
   loading = false;
   error: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.loginForm = this.fb.group({
       name: ['', Validators.required],
       password: ['', Validators.required]
@@ -50,9 +52,10 @@ export class AirlineLoginComponent {
     ).subscribe({
       next: (res) => {
         // Salva il token dove preferisci (localStorage/sessionStorage)
-        localStorage.setItem('airlineToken', res.token);
+        localStorage.setItem('postmessages_token', res.token);
         this.loading = false;
         // Reindirizza alla dashboard airline o mostra messaggio di successo
+        this.router.navigate(['/homepage-airline']);
       },
       error: (err) => {
         this.error = err.error?.message || 'Credenziali non valide';
