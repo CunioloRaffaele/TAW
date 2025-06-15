@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS Airports (
     city VARCHAR(255) NOT NULL,
     country VARCHAR(100) NOT NULL,
     time_zone INTEGER NOT NULL,
-	CHECK (time_zone BETWEEN 0 AND 13)
+	CHECK (time_zone BETWEEN -12 AND 12)
 );
 
 -- Create Aircrafts Table
