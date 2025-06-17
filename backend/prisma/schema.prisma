@@ -35,6 +35,8 @@ model airports {
   name                                String   @db.VarChar(100)
   city                                String   @db.VarChar(255)
   country                             String   @db.VarChar(100)
+  lat                                 Float
+  lan                                 Float
   time_zone                           Int
   routes_routes_departureToairports   routes[] @relation("routes_departureToairports")
   routes_routes_destinationToairports routes[] @relation("routes_destinationToairports")

@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS Airports (
     name VARCHAR(100) NOT NULL,
     city VARCHAR(255) NOT NULL,
     country VARCHAR(100) NOT NULL,
+    lat DOUBLE PRECISION NOT NULL,
+    lan DOUBLE PRECISION NOT NULL,
     time_zone INTEGER NOT NULL,
 	CHECK (time_zone BETWEEN -12 AND 12)
 );
@@ -235,23 +237,23 @@ INSERT INTO Airlines (name, password, country, motto, enrolled) VALUES
 ('Singapore Airlines', 'sing@p0r32024', 'Singapore', 'A Great Way to Fly', FALSE);
 
 -- 2. Inserimento Airports (tabella indipendente)
-INSERT INTO Airports ( name, city, country, time_zone) VALUES
-('Dubai International', 'Dubai', 'United Arab Emirates', 4),
-( 'Frankfurt Airport', 'Frankfurt', 'Germany', 1),
-( 'Changi Airport', 'Singapore', 'Singapore', 8),
-( 'Malpensa', 'Milano', 'Italy', 1),
-( 'Charles de Gaulle', 'Paris', 'France', 1),
-( 'Heathrow', 'London', 'UK', 0),
-('John F. Kennedy International', 'New York', 'United States', -5),
-('Los Angeles International', 'Los Angeles', 'United States', -8),
-('Tokyo Haneda', 'Tokyo', 'Japan', 9),
-('Sydney Kingsford Smith', 'Sydney', 'Australia', 10),
-('Madrid Barajas', 'Madrid', 'Spain', 1),
-('Toronto Pearson', 'Toronto', 'Canada', -5),
-('Beijing Capital', 'Beijing', 'China', 8),
-('Istanbul Airport', 'Istanbul', 'Turkey', 3),
-('Amsterdam Schiphol', 'Amsterdam', 'Netherlands', 1),
-('Zurich Airport', 'Zurich', 'Switzerland', 1);
+INSERT INTO Airports (name, city, country, lat, lan, time_zone) VALUES
+('Dubai International', 'Dubai', 'United Arab Emirates', 25.253174, 55.365673, 4),
+('Frankfurt Airport', 'Frankfurt', 'Germany', 50.037933, 8.562152, 1),
+('Changi Airport', 'Singapore', 'Singapore', 1.364420, 103.991531, 8),
+('Malpensa', 'Milano', 'Italy', 45.630062, 8.723068, 1),
+('Charles de Gaulle', 'Paris', 'France', 49.009690, 2.547925, 1),
+('Heathrow', 'London', 'UK', 51.470020, -0.454295, 0),
+('John F. Kennedy International', 'New York', 'United States', 40.641311, -73.778139, -5),
+('Los Angeles International', 'Los Angeles', 'United States', 33.941589, -118.408530, -8),
+('Tokyo Haneda', 'Tokyo', 'Japan', 35.549393, 139.779839, 9),
+('Sydney Kingsford Smith', 'Sydney', 'Australia', -33.939922, 151.175276, 10),
+('Madrid Barajas', 'Madrid', 'Spain', 40.498299, -3.567600, 1),
+('Toronto Pearson', 'Toronto', 'Canada', 43.677717, -79.624819, -5),
+('Beijing Capital', 'Beijing', 'China', 40.080111, 116.584556, 8),
+('Istanbul Airport', 'Istanbul', 'Turkey', 41.275278, 28.751944, 3),
+('Amsterdam Schiphol', 'Amsterdam', 'Netherlands', 52.310539, 4.768274, 1),
+('Zurich Airport', 'Zurich', 'Switzerland', 47.458056, 8.555556, 1);
 
 -- 3. Inserimento Routes (dipende da Airports)
 INSERT INTO Routes (departure, destination) VALUES
