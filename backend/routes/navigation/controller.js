@@ -272,6 +272,49 @@ exports.getAirports = async (req, res) => {
     }
 }
 
+exports.getAirportDetails = async (req, res) => {
+    const airportId = req.params.airportId;
+
+    // Validate required fields
+    if (isNaN(airportId) || !airportId) {
+        return res.status(400).json({ 
+            error: 'Missing required field: airportId' 
+        });
+    }
+
+    try {
+        // Get airport details
+        const airport = await prisma.airports.findUnique({
+            where: {
+                id: parseInt(airportId, 10)
+            },
+            select: {
+                id: true,
+                name: true,
+                city: true,
+                country: true,
+                time_zone: true
+            }
+        });
+
+        if (!airport) {
+            return res.status(404).json({ 
+                error: 'Airport not found' 
+            });
+        }
+
+        return res.status(200).json({
+            message: 'Airport details retrieved successfully',
+            airport: airport
+        });
+    } catch (error) {
+        console.error('Error retrieving airport details:', error);
+        return res.status(500).json({ 
+            error: 'Internal server error while retrieving airport details' 
+        });
+    }
+}
+
 exports.getRouteBetweenAirports = async (req, res) => {
     const { from, to } = req.query; // e.g. /routes/path?from=1&to=10
     if (!from || !to) {
@@ -296,3 +339,39 @@ exports.getRouteBetweenAirports = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error while finding route' });
     }
 };
+
+exports.getRouteByAirline = async (req, res) => {
+    const { airlineName } = req.params;
+    if (!airlineName) {
+        return res.status(400).json({ error: 'Missing required parameter: airlineName' });
+    }
+    try {
+        // Get all routes operated by the airline
+        const routes = await prisma.uses.findMany({
+            where: {
+                airline_name: {
+                    contains: airlineName,
+                    mode: 'default'
+                }
+            },
+            select: {
+                route_departure: true,
+                route_destination: true,
+            }
+        });
+
+        if (routes.length === 0) {
+            return res.status(404).json({ error: 'Airline is not enrolled in any routes' });
+        }
+
+        return res.status(200).json({
+            message: 'Routes found for airline',
+            routes: routes
+        });
+    } catch (error) {
+        console.error('Error retrieving routes by airline:', error);
+        return res.status(500).json({ 
+            error: 'Internal server error while retrieving routes by airline' 
+        });
+    }
+}

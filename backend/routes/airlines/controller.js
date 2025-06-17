@@ -302,3 +302,102 @@ exports.deleteAircraft = async (req, res) => {
         });
     }
 }
+
+exports.enrollInRoute = async (req, res) => {
+    const user = req.userToken;
+    const { departure, destination } = req.body;
+
+    if (!departure || !destination || isNaN(departure) || isNaN(destination)) {
+        return res.status(400).json({ error: 'Missing required fields or wrong types: departure, destination' });
+    }
+
+    try {
+        // Check if the route exists
+        const route = await prisma.routes.findUnique({
+            where: {
+                departure_destination: {
+                    departure: parseInt(departure, 10),
+                    destination: parseInt(destination, 10)
+                }
+            }
+        });
+
+        if (!route) {
+            return res.status(404).json({ 
+                error: 'Route not found... Please create the route before enrolling' 
+            });
+        }
+
+        // Check if the enrollment already exists
+        const existingEnrollment = await prisma.uses.findFirst({
+            where: {
+                airline_name: user.airlineName,
+                route_departure: parseInt(departure, 10),
+                route_destination: parseInt(destination, 10)
+            }
+        });
+
+        if (existingEnrollment) {
+            return res.status(409).json({
+                error: 'Airline is already enrolled in this route'
+            });
+        }
+
+        // Enroll the airline in the route
+        const newRoute = await prisma.uses.create({
+            data: {
+                airline_name: user.airlineName, // middleware verifies that user is an airline so it's safe to use user.name
+                route_departure: parseInt(departure, 10),
+                route_destination: parseInt(destination, 10)
+            }
+        });
+
+        res.status(200).json({
+            message: 'Successfully enrolled in route',
+            routeId: newRoute.id
+        });
+    } catch (error) {
+        console.error('Error enrolling in route:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while enrolling in route' 
+        });
+    }
+}
+
+exports.unenrollFromRoute = async (req, res) => {
+    const user = req.userToken;
+    const routeId = req.params.routeId;
+
+    // Validate required fields
+    if (!routeId || isNaN(routeId)) {
+        return res.status(400).json({ 
+            error: 'Missing required param: routeId' 
+        });
+    }
+
+    try {
+        // Unenroll the airline from the route
+        const result = await prisma.uses.deleteMany({
+            where: {
+                airline_name: user.airlineName,
+                id: parseInt(routeId, 10) // Ensure the routeId is an integer
+            }
+        });
+
+        if (result.count === 0) {
+            return res.status(404).json({ 
+                error: 'No enrollment found for this airline in the specified route. No action taken.' 
+            });
+        }
+
+        res.status(200).json({
+            message: 'Successfully unenrolled from route',
+            routeId: routeId
+        });
+    } catch (error) {
+        console.error('Error unenrolling from route:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while unenrolling from route' 
+        });
+    }
+}

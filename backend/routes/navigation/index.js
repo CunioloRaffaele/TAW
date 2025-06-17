@@ -7,8 +7,9 @@ var navRouter = express.Router();
 
 navRouter.post  ('/routes', validateJsonRequest, authMiddleware, checkAirlineEnrolled, controller.createRoute);
 navRouter.get   ('/routes', controller.listRoutes);
+navRouter.get   ('/routes/:airlineName', controller.getRouteByAirline);
 navRouter.get   ('/airports', controller.getAirports);
-//navRouter.get   ('/airports/:query', controller.getAirports);
+navRouter.get   ('/airports/:airportId', controller.getAirportDetails);
 navRouter.get   ('/airports/:departure/routes', controller.getAirportsDesinations);
 navRouter.get   ('/airports/:destination/incoming-routes', controller.getAirportsDepartures);
 navRouter.get   ('/routes/path', controller.getRouteBetweenAirports);
