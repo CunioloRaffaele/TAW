@@ -55,10 +55,11 @@ export class FlightSearchComponent {
     this.filteredFromAirports = this.searchForm.get('from')!.valueChanges.pipe(
       debounceTime(300),
       switchMap(value => {
+        if (typeof value !== 'string') return of([]);
         const toValue = this.searchForm.get('to')!.value;
-        if (toValue && toValue.length > 0) {
-          // Se c'è già una destinazione, filtra le partenze disponibili per quella destinazione
-          return this.searchAvailableDepartures(toValue, value);
+        if (toValue && toValue.id) {
+          // Cerca solo aeroporti da cui si può arrivare a "to"
+          return this.searchAvailableDepartures(toValue.id, value);
         }
         // Altrimenti mostra tutti gli aeroporti
         return this.searchAirports(value);
@@ -69,10 +70,13 @@ export class FlightSearchComponent {
     this.filteredToAirports = this.searchForm.get('to')!.valueChanges.pipe(
       debounceTime(300),
       switchMap(value => {
+        if (typeof value !== 'string') return of([]);
         const fromValue = this.searchForm.get('from')!.value;
         if (fromValue && fromValue.id) {
+          // Cerca solo aeroporti raggiungibili da "from"
           return this.searchAvailableDestinations(fromValue.id, value);
         }
+        // Altrimenti mostra tutti gli aeroporti
         return this.searchAirports(value);
       })
     );
@@ -88,13 +92,21 @@ export class FlightSearchComponent {
   }
 
   // Cerca partenze disponibili dato una destinazione
-  searchAvailableDepartures(destination: string, query: string): Observable<any[]> {
+  searchAvailableDepartures(departure: string, query: string): Observable<any[]> {
     if (!query || query.length < 2) return of([]);
-    return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(destination)}/incoming-routes`).pipe(
-      map(res => Array.isArray(res) ? res : res.airports ?? []),
+    return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(departure)}/incoming-routes`).pipe(
+      map(res => {
+        // Se la risposta è un array di oggetti con destinationAirport, estrai solo gli aeroporti
+        if (Array.isArray(res.airports) && res.airports.length && res.airports[0].departureAirport) {
+          return res.airports.map((r: any) => r.departureAirport);
+        }
+        // Altrimenti fallback classico
+        return Array.isArray(res) ? res : res.airports ?? [];
+      }),
       catchError(() => of([]))
     );
   }
+    
 
   // Cerca destinazioni disponibili dato una partenza
   searchAvailableDestinations(departure: string, query: string): Observable<any[]> {
@@ -118,6 +130,6 @@ export class FlightSearchComponent {
   }
 
   displayAirport(airport: any): string {
-    return airport ? `${airport.name} (${airport.city}, ${airport.country})` : '';
+    return airport && airport.name ? `${airport.name} (${airport.city})` : '';
   }
 }
