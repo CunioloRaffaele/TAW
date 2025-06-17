@@ -68,9 +68,11 @@ CREATE TABLE IF NOT EXISTS Flights (
     liftoff_date DATE,
     route_departure INTEGER,
     route_destination INTEGER,
+    airline_name VARCHAR(255),
 	CHECK (duration BETWEEN 90 and 1140),
     FOREIGN KEY (aircraft_id) REFERENCES Aircrafts(id) ON UPDATE CASCADE ON DELETE SET NULL,
-    FOREIGN KEY (route_departure, route_destination) REFERENCES Routes(departure, destination) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (route_departure, route_destination) REFERENCES Routes(departure, destination) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (airline_name) REFERENCES Airlines(name) ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 -- Create Seats Table
@@ -309,9 +311,9 @@ INSERT INTO Users (name, email, password, role) VALUES
 ('Admin User', 'admin@airline.com', 'admin123', 1);
 
 -- 8. Inserimento Flights (dipende da Routes e Aircrafts)
-INSERT INTO Flights ( duration, aircraft_id, liftoff_date, route_departure, route_destination) VALUES
-( 368, 1, '2024-06-01', 1, 2),
-( 728, 2, '2024-06-02', 2, 3);
+INSERT INTO Flights ( duration, aircraft_id, liftoff_date, route_departure, route_destination, airline_name) VALUES
+( 368, 1, '2024-06-01', 1, 2, 'Emirates'),
+( 728, 2, '2024-06-02', 2, 3, 'Lufthansa');
 
 -- 9. Inserimento Tickets (dipende da Flights)
 WITH 
