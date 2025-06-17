@@ -1,6 +1,5 @@
 const { parse } = require('dotenv');
-const { PrismaClient } = require('../../prisma/generated/prisma');
-const prisma = new PrismaClient()
+const prisma = require('../../utils/prisma');
 const findRoute = require('./alg');
 
 exports.createRoute = async (req, res) => {
@@ -255,7 +254,9 @@ exports.getAirports = async (req, res) => {
                     name: true,
                     city: true,
                     country: true,
-                    time_zone: true
+                    time_zone: true,
+                    lan: true,
+                    lat: true
                 }
             });
         }

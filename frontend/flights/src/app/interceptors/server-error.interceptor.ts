@@ -1,0 +1,22 @@
+import { Injectable } from '@angular/core';
+import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
+
+@Injectable()
+export class ServerErrorInterceptor implements HttpInterceptor {
+  constructor(private router: Router) {}
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return next.handle(req).pipe(
+      catchError((error: HttpErrorResponse) => {
+        // Se il server non risponde (status 0) o errore 5xx
+        if (error.status === 0 || (error.status >= 500 && error.status < 600)) {
+          this.router.navigate(['/server-error']);
+        }
+        return throwError(() => error);
+      })
+    );
+  }
+}
