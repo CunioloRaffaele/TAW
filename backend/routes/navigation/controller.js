@@ -216,7 +216,7 @@ exports.getAirportsDepartures = async (req, res) => {
 }
 
 exports.getAirports = async (req, res) => {
-    const query = req.params.query;
+    const { query } = req.query;
 
     let airports = [];
     try {

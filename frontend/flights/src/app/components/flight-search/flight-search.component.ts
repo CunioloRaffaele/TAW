@@ -81,7 +81,7 @@ export class FlightSearchComponent {
   // Cerca tutti gli aeroporti (autocomplete base)
   searchAirports(query: string): Observable<any[]> {
     if (!query || query.length < 2) return of([]);
-    return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(query)}`).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports?query=${encodeURIComponent(query)}`).pipe(
       map(res => Array.isArray(res) ? res : res.airports ?? []),
       catchError(() => of([]))
     );
@@ -90,7 +90,7 @@ export class FlightSearchComponent {
   // Cerca partenze disponibili dato una destinazione
   searchAvailableDepartures(destination: string, query: string): Observable<any[]> {
     if (!query || query.length < 2) return of([]);
-    return this.http.get<any>(`${environment.apiUrl}/api/navigate/routes/airports/destination/${encodeURIComponent(destination)}?query=${encodeURIComponent(query)}`).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(destination)}/incoming-routes`).pipe(
       map(res => Array.isArray(res) ? res : res.airports ?? []),
       catchError(() => of([]))
     );
@@ -99,7 +99,7 @@ export class FlightSearchComponent {
   // Cerca destinazioni disponibili dato una partenza
   searchAvailableDestinations(departure: string, query: string): Observable<any[]> {
     if (!query || query.length < 2) return of([]);
-    return this.http.get<any>(`${environment.apiUrl}/api/navigate/routes/airports/departure/${encodeURIComponent(departure)}?query=${encodeURIComponent(query)}`).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(departure)}/routes`).pipe(
       map(res => {
         // Se la risposta è un array di oggetti con destinationAirport, estrai solo gli aeroporti
         if (Array.isArray(res.airports) && res.airports.length && res.airports[0].destinationAirport) {
