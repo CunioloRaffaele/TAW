@@ -1,6 +1,5 @@
 const { parse } = require('dotenv');
-const { PrismaClient } = require('../../prisma/generated/prisma');
-const prisma = new PrismaClient()
+const prisma = require('../../utils/prisma');
 const findRoute = require('./alg');
 
 exports.createRoute = async (req, res) => {
