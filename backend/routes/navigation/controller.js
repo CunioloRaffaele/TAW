@@ -255,7 +255,9 @@ exports.getAirports = async (req, res) => {
                     name: true,
                     city: true,
                     country: true,
-                    time_zone: true
+                    time_zone: true,
+                    lan: true,
+                    lat: true
                 }
             });
         }
