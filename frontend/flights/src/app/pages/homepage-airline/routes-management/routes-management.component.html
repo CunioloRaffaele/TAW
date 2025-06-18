@@ -1,1 +1,108 @@
-<p>routes-management works!</p>
+<mat-card>
+  <mat-card-title>Gestione Rotte</mat-card-title>
+  <mat-card-content>
+    <div class="actions-row">
+      <button mat-raised-button color="primary" (click)="openAddDialog()">
+        <mat-icon>add</mat-icon>
+        Aggiungi rotta
+      </button>
+      <button mat-raised-button color="accent" class="create-route-btn" (click)="openCreateDialog()">
+        <mat-icon>add_road</mat-icon>
+        Crea rotta
+      </button>
+    </div>
+
+    <!-- Popup aggiunta rotta -->
+    <div class="add-route-dialog" *ngIf="showAddDialog">
+      <h3>Aggiungi una rotta</h3>
+      <form [formGroup]="addRouteForm" (ngSubmit)="onAddRoute()">
+        <mat-form-field appearance="outline">
+          <mat-label>Aeroporto di partenza</mat-label>
+          <input matInput [matAutocomplete]="autoFrom" formControlName="from" (input)="onAirportInput('from')" required>
+          <mat-autocomplete #autoFrom="matAutocomplete" [displayWith]="displayAirport">
+            <mat-option *ngFor="let option of filteredFromAirports" [value]="option">
+              {{ option.name }} ({{ option.city }}, {{ option.country }})
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Aeroporto di destinazione</mat-label>
+          <input matInput [matAutocomplete]="autoTo" formControlName="to" (input)="onAirportInput('to')" required>
+          <mat-autocomplete #autoTo="matAutocomplete" [displayWith]="displayAirport">
+            <mat-option *ngFor="let option of filteredToAirports" [value]="option">
+              {{ option.name }} ({{ option.city }}, {{ option.country }})
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <div class="add-actions">
+          <button mat-button type="button" (click)="closeAddDialog()">Annulla</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="addRouteForm.invalid || loadingAdd">
+            <mat-progress-spinner *ngIf="loadingAdd" diameter="20" mode="indeterminate"></mat-progress-spinner>
+            <span *ngIf="!loadingAdd">Aggiungi</span>
+          </button>
+        </div>
+        <div *ngIf="addError" class="error-message">
+          <mat-icon color="warn">error</mat-icon>
+          {{ addError }}
+        </div>
+      </form>
+    </div>
+
+    <!-- Popup creazione rotta -->
+    <div class="add-route-dialog" *ngIf="showCreateDialog">
+      <h3>Crea una nuova rotta</h3>
+      <form [formGroup]="createRouteForm" (ngSubmit)="onCreateRoute()">
+        <mat-form-field appearance="outline">
+          <mat-label>Aeroporto di partenza</mat-label>
+          <input matInput [matAutocomplete]="autoFromCreate" formControlName="from" (input)="onAirportInputCreate('from')" required>
+          <mat-autocomplete #autoFromCreate="matAutocomplete" [displayWith]="displayAirport">
+            <mat-option *ngFor="let option of filteredFromAirportsCreate" [value]="option">
+              {{ option.name }} ({{ option.city }}, {{ option.country }})
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Aeroporto di destinazione</mat-label>
+          <input matInput [matAutocomplete]="autoToCreate" formControlName="to" (input)="onAirportInputCreate('to')" required>
+          <mat-autocomplete #autoToCreate="matAutocomplete" [displayWith]="displayAirport">
+            <mat-option *ngFor="let option of filteredToAirportsCreate" [value]="option">
+              {{ option.name }} ({{ option.city }}, {{ option.country }})
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
+        <div class="add-actions">
+          <button mat-button type="button" (click)="closeCreateDialog()">Annulla</button>
+          <button mat-raised-button color="accent" type="submit" [disabled]="createRouteForm.invalid || loadingCreate">
+            <mat-progress-spinner *ngIf="loadingCreate" diameter="20" mode="indeterminate"></mat-progress-spinner>
+            <span *ngIf="!loadingCreate">Crea</span>
+          </button>
+        </div>
+        <div *ngIf="createError" class="error-message">
+          <mat-icon color="warn">error</mat-icon>
+          {{ createError }}
+        </div>
+      </form>
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+    <div *ngIf="!loading && routes.length === 0" class="empty-list">
+      Nessuna rotta associata.
+    </div>
+
+    <!-- LISTA DELLE ROTTE SOTTO IL BOX DI AGGIUNTA -->
+    <div *ngIf="!loading && routes.length > 0" class="routes-list">
+      <app-route-card
+        *ngFor="let route of routes"
+        [departureId]="route.route_departure"
+        [destinationId]="route.route_destination"
+        [routeId]="route.id"
+        (disconnect)="onDisconnect($event)">
+      </app-route-card>
+    </div>
+  </mat-card-content>
+</mat-card>
