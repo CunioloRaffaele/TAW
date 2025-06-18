@@ -16,5 +16,6 @@ airlineRouter.post  ('/routes', validateJsonRequest, authMiddleware, checkAirlin
 airlineRouter.delete('/routes/:routeId', authMiddleware, checkAirlineEnrolled, controller.unenrollFromRoute);
 airlineRouter.get   ('/routes', authMiddleware, checkAirlineEnrolled, controller.listRoutes);
 //airlineRouter.post('/route', validateJsonRequest, authMiddleware, checkAirlineEnrolled, controller.addRoute);
+airlineRouter.get   ('/flights', authMiddleware, checkAirlineEnrolled, controller.listFlights);
 
 module.exports = airlineRouter;

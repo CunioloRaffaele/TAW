@@ -234,7 +234,7 @@ $$ LANGUAGE plpgsql;
 
 -- 1. Inserimento Airlines (tabella indipendente)
 INSERT INTO Airlines (name, password, country, motto, enrolled) VALUES
-('FlySave', '$2b$10$vV47kdLzjVjPHQ4pyZlQQesn1/yqmbNdQt48kXVmHK.Xmqj.lXAWW', 'Francia', 'Vive la france', TRUE),
+('FlySafe', '$2b$10$vV47kdLzjVjPHQ4pyZlQQesn1/yqmbNdQt48kXVmHK.Xmqj.lXAWW', 'Francia', 'Vive la france', TRUE),
 ('Emirates', 'em1r@t3s2024', 'United Arab Emirates', 'Fly Better', TRUE),
 ('Lufthansa', 'luft2024!secure', 'Germany', 'Say yes to the world', TRUE),
 ('Singapore Airlines', 'sing@p0r32024', 'Singapore', 'A Great Way to Fly', TRUE);
@@ -285,10 +285,10 @@ INSERT INTO Routes (departure, destination) VALUES
 -- 4. Inserimento Aircrafts (dipende da Airlines)
 INSERT INTO Aircrafts (model, seats_capacity, owner_name) VALUES
 ('Airbus A380', 550, 'Emirates'),
-( 'Boeing 747-8', 400, 'Lufthansa'),
+( 'Boeing 747-8', 400, 'FlySafe'),
 ( 'Airbus A350', 350, 'Singapore Airlines'),
 ( 'Airbus A320', 180, 'Lufthansa'),
-('Boeing 777', 396, 'Emirates'),
+('Boeing 777', 396, 'FlySafe"'),
 ('Airbus A321', 200, 'Singapore Airlines');
 
 -- 5. Inserimento Uses (dipende da Routes)

@@ -32,8 +32,7 @@ To quickly set up the entire application stack using Docker Compose, follow thes
 - **Enrolled Airline**:
 ```json
 {
-    "name": "FlySave",
+    "name": "FlySafe",
     "password": "password123"
 }
 ```
-- 

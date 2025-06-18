@@ -454,3 +454,46 @@ exports.listRoutes = async (req, res) => {
     }
 }
 
+exports.listFlights = async (req, res) => {
+    const user = req.userToken;
+
+    try {
+        // List flights for the airline
+        const flights = await prisma.flights.findMany({
+            where: {
+                airline_name: user.airlineName // middleware verifies that user is an airline so it's safe to use user.name
+            },
+            select: {
+                code: true,
+                liftoff_date: true,
+                duration: true,
+                route_departure: true,
+                route_destination: true,
+                aircraft_id: true,
+            }
+        });
+        // for each flight get the details for aircraft
+        for (let flight of flights) {
+            const aircraft = await prisma.aircrafts.findUnique({
+                where: {
+                    id: flight.aircraft_id
+                },
+                select: {
+                    model: true,
+                    seats_capacity: true
+                }
+            });
+            flight.aircraft_details = aircraft; // Add aircraft details to the flight object
+        }
+
+        res.status(200).json({
+            message: 'List of flights retrieved successfully',
+            flights: flights
+        });
+    } catch (error) {
+        console.error('Error retrieving flights:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while retrieving flights' 
+        });
+    }
+};

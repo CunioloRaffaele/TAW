@@ -67,41 +67,11 @@ exports.listRoutes = async (req, res) => {
     try {
         // List all routes
         const routes = await prisma.routes.findMany({
-            select: {
-                departure: true,
-                destination: true,
-            }
-        });
-
-        for (const route of routes) {
-            // get airprort details for each route
-            const getOrigin = await prisma.airports.findFirst({
-                where: {
-                    id: route.departure
-                },
-                select: {
-                    city: true,
-                    name: true,
-                    time_zone: true,
-                    country: true
-                }
-            });
-            const getDestination = await prisma.airports.findFirst({
-                where: {
-                    id: route.destination
-                },
-                select: {
-                    city: true,
-                    name: true,
-                    time_zone: true,
-                    country: true
-                }
-            });
-            route.departureAirport = getOrigin;
-            route.destinationAirport = getDestination;
-        }
-
-        
+            include: {
+                airports_routes_departureToairports : true,
+                airports_routes_destinationToairports: true
+            },
+        });       
 
         return res.status(200).json({
             message: 'List of routes retrieved successfully',
@@ -375,6 +345,155 @@ exports.getRouteByAirline = async (req, res) => {
         console.error('Error retrieving routes by airline:', error);
         return res.status(500).json({ 
             error: 'Internal server error while retrieving routes by airline' 
+        });
+    }
+}
+
+exports.newFlight = async (req, res) => {
+    const { liftOffDate, duration, routeDeparture, routeDestination, aircraftId } = req.body;
+    const airlineName = req.userToken.airlineName;
+
+    // Validate required fields
+    if (!liftOffDate || !duration || isNaN(duration) || !routeDeparture || isNaN(routeDeparture) || !routeDestination || isNaN(routeDestination) || !aircraftId || isNaN(aircraftId)) {
+        return res.status(400).json({ 
+            error: 'Missing required fields: liftOffDate, duration, routeDeparture, routeDestination, aircraftId' 
+        });
+    }
+    try {
+        // check if the aircraft exists and belongs to the airline
+        const aircraft = await prisma.aircrafts.findUnique({
+            where: {
+                id: parseInt(aircraftId, 10),
+                owner_name: airlineName
+            }
+        });
+        if (!aircraft) {
+            return res.status(404).json({
+                error: 'Aircraft not found or does not belong to the airline'
+            });
+        }
+        // check if the route exists and if the airline is enrolled in it
+        const route = await prisma.routes.findFirst({
+            where: {
+                departure: parseInt(routeDeparture, 10),
+                destination: parseInt(routeDestination, 10)
+            }
+        });
+        if (!route) {
+            return res.status(404).json({
+                error: 'Route not found between the specified airports'
+            });
+        }
+        const isEnrolled = await prisma.uses.findFirst({
+            where: {
+                airline_name: airlineName,
+                route_departure: parseInt(routeDeparture, 10),
+                route_destination: parseInt(routeDestination, 10)
+            }
+        });
+        if (!isEnrolled) {
+            return res.status(403).json({
+                error: 'Airline is not enrolled in the specified route'
+            });
+        }
+
+        // Create new flight
+        const flight = await prisma.flights.create({
+            data: {
+                liftoff_date: new Date(liftOffDate).toISOString(),
+                duration: parseInt(duration, 10),
+                route_departure: parseInt(routeDeparture, 10),
+                route_destination: parseInt(routeDestination, 10),
+                aircraft_id: parseInt(aircraftId, 10),
+                airline_name: airlineName
+            }
+        });
+
+        return res.status(201).json({
+            message: 'New flight created successfully',
+            flight: flight
+        });
+    } catch (error) {
+        console.error('Error creating new flight:', error);
+        return res.status(500).json({ 
+            error: 'Internal server error while creating new flight' 
+        });
+    }
+}
+
+exports.listFlights = async (req, res) => {
+    // get from json
+    // array of routes [{departure, destination}]
+    // searchStartDate
+    // searchEndDate
+    // number of passengers
+    // class
+    const { routes, searchStartDate, searchEndDate, passengers, classType } = req.body;
+    if (!routes || !searchStartDate || !searchEndDate || !passengers || !classType) {
+        return res.status(400).json({ 
+            error: 'Missing required query parameters: routes, searchStartDate, searchEndDate, passengers, classType' 
+        });
+    }
+    try {
+        // get routes
+        for (const route of routes) {
+            if (!route.departure || !route.destination) {
+                return res.status(400).json({ 
+                    error: 'Each route must have a departure and destination' 
+                });
+            }
+        }
+        if (routes.length === 0) {
+            return res.status(400).json({ 
+                error: 'At least one route must be provided' 
+            });
+        }
+
+        // Validate date formats
+        const startDate = new Date(searchStartDate).toISOString();
+        const endDate = new Date(searchEndDate).toISOString();
+        if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime()) || new Date(startDate) > new Date(endDate)) {
+            return res.status(400).json({ 
+                error: 'Invalid date format for searchStartDate or searchEndDate' 
+            });
+        }
+
+        // Fetch flights based on the provided criteria
+        const flights = await prisma.flights.findMany({
+            where: {
+                AND: [
+                    {
+                        liftoff_date: {
+                            gte: startDate,
+                            lte: endDate
+                        }
+                    },
+                    {
+                        route_departure: {
+                            in: routes.map(route => route.departure)
+                        }
+                    },
+                    {
+                        route_destination: {
+                            in: routes.map(route => route.destination)
+                        }
+                    }
+                ]
+            },
+            include: {
+                aircrafts: true,
+                routes: true
+            }
+        });
+
+        return res.status(200).json({
+            message: 'Flights retrieved successfully',
+            flights: flights
+        });
+    } catch (error) {
+        console.error('Error retrieving flights:', error);
+        return res.status(500).json({ 
+            error: 'Internal server error while retrieving flights' 
         });
     }
 }

@@ -5,10 +5,12 @@ var routes = express.Router();
 var userRouter = require('./users/index');
 var airlineRouter = require('./airlines/index');
 var navigationRouter = require('./navigation/index');
+var bookingRouter = require('./bookings/index');
 
 // Attach all routers to the main router
 routes.use('/users', userRouter);
 routes.use('/airlines', airlineRouter);
 routes.use('/navigate', navigationRouter);
+routes.use('/bookings', bookingRouter);
 
 module.exports = routes;
