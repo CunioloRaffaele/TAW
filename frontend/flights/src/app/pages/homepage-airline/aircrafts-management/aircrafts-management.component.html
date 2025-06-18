@@ -1,1 +1,54 @@
-<p>aircrafts-management works!</p>
+<mat-card>
+  <mat-card-title>Gestione Aerei</mat-card-title>
+  <mat-card-content>
+     
+    <button mat-raised-button color="primary" (click)="openAddAircraftDialog()" style="margin-bottom: 18px;">
+      <mat-icon>add</mat-icon>
+      Aggiungi aereo
+    </button>
+    <!-- Popup aggiunta aereo -->
+    <div class="add-aircraft-dialog" *ngIf="showAddAircraftDialog">
+      <h3>Aggiungi un nuovo aereo</h3>
+      <form [formGroup]="addAircraftForm" (ngSubmit)="onAddAircraft()">
+        <mat-form-field appearance="outline">
+          <mat-label>Modello</mat-label>
+          <input matInput formControlName="aircraftType" required>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Numero posti</mat-label>
+          <input matInput formControlName="capacity" type="number" min="25" max="750" required>
+        </mat-form-field>
+        <div class="add-actions">
+          <button mat-button type="button" (click)="closeAddAircraftDialog()">Annulla</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="addAircraftForm.invalid || loadingAddAircraft">
+            <mat-progress-spinner *ngIf="loadingAddAircraft" diameter="20" mode="indeterminate"></mat-progress-spinner>
+            <span *ngIf="!loadingAddAircraft">Aggiungi</span>
+          </button>
+        </div>
+        <div *ngIf="addAircraftError" class="error-message">
+          <mat-icon color="warn">error</mat-icon>
+          {{ addAircraftError }}
+        </div>
+      </form>
+    </div>
+
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    <div *ngIf="error" class="error-message">
+      {{ error }}
+    </div>
+    <div *ngIf="!loading && aircrafts.length === 0" class="empty-list">
+      Nessun aereo associato.
+    </div>
+    <div *ngIf="!loading && aircrafts.length > 0" class="aircrafts-list">
+      <app-aircraft-card
+        *ngFor="let aircraft of aircrafts"
+        [id]="aircraft.id"
+        [model]="aircraft.model"
+        [nSeats]="aircraft.seats_capacity"
+            (deleteAircraft)="ondeleteAircraft($event)">
+      </app-aircraft-card>
+    </div>
+  </mat-card-content>
+</mat-card>

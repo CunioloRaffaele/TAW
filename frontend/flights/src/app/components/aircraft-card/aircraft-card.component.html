@@ -1,1 +1,31 @@
-<p>aircraft-card works!</p>
+<div class="aircraft-card">
+  <div class="aircraft-info">
+    <div class="info-item">
+      <span class="label">ID:</span>
+      <span class="value">{{ id() }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Modello:</span>
+      <span class="value">{{ model() }}</span>
+    </div>
+    <div class="info-item">
+      <span class="label">Posti:</span>
+      <span class="value">{{ nSeats() }}</span>
+    </div>
+  </div>
+   <button mat-icon-button color="warn" (click)="showDeleteConfirm = true" class="delete-button" matTooltip="Elimina aereo">
+    <mat-icon>delete</mat-icon>
+  </button>
+
+  <!-- Popup conferma eliminazione -->
+  <div class="confirm-overlay" *ngIf="showDeleteConfirm">
+    <div class="confirm-dialog">
+      <h3>Conferma eliminazione</h3>
+      <p>Vuoi davvero eliminare questo aereo?</p>
+      <div class="confirm-actions">
+        <button mat-button (click)="showDeleteConfirm = false">Annulla</button>
+        <button mat-raised-button color="warn" (click)="confirmDelete()">Elimina</button>
+      </div>
+    </div>
+  </div>
+</div>
