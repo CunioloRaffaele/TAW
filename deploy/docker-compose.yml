@@ -1,0 +1,25 @@
+
+services:
+  db:
+    build: ./database
+    container_name: postdb
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5431:5432"
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../deploy/backend/Dockerfile
+    container_name: backend
+    environment:
+      DATABASE_URL: postgresql://postgres:123@db:5432/postgres
+      # should ovverride project's .env file and use docker network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    command: npm run easyStart

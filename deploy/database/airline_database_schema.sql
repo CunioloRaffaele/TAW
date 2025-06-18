@@ -308,7 +308,8 @@ INSERT INTO Seats (id, postion, aircraft_id) VALUES
 -- 7. Inserimento Users (tabella indipendente)
 INSERT INTO Users (name, email, password, role) VALUES
 ('John Doe', 'john@email.com', 'password123', 0),
-('Admin User', 'admin@airline.com', 'admin123', 1);
+('Admin User', 'admin@airline.com', 'admin123', 1),
+('Admin', 'adminAccount@gmail.com', '$2b$10$dTV3A7cZwWjBiqKrxEXwuuIJGDkIKqSJOizMDkdwL9s0jQK4bsNx6', 1);
 
 -- 8. Inserimento Flights (dipende da Routes e Aircrafts)
 INSERT INTO Flights ( duration, aircraft_id, liftoff_date, route_departure, route_destination, airline_name) VALUES

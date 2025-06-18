@@ -38,14 +38,14 @@ cd backend
 npm install
 ```
 
-3. Generate Prisma client locally
+3. Generate Prisma client locally (actually this is done automatically by the easyStart script, but you can run it manually if needed):
 ```bash
 npx prisma generate
 ```
 
 4. Start the server:
 ```bash
-npm start
+npm run easyStart
 ```
 or
 ```bash
