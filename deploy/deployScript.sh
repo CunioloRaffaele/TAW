@@ -3,6 +3,10 @@
 REPO_URL="https://github.com/CunioloRaffaele/TAW.git"
 PROJECT_DIR="$HOME/TAW"
 
+# Ensure Docker is running
+sudo systemctl start docker
+echo "Docker service started."
+
 # Clone or update the repository
 if [ -d "$PROJECT_DIR/.git" ]; then
   echo "Repository exists. Pulling latest changes..."
