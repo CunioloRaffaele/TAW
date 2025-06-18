@@ -288,7 +288,7 @@ INSERT INTO Aircrafts (model, seats_capacity, owner_name) VALUES
 ( 'Boeing 747-8', 400, 'FlySafe'),
 ( 'Airbus A350', 350, 'Singapore Airlines'),
 ( 'Airbus A320', 180, 'Lufthansa'),
-('Boeing 777', 396, 'FlySafe"'),
+( 'Boeing 777', 396, 'FlySafe'),
 ('Airbus A321', 200, 'Singapore Airlines');
 
 -- 5. Inserimento Uses (dipende da Routes)
