@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS Flights (
     code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     duration INTEGER,
     aircraft_id INTEGER,
-    liftoff_date DATE,
+    liftoff_date TIMESTAMP,
     route_departure INTEGER,
     route_destination INTEGER,
     airline_name VARCHAR(255),
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS Tickets (
 -- Create Trips Table
 CREATE TABLE IF NOT EXISTS Trips (
     id SERIAL PRIMARY KEY,
-    creation_date DATE,
+    creation_date TIMESTAMP,
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES Users(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
@@ -314,8 +314,8 @@ INSERT INTO Users (name, email, password, role) VALUES
 
 -- 8. Inserimento Flights (dipende da Routes e Aircrafts)
 INSERT INTO Flights ( duration, aircraft_id, liftoff_date, route_departure, route_destination, airline_name) VALUES
-( 368, 1, '2024-06-01', 1, 2, 'Emirates'),
-( 728, 2, '2024-06-02', 2, 3, 'Lufthansa');
+( 368, 1, '2024-06-01 20:20:20', 1, 2, 'Emirates'),
+( 728, 2, '2024-06-02 15:30:00', 2, 3, 'Lufthansa');
 
 -- 9. Inserimento Tickets (dipende da Flights)
 WITH 
@@ -335,8 +335,8 @@ SELECT type, price, flight_code FROM ticket_data;
 
 -- 10. Inserimento Trips (dipende da Users)
 INSERT INTO Trips (creation_date, user_id) VALUES
-('2024-05-15', 1),
-('2024-05-16', 2);
+('2024-05-15 20:20:20', 1),
+('2024-05-16 15:30:00', 2);
 
 -- 11. Inserimento Extras (tabella indipendente)
 INSERT INTO Extras (description, price) VALUES
