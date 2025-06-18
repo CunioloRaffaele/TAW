@@ -234,9 +234,10 @@ $$ LANGUAGE plpgsql;
 
 -- 1. Inserimento Airlines (tabella indipendente)
 INSERT INTO Airlines (name, password, country, motto, enrolled) VALUES
-('Emirates', 'em1r@t3s2024', 'United Arab Emirates', 'Fly Better', FALSE),
+('FlySave', '$2b$10$vV47kdLzjVjPHQ4pyZlQQesn1/yqmbNdQt48kXVmHK.Xmqj.lXAWW', 'Francia', 'Vive la france', TRUE),
+('Emirates', 'em1r@t3s2024', 'United Arab Emirates', 'Fly Better', TRUE),
 ('Lufthansa', 'luft2024!secure', 'Germany', 'Say yes to the world', TRUE),
-('Singapore Airlines', 'sing@p0r32024', 'Singapore', 'A Great Way to Fly', FALSE);
+('Singapore Airlines', 'sing@p0r32024', 'Singapore', 'A Great Way to Fly', TRUE);
 
 -- 2. Inserimento Airports (tabella indipendente)
 INSERT INTO Airports (name, city, country, lat, lan, time_zone) VALUES

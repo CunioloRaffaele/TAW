@@ -20,3 +20,19 @@ To quickly set up the entire application stack using Docker Compose, follow thes
    docker ps
    ```
 
+## 🧑‍💻 Demo Accounts
+- **Admin**: 
+```json
+{
+    "name": "Admin",
+    "email": "adminAccount@gmail.com",
+    "password": "ciao"
+}
+```
+- **Enrolled Airline**:
+```json
+{
+    "name": "FlySave",
+    "password": "password123"
+}
+```
