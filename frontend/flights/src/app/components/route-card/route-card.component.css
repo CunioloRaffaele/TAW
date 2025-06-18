@@ -1,0 +1,92 @@
+.route-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+  padding: 18px 28px;
+  margin: 12px 0;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.route-card:hover {
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.15);
+}
+
+.route-info {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  flex: 1;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+}
+
+.label {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.value {
+  font-size: 1.08em;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.city-country {
+  font-size: 0.98em;
+  color: #666;
+  margin-left: 4px;
+}
+
+.airport-icon {
+  font-size: 22px;
+  vertical-align: middle;
+}
+
+.arrow-icon {
+  font-size: 28px;
+  margin: 0 12px;
+}
+
+.disconnect-button {
+  margin-left: 18px;
+}
+
+/* Popup conferma */
+.confirm-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+.confirm-dialog {
+  background-color: white;
+  border-radius: 10px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 370px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+}
+.confirm-dialog h3 {
+  margin-top: 0;
+  color: #d32f2f;
+  font-size: 1.18em;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 24px;
+}

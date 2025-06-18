@@ -1,0 +1,39 @@
+<mat-card class="route-card">
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="30"></mat-spinner>
+  </div>
+  <div *ngIf="!loading && !error" class="route-info">
+    <div class="info-item">
+      <span class="label">Da:</span>
+      <span class="value">
+        <mat-icon class="airport-icon" color="primary">flight_takeoff</mat-icon>
+        {{ departureAirport?.name }}
+        <span class="city-country">({{ departureAirport?.city }}, {{ departureAirport?.country }})</span>
+      </span>
+    </div>
+    <mat-icon class="arrow-icon" color="primary">arrow_forward</mat-icon>
+    <div class="info-item">
+      <span class="label">A:</span>
+      <span class="value">
+        <mat-icon class="airport-icon" color="accent">flight_land</mat-icon>
+        {{ destinationAirport?.name }}
+        <span class="city-country">({{ destinationAirport?.city }}, {{ destinationAirport?.country }})</span>
+      </span>
+    </div>
+    <button mat-icon-button color="warn" (click)="showDisconnectConfirm = true" class="disconnect-button" matTooltip="Dissocia questa rotta">
+      <mat-icon>link_off</mat-icon>
+    </button>
+  </div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <!-- Popup di conferma -->
+  <div class="confirm-overlay" *ngIf="showDisconnectConfirm">
+    <div class="confirm-dialog">
+      <h3>Conferma disconnessione</h3>
+      <p>Vuoi davvero dissociare questa rotta dalla compagnia?</p>
+      <div class="confirm-actions">
+        <button mat-button (click)="showDisconnectConfirm = false">Annulla</button>
+        <button mat-raised-button color="warn" (click)="confirmDisconnect()">Disconnetti</button>
+      </div>
+    </div>
+  </div>
+</mat-card>

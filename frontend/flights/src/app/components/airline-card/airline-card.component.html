@@ -13,9 +13,7 @@
       <span class="value">{{ motto() }}</span>
     </div>
   </div>
-  <button mat-icon-button color="warn" (click)="showDeleteConfirm = true" class="delete-button">
-    <mat-icon>delete</mat-icon>
-  </button>
+
   <div class="confirm-overlay" *ngIf="showDeleteConfirm">
     <div class="confirm-dialog">
       <h3>Conferma eliminazione</h3>

@@ -1,4 +1,4 @@
 // environment.ts
 export const environment = {
-  apiUrl: 'http://localhost:3000'
+  apiUrl: 'http://129.152.7.218:3000'
 };
