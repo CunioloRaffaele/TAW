@@ -26,6 +26,7 @@ model airlines {
   motto     String?     @default("Fly with us, fly safe and snug <3") @db.VarChar(300)
   enrolled  Boolean?    @default(false)
   aircrafts aircrafts[]
+  flights   flights[]
   uses      uses[]
 }
 
@@ -40,6 +41,11 @@ model airports {
   time_zone                           Int
   routes_routes_departureToairports   routes[] @relation("routes_departureToairports")
   routes_routes_destinationToairports routes[] @relation("routes_destinationToairports")
+}
+
+model bljwts {
+  id  Int    @id @default(autoincrement())
+  jwt String @db.VarChar(255)
 }
 
 model bookings {
@@ -70,7 +76,9 @@ model flights {
   liftoff_date      DateTime?  @db.Date
   route_departure   Int?
   route_destination Int?
+  airline_name      String?    @db.VarChar(255)
   aircrafts         aircrafts? @relation(fields: [aircraft_id], references: [id])
+  airlines          airlines?  @relation(fields: [airline_name], references: [name])
   routes            routes?    @relation(fields: [route_departure, route_destination], references: [departure, destination])
   tickets           tickets[]
 }
@@ -131,9 +139,4 @@ model uses {
   route_destination Int?
   airlines          airlines? @relation(fields: [airline_name], references: [name], onDelete: Cascade)
   routes            routes?   @relation(fields: [route_departure, route_destination], references: [departure, destination], onDelete: Cascade)
-}
-
-model bljwts {
-  id  Int    @id @default(autoincrement())
-  jwt String @db.VarChar(255)
 }
