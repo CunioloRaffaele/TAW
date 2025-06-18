@@ -14,6 +14,7 @@ airlineRouter.get   ('/aircrafts/:airlineName', controller.listAircrafts);
 airlineRouter.delete('/aircrafts/:aircraftId', authMiddleware, checkAirlineEnrolled, controller.deleteAircraft);
 airlineRouter.post  ('/routes', validateJsonRequest, authMiddleware, checkAirlineEnrolled, controller.enrollInRoute);
 airlineRouter.delete('/routes/:routeId', authMiddleware, checkAirlineEnrolled, controller.unenrollFromRoute);
+airlineRouter.get   ('/routes', authMiddleware, checkAirlineEnrolled, controller.listRoutes);
 //airlineRouter.post('/route', validateJsonRequest, authMiddleware, checkAirlineEnrolled, controller.addRoute);
 
 module.exports = airlineRouter;

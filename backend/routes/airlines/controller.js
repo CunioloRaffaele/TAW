@@ -400,3 +400,57 @@ exports.unenrollFromRoute = async (req, res) => {
         });
     }
 }
+
+exports.listRoutes = async (req, res) => {
+    const user = req.userToken;
+
+    try {
+        // List routes for the airline
+        const routes = await prisma.uses.findMany({
+            where: {
+                airline_name: user.airlineName // middleware verifies that user is an airline so it's safe to use user.name
+            },
+            select: {
+                id: true,
+                route_departure: true,
+                route_destination: true
+            }
+        });
+        // for each route get the details for departure and destination airports
+        for (let route of routes) {
+            const departureAirport = await prisma.airports.findUnique({
+                where: {
+                    id: route.route_departure
+                },
+                select: {
+                    name: true,
+                    city: true,
+                    country: true
+                }
+            });
+            const destinationAirport = await prisma.airports.findUnique({
+                where: {
+                    id: route.route_destination
+                },
+                select: {
+                    name: true,
+                    city: true,
+                    country: true
+                }
+            });
+            route.departure_details = departureAirport; // Add departure airport details to the route object
+            route.destination_details = destinationAirport; // Add destination airport details to the route object
+        }
+
+        res.status(200).json({
+            message: 'List of routes retrieved successfully',
+            routes: routes
+        });
+    } catch (error) {
+        console.error('Error retrieving routes:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while retrieving routes' 
+        });
+    }
+}
+
