@@ -205,6 +205,12 @@ exports.getAirports = async (req, res) => {
                                 startsWith: query,
                                 mode: 'insensitive'
                             }
+                        },
+                        {
+                            country: {
+                                startsWith: query,
+                                mode: 'insensitive'
+                            }
                         }
                     ]
                 },
