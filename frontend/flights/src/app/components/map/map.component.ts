@@ -25,14 +25,33 @@ export class LeafletMapComponent implements AfterViewInit {
 
   private loadAirports(): void {
     const url = `${environment.apiUrl}/api/navigate/airports/`;
+    
+    // Set map bounds
+    const southWest = L.latLng(-60, -170);
+    const northEast = L.latLng(85, 190);
+    const bounds = L.latLngBounds(southWest, northEast);
+    
+    this.map.setMaxBounds(bounds);
+    this.map.on('drag', () => {
+      this.map.panInsideBounds(bounds, { animate: false });
+    });
+    this.map.options.minZoom = 2;
     this.http.get<any>(url).subscribe({
       next: (response) => {
         if (response.airports) {
           response.airports.forEach((airport: any) => {
             if (airport.lat && airport.lan) {
+              const localTime = new Date().toLocaleTimeString('en-US', {
+                timeZone: airport.time_zone,
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: '2-digit',
+                hour12: false
+              });
               L.marker([airport.lat, airport.lan])
                 .addTo(this.map)
-                .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}`);
+                .bindPopup(`<b>${airport.name}</b><br>${airport.city}, ${airport.country}<br> ${airport.time_zone}<br>Local Time: ${localTime}`);
             }
           });
         }
