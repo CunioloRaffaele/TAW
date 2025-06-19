@@ -1,6 +1,7 @@
 const { parse } = require('dotenv');
 const prisma = require('../../utils/prisma');
 const findRoute = require('./alg');
+const { DateTime } = require('luxon');
 
 exports.createRoute = async (req, res) => {
     const { origin, destination } = req.body;
@@ -356,13 +357,13 @@ exports.getRouteByAirline = async (req, res) => {
 }
 
 exports.newFlight = async (req, res) => {
-    const { liftOffDate, duration, routeDeparture, routeDestination, aircraftId } = req.body;
+    const { liftOffDateLOCAL, duration, routeDeparture, routeDestination, aircraftId } = req.body;
     const airlineName = req.userToken.airlineName;
 
     // Validate required fields
-    if (!liftOffDate || !duration || isNaN(duration) || !routeDeparture || isNaN(routeDeparture) || !routeDestination || isNaN(routeDestination) || !aircraftId || isNaN(aircraftId)) {
+    if (!liftOffDateLOCAL || !duration || isNaN(duration) || !routeDeparture || isNaN(routeDeparture) || !routeDestination || isNaN(routeDestination) || !aircraftId || isNaN(aircraftId)) {
         return res.status(400).json({ 
-            error: 'Missing required fields: liftOffDate, duration, routeDeparture, routeDestination, aircraftId' 
+            error: 'Missing required fields: liftOffDateLOCAL, duration, routeDeparture, routeDestination, aircraftId' 
         });
     }
     try {
@@ -403,10 +404,58 @@ exports.newFlight = async (req, res) => {
             });
         }
 
+        // Validate liftOffDateLOCAL format
+        const liftOffDate = new Date(liftOffDateLOCAL);
+        if (isNaN(liftOffDate.getTime())) {
+            return res.status(400).json({
+            error: 'Invalid liftOffDateLOCAL format. Expected ISO date string.'
+            });
+        }
+        
+        // Convert date to UTC based on the route's departure airport time zone
+        const departureAirport = await prisma.airports.findUnique({
+            where: { id: parseInt(routeDeparture, 10) },
+            select: { time_zone: true }
+        });
+
+        const liftOffDateUTC = DateTime.fromISO(liftOffDateLOCAL, { zone: departureAirport.time_zone }).toUTC().toJSDate();
+
+        // Verify if the aircraft is available for the specified lift-off date
+        const existingFlight = await prisma.flights.findFirst({
+            where: {
+            aircraft_id: parseInt(aircraftId, 10),
+            OR: [
+                // Check if new flight starts during an existing flight
+                {
+                liftoff_date: {
+                    lte: liftOffDateUTC,
+                },
+                AND: {
+                    liftoff_date: {
+                    gte: new Date(new Date(liftOffDateUTC).getTime() - parseInt(duration, 10) * 60000)
+                    }
+                }
+                },
+                // Check if an existing flight starts during the new flight
+                {
+                liftoff_date: {
+                    gte: liftOffDateUTC,
+                    lte: new Date(new Date(liftOffDateUTC).getTime() + parseInt(duration, 10) * 60000)
+                }
+                }
+            ]
+            }
+        });
+        if (existingFlight) {
+            return res.status(400).json({
+                error: 'Aircraft is already scheduled for a flight at the specified lift-off date'
+            });
+        }
+
         // Create new flight
         const flight = await prisma.flights.create({
             data: {
-                liftoff_date: new Date(liftOffDate).toISOString(),
+                liftoff_date: liftOffDateUTC,
                 duration: parseInt(duration, 10),
                 route_departure: parseInt(routeDeparture, 10),
                 route_destination: parseInt(routeDestination, 10),
@@ -427,6 +476,45 @@ exports.newFlight = async (req, res) => {
     }
 }
 
+exports.deleteFlight = async (req, res) => {
+    const flightUUID = req.params.flightUUID;
+    const airlineName = req.userToken.airlineName;
+    // Validate required fields
+    if (!flightUUID) {
+        return res.status(400).json({
+            error: 'Missing required parameter: flightUUID'
+        });
+    }
+    try {
+        // Check if the flight exists and belongs to the airline
+        const flight = await prisma.flights.findUnique({
+            where: {
+                code: flightUUID,
+                airline_name: airlineName
+            }
+        });
+        if (!flight) {
+            return res.status(404).json({
+                error: 'Flight not found or does not belong to the airline'
+            });
+        }
+        // Delete the flight
+        await prisma.flights.delete({
+            where: {
+                code: flightUUID
+            }
+        });
+        return res.status(200).json({
+            message: 'Flight deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting flight:', error);
+        return res.status(500).json({
+            error: 'Internal server error while deleting flight'
+        });
+    }
+}
+
 exports.listFlights = async (req, res) => {
     // get from json
     // array of routes [{departure, destination}]
@@ -434,10 +522,10 @@ exports.listFlights = async (req, res) => {
     // searchEndDate
     // number of passengers
     // class
-    const { routes, searchStartDate, searchEndDate, passengers, classType } = req.body;
-    if (!routes || !searchStartDate || !searchEndDate || !passengers || !classType) {
+    const { routes, searchStartDateLOCAL, searchEndDateLOCAL, passengers, classType } = req.body;
+    if (!routes || !searchStartDateLOCAL || !searchEndDateLOCAL || !passengers || !classType) {
         return res.status(400).json({ 
-            error: 'Missing required query parameters: routes, searchStartDate, searchEndDate, passengers, classType' 
+            error: 'Missing required query parameters: routes, searchStartDateLOCAL, searchEndDateLOCAL, passengers, classType' 
         });
     }
     try {
@@ -456,50 +544,199 @@ exports.listFlights = async (req, res) => {
         }
 
         // Validate date formats
-        const startDate = new Date(searchStartDate).toISOString();
-        const endDate = new Date(searchEndDate).toISOString();
+        const startDate = new Date(searchStartDateLOCAL).toISOString();
+        const endDate = new Date(searchEndDateLOCAL).toISOString();
         if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime()) || new Date(startDate) > new Date(endDate)) {
             return res.status(400).json({ 
-                error: 'Invalid date format for searchStartDate or searchEndDate' 
+                error: 'Invalid date format for searchStartDateLOCAL or searchEndDateLOCAL' 
             });
         }
 
-        // Fetch flights based on the provided criteria
-        const flights = await prisma.flights.findMany({
-            where: {
-                AND: [
-                    {
-                        liftoff_date: {
-                            gte: startDate,
-                            lte: endDate
-                        }
-                    },
-                    {
-                        route_departure: {
-                            in: routes.map(route => route.departure)
-                        }
-                    },
-                    {
-                        route_destination: {
-                            in: routes.map(route => route.destination)
+        // Convert local date to UTC based on the route's departure airport time zone
+        const departureAirport = await prisma.airports.findUnique({
+            where: { id: parseInt(routes[0].departure, 10) },
+            select: { time_zone: true }
+        });
+        const startDateUtc = DateTime.fromISO(startDate, { zone: departureAirport.time_zone }).toUTC().toJSDate();
+        const endDateUtc = DateTime.fromISO(endDate, { zone: departureAirport.time_zone }).toUTC().toJSDate();
+        // verify startDateUtc < endDateUtc amd startDateUtc > current date
+        if (startDateUtc >= endDateUtc || startDateUtc < new Date()) {
+            return res.status(400).json({ 
+                error: 'Invalid date range for searchStartDateLOCAL and searchEndDateLOCAL' 
+            });
+        }
+
+        // For single-leg, just return matching flights
+        if (routes.length === 1) {
+            const flights = await prisma.flights.findMany({
+                where: {
+                    liftoff_date: { gte: startDateUtc, lte: endDateUtc },
+                    route_departure: routes[0].departure,
+                    route_destination: routes[0].destination
+                },
+                include: {
+                    aircrafts: true,
+                    routes: {
+                        include: {
+                            airports_routes_departureToairports: true,
+                            airports_routes_destinationToairports: true
                         }
                     }
-                ]
+                }
+            });
+
+            // for each flight add the LOCAL departure time based on the airport's time zone
+            for (const flight of flights) {
+                const airport = await prisma.airports.findUnique({
+                    where: { id: flight.route_departure },
+                    select: { time_zone: true }
+                });
+                flight.liftoff_date_LOCAL = DateTime.fromJSDate(flight.liftoff_date).setZone(airport.time_zone).toISO();
+            }
+            return res.status(200).json({ message: 'Flights for single leg retrieved successfully', startDateUtc, endDateUtc, departureAirport, flights });
+        }
+
+        // For multi-leg, build valid combinations
+        let validCombinations = [];
+        // Fetch flights for the first leg
+        let prevFlights = await prisma.flights.findMany({
+            where: {
+                liftoff_date: { gte: startDateUtc, lte: endDateUtc },
+                route_departure: routes[0].departure,
+                route_destination: routes[0].destination
             },
-            include: {
-                aircrafts: true,
-                routes: true
+            include: { 
+                aircrafts: true, 
+                routes: {
+                    include: {
+                        airports_routes_departureToairports: true,
+                        airports_routes_destinationToairports: true
+                    }
+                }
             }
         });
 
+        for (const firstFlight of prevFlights) {
+            let lastArrival = new Date(firstFlight.liftoff_date);
+            lastArrival.setMinutes(lastArrival.getMinutes() + firstFlight.duration);
+
+            // Fetch flights for the second leg that depart after the first flight's arrival
+            let nextFlights = await prisma.flights.findMany({
+                where: {
+                    liftoff_date: { gte: lastArrival, lte: endDateUtc },
+                    route_departure: routes[1].departure,
+                    route_destination: routes[1].destination
+                },
+                include: { 
+                    aircrafts: true, 
+                    routes: {
+                        include: {
+                            airports_routes_departureToairports: true,
+                            airports_routes_destinationToairports: true
+                        }
+                    }
+                }
+            });
+
+            for (const secondFlight of nextFlights) {
+                validCombinations.push([firstFlight, secondFlight]);
+            }
+        }
+
+        // Fetch flights for the third leg
+        if (routes.length > 2) {
+            for (const combination of validCombinations) {
+                const [firstFlight, secondFlight] = combination;
+                let lastArrival = new Date(secondFlight.liftoff_date);
+                lastArrival.setMinutes(lastArrival.getMinutes() + secondFlight.duration);
+
+                // Fetch flights for the third leg that depart after the second flight's arrival
+                let thirdLegFlights = await prisma.flights.findMany({
+                    where: {
+                        liftoff_date: { gte: lastArrival, lte: endDateUtc },
+                        route_departure: routes[2].departure,
+                        route_destination: routes[2].destination
+                    },
+                    include: { 
+                        aircrafts: true, 
+                        routes: {
+                            include: {
+                                airports_routes_departureToairports: true,
+                                airports_routes_destinationToairports: true
+                            }
+                        }
+                    }
+                });
+
+                for (const thirdFlight of thirdLegFlights) {
+                    validCombinations.push([firstFlight, secondFlight, thirdFlight]);
+                }
+            }
+        }
+
         return res.status(200).json({
-            message: 'Flights retrieved successfully',
-            flights: flights
+            message: 'Flights with multiple legs retrieved successfully',
+            startDateUtc,
+            endDateUtc,
+            departureAirport,
+            flights: validCombinations
         });
     } catch (error) {
         console.error('Error retrieving flights:', error);
         return res.status(500).json({ 
             error: 'Internal server error while retrieving flights' 
+        });
+    }
+}
+
+exports.getFlightDetails = async (req, res) => {
+    const flightUUID = req.params.flightUUID;
+
+    // Validate required fields
+    if (!flightUUID) {
+        return res.status(400).json({ 
+            error: 'Missing required parameter: flightUUID' 
+        });
+    }
+
+    try {
+        // Get flight details
+        const flight = await prisma.flights.findUnique({
+            where: {
+                code: flightUUID
+            },
+            include: {
+                aircrafts: true,
+                routes: {
+                    include: {
+                        airports_routes_departureToairports: true,
+                        airports_routes_destinationToairports: true
+                    }
+                }
+            }
+        });
+
+        if (!flight) {
+            return res.status(404).json({ 
+                error: 'Flight not found' 
+            });
+        }
+
+        // Convert liftoff_date to local time based on departure airport's time zone
+        const departureAirport = await prisma.airports.findUnique({
+            where: { id: flight.route_departure },
+            select: { time_zone: true }
+        });
+        flight.liftoff_date_LOCAL = DateTime.fromJSDate(flight.liftoff_date).setZone(departureAirport.time_zone).toISO();
+
+        return res.status(200).json({
+            message: 'Flight details retrieved successfully',
+            flight: flight
+        });
+    } catch (error) {
+        console.error('Error retrieving flight details:', error);
+        return res.status(500).json({ 
+            error: 'Internal server error while retrieving flight details' 
         });
     }
 }
