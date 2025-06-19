@@ -1,17 +1,170 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-flights-management',
     standalone: true,
   imports: [CommonModule,
+    ReactiveFormsModule,
+    HttpClientModule,
     MatCardModule,
-    MatButtonModule],
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSelectModule],
   templateUrl: './flights-management.component.html',
-  styleUrl: './flights-management.component.css'
+  styleUrls: ['./flights-management.component.css']
 })
-export class FlightsManagementComponent {
+export class FlightsManagementComponent implements OnInit {
+  flightForm: FormGroup;
+  aircrafts: any[] = [];
+  filteredFromAirports: any[] = [];
+  filteredToAirports: any[] = [];
+  filteredStopoverAirports: any[][] = [];
+  loading = false;
+  error: string | null = null;
+  success = false;
 
+  constructor(private fb: FormBuilder, private http: HttpClient) {
+    this.flightForm = this.fb.group({
+      basePrice: ['', [Validators.required, Validators.min(1)]],
+      from: ['', Validators.required],
+      to: ['', Validators.required],
+      stopovers: this.fb.array([]),
+      departureDate: ['', Validators.required],
+      aircraft: ['', Validators.required]
+    });
+  }
+
+  ngOnInit() {
+    this.loadAircrafts();
+  }
+
+  get stopovers() {
+    return this.flightForm.get('stopovers') as FormArray;
+  }
+
+  addStopover() {
+    this.stopovers.push(this.fb.control('', Validators.required));
+    this.filteredStopoverAirports.push([]);
+  }
+
+  removeStopover(index: number) {
+    this.stopovers.removeAt(index);
+    this.filteredStopoverAirports.splice(index, 1);
+  }
+
+  onAirportInput(field: 'from' | 'to') {
+    const query = this.flightForm.get(field)?.value;
+    if (typeof query === 'string' && query.length > 0) {
+      this.http.get<any>(`${environment.apiUrl}/api/navigate/airports?query=${encodeURIComponent(query)}`).subscribe({
+        next: res => {
+          const airports = Array.isArray(res) ? res : res.airports ?? [];
+          if (field === 'from') this.filteredFromAirports = airports;
+          else this.filteredToAirports = airports;
+        },
+        error: () => {
+          if (field === 'from') this.filteredFromAirports = [];
+          else this.filteredToAirports = [];
+        }
+      });
+    } else {
+      if (field === 'from') this.filteredFromAirports = [];
+      else this.filteredToAirports = [];
+    }
+  }
+
+  onStopoverInput(index: number) {
+    const query = this.stopovers.at(index).value;
+    if (typeof query === 'string' && query.length > 0) {
+      this.http.get<any>(`${environment.apiUrl}/api/navigate/airports?query=${encodeURIComponent(query)}`).subscribe({
+        next: res => {
+          this.filteredStopoverAirports[index] = Array.isArray(res) ? res : res.airports ?? [];
+        },
+        error: () => {
+          this.filteredStopoverAirports[index] = [];
+        }
+      });
+    } else {
+      this.filteredStopoverAirports[index] = [];
+    }
+  }
+
+  displayAirport(airport: any): string {
+    return airport ? `${airport.name} (${airport.city}, ${airport.country})` : '';
+  }
+
+  loadAircrafts() {
+    this.http.get<any>(`${environment.apiUrl}/api/airlines/aircrafts`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+    }).subscribe({
+      next: res => {
+        this.aircrafts = res.aircrafts ?? [];
+      },
+      error: () => {
+        this.aircrafts = [];
+      }
+    });
+  }
+
+  onCreateFlight() {
+    if (this.flightForm.invalid) return;
+    this.loading = true;
+    this.error = null;
+    this.success = false;
+
+    // Costruisci l'array delle rotte (partenza, scali, arrivo)
+    const from = this.flightForm.value.from.id;
+    const to = this.flightForm.value.to.id;
+    const stopovers = this.stopovers.value.map((s: any) => s.id);
+    const routeIds = [from, ...stopovers, to];
+
+    // Costruisci le rotte come array di oggetti {departure, destination}
+    const routes = [];
+    for (let i = 0; i < routeIds.length - 1; i++) {
+      routes.push({ departure: routeIds[i], destination: routeIds[i + 1] });
+    }
+
+    const body = {
+      routes,
+      searchStartDate: this.flightForm.value.departureDate, // puoi aggiungere orario se serve
+      searchEndDate: this.flightForm.value.departureDate, // per creazione puoi usare la stessa data
+      passengers: 1, // per creazione non serve, ma il backend lo richiede
+      classType: 'ECONOMY', // default, puoi aggiungere la scelta se vuoi
+      basePrice: this.flightForm.value.basePrice,
+      aircraftId: this.flightForm.value.aircraft
+    };
+
+    this.http.post<any>(`${environment.apiUrl}/api/airlines/flights`, body, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+    }).subscribe({
+      next: () => {
+        this.success = true;
+        this.loading = false;
+        this.flightForm.reset();
+        this.stopovers.clear();
+        this.filteredStopoverAirports = [];
+      },
+      error: err => {
+        this.error = err.error?.error || 'Errore nella creazione del volo';
+        this.loading = false;
+      }
+    });
+  }
 }

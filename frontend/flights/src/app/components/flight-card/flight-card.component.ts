@@ -1,11 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common'; 
 
 @Component({
   selector: 'app-flight-card',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './flight-card.component.html',
-  styleUrl: './flight-card.component.css'
+  styleUrls: ['./flight-card.component.css']
 })
 export class FlightCardComponent {
+  @Input() flight: any;
 
+  get hasStop(): boolean {
+    return !!this.flight?.stopoverCode;
+  }
 }

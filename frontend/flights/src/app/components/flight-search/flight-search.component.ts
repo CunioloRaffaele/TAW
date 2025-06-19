@@ -13,6 +13,7 @@ import { Observable, of } from 'rxjs';
 import { debounceTime, switchMap, catchError, tap, map } from 'rxjs/operators';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-flight-search',
@@ -41,7 +42,7 @@ export class FlightSearchComponent {
   filteredFromAirports: Observable<any[]> = of([]);
   filteredToAirports: Observable<any[]> = of([]);
 
-  constructor(private fb: FormBuilder, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.searchForm = this.fb.group({
       from: ['', Validators.required],
       to: ['', Validators.required],
@@ -125,8 +126,16 @@ export class FlightSearchComponent {
   }
 
   onSearch() {
-    if (this.searchForm.invalid) return;
-    console.log('Ricerca voli:', this.searchForm.value);
+    const searchData = {
+      routes: [
+        { departure: this.searchForm.value.from.id, destination: this.searchForm.value.to.id }
+      ],
+      searchStartDate: this.searchForm.value.startDate, // assicurati sia nel formato richiesto
+      searchEndDate: this.searchForm.value.endDate,
+      passengers: this.searchForm.value.passengers,
+      classType: this.searchForm.value.classType
+    };
+    this.router.navigate(['/flights-display'], { state: { searchData } });
   }
 
   displayAirport(airport: any): string {

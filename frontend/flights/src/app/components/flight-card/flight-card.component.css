@@ -1,0 +1,25 @@
+.flight-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  box-shadow: 0 2px 8px #0001;
+}
+.flight-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.flight-times {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.company { color: #1976d2; }
+.duration { color: #555; }
+.airport, .stopover { font-family: monospace; font-size: 1.1em; }
+.arrow { color: #888; }
+.time { font-weight: bold; }
+.stopover { color: #e67e22; }

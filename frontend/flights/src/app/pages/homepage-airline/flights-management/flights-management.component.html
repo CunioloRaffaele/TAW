@@ -1,1 +1,73 @@
-<p>flights-management works!</p>
+<mat-card>
+  <mat-card-title>Crea un nuovo volo</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="flightForm" (ngSubmit)="onCreateFlight()">
+      <mat-form-field appearance="outline">
+        <mat-label>Prezzo base</mat-label>
+        <input matInput formControlName="basePrice" type="number" min="1" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Aeroporto di partenza</mat-label>
+        <input matInput [matAutocomplete]="autoFrom" formControlName="from" required (input)="onAirportInput('from')">
+        <mat-autocomplete #autoFrom="matAutocomplete" [displayWith]="displayAirport">
+          <mat-option *ngFor="let option of filteredFromAirports" [value]="option">
+            {{ option.name }} ({{ option.city }}, {{ option.country }})
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Aeroporto di arrivo</mat-label>
+        <input matInput [matAutocomplete]="autoTo" formControlName="to" required (input)="onAirportInput('to')">
+        <mat-autocomplete #autoTo="matAutocomplete" [displayWith]="displayAirport">
+          <mat-option *ngFor="let option of filteredToAirports" [value]="option">
+            {{ option.name }} ({{ option.city }}, {{ option.country }})
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <!-- Scali intermedi -->
+      <div formArrayName="stopovers">
+        <div *ngFor="let stop of stopovers.controls; let i = index">
+          <mat-form-field appearance="outline">
+            <mat-label>Scalo {{i + 1}}</mat-label>
+            <input matInput [matAutocomplete]="autoStop" [formControlName]="i" (input)="onStopoverInput(i)">
+            <mat-autocomplete #autoStop="matAutocomplete" [displayWith]="displayAirport">
+              <mat-option *ngFor="let option of filteredStopoverAirports[i]" [value]="option">
+                {{ option.name }} ({{ option.city }}, {{ option.country }})
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <button mat-icon-button color="warn" (click)="removeStopover(i)">
+            <mat-icon>remove_circle</mat-icon>
+          </button>
+        </div>
+        <button mat-button color="primary" type="button" (click)="addStopover()">Aggiungi scalo</button>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Data e ora di partenza</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="departureDate" required>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Aereo</mat-label>
+        <mat-select formControlName="aircraft" required>
+          <mat-option *ngFor="let aircraft of aircrafts" [value]="aircraft.id">
+            {{ aircraft.model }} ({{ aircraft.seats_capacity }} posti)
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="flightForm.invalid || loading">
+        <mat-icon>add</mat-icon>
+        Crea volo
+      </button>
+    </form>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+    <div *ngIf="success" class="success-message">Volo creato con successo!</div>
+  </mat-card-content>
+</mat-card>

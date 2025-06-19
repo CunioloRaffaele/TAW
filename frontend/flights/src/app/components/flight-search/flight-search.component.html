@@ -9,6 +9,7 @@
         placeholder="Es. Milano MXP"
         required
         autocomplete="off"
+        type="text"
       />
       <mat-autocomplete #autoFrom="matAutocomplete" [displayWith]="displayAirport">
         <mat-option *ngFor="let option of filteredFromAirports | async" [value]="option">

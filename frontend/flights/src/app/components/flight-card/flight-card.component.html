@@ -1,1 +1,15 @@
-<p>flight-card works!</p>
+<div class="flight-card">
+  <div class="flight-header">
+    <span class="company">{{ flight.companyName }}</span>
+    <span class="duration">{{ flight.duration }}</span>
+  </div>
+  <div class="flight-times">
+    <span class="time">{{ flight.departureTime }}</span>
+    <span class="airport">{{ flight.departureCode }}</span>
+    <span class="arrow">→</span>
+    <span *ngIf="hasStop" class="stopover">{{ flight.stopoverCode }}</span>
+    <span *ngIf="hasStop" class="arrow">→</span>
+    <span class="time">{{ flight.arrivalTime }}</span>
+    <span class="airport">{{ flight.arrivalCode }}</span>
+  </div>
+</div>

@@ -1,10 +1,12 @@
-<p>flight-list works!</p>
-<!-- Mostra messaggio se non ci sono voli -->
+<div *ngIf="loading" class="loading-container">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>
+<div *ngIf="error" class="error-message">
+  {{ error }}
+</div>
 <div *ngIf="!loading && !error && flights.length === 0">
   Nessun volo trovato.
 </div>
-
-<!-- Mostra le card dei voli -->
 <div *ngIf="flights.length > 0">
   <app-flight-card
     *ngFor="let flight of flights"

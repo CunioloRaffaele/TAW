@@ -11,8 +11,11 @@ export class ServerErrorInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Se il server non risponde (status 0) o errore 5xx
-        if (error.status === 0 || (error.status >= 500 && error.status < 600)) {
+        // Evita redirect se sei già su /server-error
+        if (
+          (error.status === 0 || (error.status >= 500 && error.status < 600)) &&
+          this.router.url !== '/server-error'
+        ) {
           this.router.navigate(['/server-error']);
         }
         return throwError(() => error);
