@@ -2,6 +2,7 @@ const prisma = require('../../utils/prisma');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../../utils/jwt');
 const { parse } = require('dotenv');
+const { DateTime } = require('luxon');
 
 exports.createAirlineNewAccount = async (req, res) => {
     // This operation is only accessibe to admin
@@ -472,7 +473,7 @@ exports.listFlights = async (req, res) => {
                 aircraft_id: true,
             }
         });
-        // for each flight get the details for aircraft
+        // for each flight get the details for aircraft and localtimezone
         for (let flight of flights) {
             const aircraft = await prisma.aircrafts.findUnique({
                 where: {
@@ -483,6 +484,28 @@ exports.listFlights = async (req, res) => {
                     seats_capacity: true
                 }
             });
+
+            // Get departure airport timezone
+            const departureAirport = await prisma.airports.findUnique({
+                where: {
+                    id: flight.route_departure
+                },
+                select: {
+                    time_zone: true
+                }
+            });
+
+            // Convert UTC liftoff_date to local time at departure airport
+            if (flight.liftoff_date && departureAirport?.time_zone) {
+                flight.lifoffTimeZone = departureAirport.time_zone; // Store the timezone for reference
+                flight.liftoff_dateLOCAL = DateTime
+                    .fromJSDate(flight.liftoff_date, { zone: 'utc' })
+                    .setZone(departureAirport.time_zone)
+                    .toFormat("yyyy-MM-dd'T'HH:mm:ss");
+            } else {
+                flight.liftoff_dateLOCAL = null;
+            }
+
             flight.aircraft_details = aircraft; // Add aircraft details to the flight object
         }
 

@@ -38,7 +38,7 @@ model airports {
   country                             String   @db.VarChar(100)
   lat                                 Float
   lan                                 Float
-  time_zone                           Int
+  time_zone                           String   @db.VarChar
   routes_routes_departureToairports   routes[] @relation("routes_departureToairports")
   routes_routes_destinationToairports routes[] @relation("routes_destinationToairports")
 }
@@ -73,7 +73,7 @@ model flights {
   code              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   duration          Int?
   aircraft_id       Int?
-  liftoff_date      DateTime?  @db.Date
+  liftoff_date      DateTime?  @db.Timestamp(6)
   route_departure   Int?
   route_destination Int?
   airline_name      String?    @db.VarChar(255)
@@ -116,7 +116,7 @@ model tickets {
 
 model trips {
   id            Int        @id @default(autoincrement())
-  creation_date DateTime?  @db.Date
+  creation_date DateTime?  @db.Timestamp(6)
   user_id       Int?
   bookings      bookings[]
   users         users?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
