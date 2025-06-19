@@ -2,20 +2,14 @@
   <mat-card-title>Gestione Aeroporti</mat-card-title>
   <mat-card-content>
     <div class="sort-controls">
-  <span>Ordina per:</span>
-  <button mat-button [color]="sortBy === 'name' ? 'primary' : ''" (click)="setSort('name')">
-    Nome
-    <mat-icon *ngIf="sortBy === 'name'">
-      {{ sortDir === 'asc' ? 'arrow_downward' : 'arrow_upward' }}
-    </mat-icon>
-  </button>
-  <button mat-button [color]="sortBy === 'time_zone' ? 'primary' : ''" (click)="setSort('time_zone')">
-    Fuso orario
-    <mat-icon *ngIf="sortBy === 'time_zone'">
-      {{ sortDir === 'asc' ? 'arrow_downward' : 'arrow_upward' }}
-    </mat-icon>
-  </button>
-</div>
+      <span>Ordina per:</span>
+      <button mat-button [color]="sortBy === 'name' ? 'primary' : ''" (click)="setSort('name')">
+        Nome
+        <mat-icon *ngIf="sortBy === 'name'">
+          {{ sortDir === 'asc' ? 'arrow_downward' : 'arrow_upward' }}
+        </mat-icon>
+      </button>
+    </div>
     <div *ngIf="loading" class="loading-container">
       <mat-spinner diameter="40"></mat-spinner>
     </div>

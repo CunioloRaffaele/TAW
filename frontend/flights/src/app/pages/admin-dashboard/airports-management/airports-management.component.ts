@@ -36,8 +36,8 @@ export class AirportsManagementComponent implements OnInit {
   airports: Airport[] = [];
   loading = false;
   error: string | null = null;
-  sortBy: 'name' | 'time_zone' = 'name';
-  sortDir: 'asc' | 'desc' = 'asc'; // <--- aggiungi questa proprietà
+  sortBy: 'name' = 'name'; // Solo sort per nome
+  sortDir: 'asc' | 'desc' = 'asc';
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -61,7 +61,7 @@ export class AirportsManagementComponent implements OnInit {
   
 
 
-  setSort(sort: 'name' | 'time_zone') {
+  setSort(sort: 'name') {
     if (this.sortBy === sort) {
       // Se clicchi di nuovo sullo stesso, alterna la direzione
       this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
@@ -73,12 +73,7 @@ export class AirportsManagementComponent implements OnInit {
 
   get sortedAirports(): Airport[] {
     return [...this.airports].sort((a, b) => {
-      let cmp = 0;
-      if (this.sortBy === 'name') {
-        cmp = a.name.localeCompare(b.name);
-      } else {
-        cmp = a.time_zone - b.time_zone;
-      }
+      let cmp = a.name.localeCompare(b.name);
       return this.sortDir === 'asc' ? cmp : -cmp;
     });
   }
