@@ -22,7 +22,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./toolbar.component.css']
 })
 export class ToolbarComponent {
-  constructor(private router: Router) {}
+  constructor(public router: Router) {}
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('postmessages_token');
@@ -33,6 +33,9 @@ export class ToolbarComponent {
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
+      // Per airline, mostra il nome compagnia
+      if (payload.airlineName) return payload.airlineName;
+      // Per admin/utente normale
       return payload.name || payload.email || null;
     } catch {
       return null;
@@ -60,5 +63,36 @@ export class ToolbarComponent {
     const target = route.replace(/\/$/, '');
     if (target === '') return current === ''; // homepage
     return current.startsWith(target);
+  }
+
+  goToProfile() {
+    const token = localStorage.getItem('postmessages_token');
+    if (!token) {
+      this.router.navigate(['/signin']);
+      return;
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.role === 2) {
+        this.router.navigate(['/profile-airline']);
+      } else if (payload.role === 1) {
+        this.router.navigate(['/profile-admin']);
+      } else {
+        this.router.navigate(['/profile-customer']);
+      }
+    } catch {
+      this.router.navigate(['/signin']);
+    }
+  }
+
+  isAirline(): boolean {
+    const token = localStorage.getItem('postmessages_token');
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role === 2;
+    } catch {
+      return false;
+    }
   }
 }
