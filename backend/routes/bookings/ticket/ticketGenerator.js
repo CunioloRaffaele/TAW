@@ -25,25 +25,36 @@ async function generateTicketPDF(ticketData) {
                //.replace(/{{extras_price}}/g, ticketData.bookings[0].extras.map(extra => extra.price).join(', '));
 
     // Launch Puppeteer and generate PDF
-    const browser = await puppeteer.launch({ 
-        headless: true,
-        executablePath: '/usr/bin/google-chrome'});
-    const page = await browser.newPage();
-    await page.setContent(html, {
-        timeout: 0,
-        waitUntil: 'domcontentloaded',
-    });
-    await page.emulateMediaType('print');
-    // Wait for you to check the page
-    const pdfBuffer = await page.pdf({
-        preferCSSPageSize: true,
-        timeout: 0,
-        format: 'A4'
-    });
-    //fs.writeFileSync(path.join(__dirname, 'ticket.pdf'), pdfBuffer);
-    await page.close();
-    await browser.close();
-    return pdfBuffer;
+    try {
+        const chromiumPath = fs.existsSync('/usr/bin/chromium-browser')
+            ? '/usr/bin/chromium-browser'
+            : '/usr/bin/chromium';
+
+        const browser = await puppeteer.launch({
+            headless: true,
+            executablePath: chromiumPath,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        await page.setContent(html, {
+            timeout: 0,
+            waitUntil: 'domcontentloaded',
+        });
+        await page.emulateMediaType('print');
+        // Wait for you to check the page
+        const pdfBuffer = await page.pdf({
+            preferCSSPageSize: true,
+            timeout: 0,
+            format: 'A4'
+        });
+        //fs.writeFileSync(path.join(__dirname, 'ticket.pdf'), pdfBuffer);
+        await page.close();
+        await browser.close();
+        return pdfBuffer;
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        throw error;
+    }
 }
 
 module.exports = { generateTicketPDF };
