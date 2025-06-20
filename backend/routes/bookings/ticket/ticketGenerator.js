@@ -9,20 +9,20 @@ async function generateTicketPDF(ticketData) {
     let html = fs.readFileSync(templatePath, 'utf8');
 
     // Replace placeholders with actual ticket data
-    html = html.replace(/{{name}}/g, ticketData.bookings[0].trips.users.name)
-               .replace(/{{flight}}/g, ticketData.flights.code)
+    html = html.replace(/{{name}}/g, ticketData.trips.users.name)
+               .replace(/{{flight}}/g, ticketData.tickets.flights.code)
                .replace(/{{date}}/g, ticketData.localDepartureDate)
-               .replace(/{{from}}/g, ticketData.flights.routes.airports_routes_departureToairports.name)
-               .replace(/{{from_code}}/g, ticketData.flights.routes.airports_routes_departureToairports.id.toString())
-               .replace(/{{to}}/g, ticketData.flights.routes.airports_routes_destinationToairports.name)
-               .replace(/{{to_code}}/g, ticketData.flights.routes.airports_routes_destinationToairports.id.toString())
-               .replace(/{{seat}}/g, ticketData.bookings[0].seat_id.toString())
-               .replace(/{{class}}/g, ticketData.type)
-               .replace(/{{ticket_code}}/g, ticketData.code)
-               .replace(/{{airline}}/g, ticketData.flights.airline_name)
-               .replace(/{{barcode}}/g, ticketData.code);
-               //.replace(/{{extras_description}}/g, ticketData.bookings[0].extras.map(extra => extra.description).join(', '))
-               //.replace(/{{extras_price}}/g, ticketData.bookings[0].extras.map(extra => extra.price).join(', '));
+               .replace(/{{from}}/g, ticketData.tickets.flights.routes.airports_routes_departureToairports.name)
+               .replace(/{{from_code}}/g, ticketData.tickets.flights.routes.airports_routes_departureToairports.id.toString())
+               .replace(/{{to}}/g, ticketData.tickets.flights.routes.airports_routes_destinationToairports.name)
+               .replace(/{{to_code}}/g, ticketData.tickets.flights.routes.airports_routes_destinationToairports.id.toString())
+               .replace(/{{seat}}/g, ticketData.seats.postion)
+               .replace(/{{class}}/g, ticketData.tickets.type)
+               .replace(/{{ticket_code}}/g, ticketData.tickets.code)
+               .replace(/{{airline}}/g, ticketData.tickets.flights.airline_name)
+               .replace(/{{barcode}}/g, ticketData.tickets.code)
+               .replace(/{{extras_description}}/g, ticketData.extras ? ticketData.extras.description : '')
+               .replace(/{{extras_price}}/g, ticketData.extras && ticketData.extras.price !== undefined ? ticketData.extras.price + ' €' : '');
 
     // Launch Puppeteer and generate PDF
     try {
