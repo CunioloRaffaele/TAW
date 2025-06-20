@@ -309,6 +309,7 @@ INSERT INTO Seats (id, postion, aircraft_id) VALUES
 INSERT INTO Users (name, email, password, role) VALUES
 ('John Doe', 'john@email.com', 'password123', 0),
 ('Admin User', 'admin@airline.com', 'admin123', 1),
+('Mario', 'mario@gmail.com', '$2b$10$9EFgx8UGHk.ffleOqYciDuLnsnyiIVFKFKqExPfGtyMxY6TN0h6gm', 0),
 ('Admin', 'adminAccount@gmail.com', '$2b$10$dTV3A7cZwWjBiqKrxEXwuuIJGDkIKqSJOizMDkdwL9s0jQK4bsNx6', 1);
 
 -- 8. Inserimento Flights (dipende da Routes e Aircrafts)
