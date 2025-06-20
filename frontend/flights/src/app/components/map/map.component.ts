@@ -3,13 +3,22 @@ import * as L from 'leaflet';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
+// Configura Leaflet per usare le icone dalla cartella assets/leaflet
+// (devi aver copiato marker-icon.png, marker-icon-2x.png, marker-shadow.png in src/assets/leaflet/)
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: '/assets/leaflet/marker-icon-2x.png',
+  iconUrl: '/assets/leaflet/marker-icon.png',
+  shadowUrl: '/assets/leaflet/marker-shadow.png'
+});
+
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
 
-export class LeafletMapComponent implements AfterViewInit {
+export class MapComponent implements AfterViewInit {
   private map!: L.Map;
 
   constructor(private http: HttpClient) { }
