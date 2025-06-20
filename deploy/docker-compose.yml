@@ -23,14 +23,3 @@ services:
     depends_on:
       - db
     command: npm run easyStart
-
-  frontend:
-    build:
-      context: ../frontend/flights
-      dockerfile: ../deploy/frontend/Dockerfile
-    container_name: frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-    command: npm run start
