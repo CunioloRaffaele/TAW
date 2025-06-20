@@ -25,7 +25,9 @@ async function generateTicketPDF(ticketData) {
                //.replace(/{{extras_price}}/g, ticketData.bookings[0].extras.map(extra => extra.price).join(', '));
 
     // Launch Puppeteer and generate PDF
-    const browser = await puppeteer.launch({ headless: true }); // <--- show browser
+    const browser = await puppeteer.launch({ 
+        headless: true,
+        executablePath: '/usr/bin/google-chrome'});
     const page = await browser.newPage();
     await page.setContent(html, {
         timeout: 0,
