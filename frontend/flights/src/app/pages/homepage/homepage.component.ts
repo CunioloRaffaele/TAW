@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FlightSearchComponent } from '../../components/flight-search/flight-search.component'; 
-import { LeafletMapComponent } from '../../components/map/map.component';
+import { MapComponent } from '../../components/map/map.component';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [
     FlightSearchComponent,
-    LeafletMapComponent,
+    MapComponent,
     RouterModule,
     MatIconModule,
     MatButtonModule

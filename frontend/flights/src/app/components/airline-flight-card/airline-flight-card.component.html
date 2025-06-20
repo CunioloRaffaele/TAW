@@ -4,6 +4,16 @@
     <span class="flight-model">{{ flight()?.aircraft_details?.model }}</span>
   </div>
   <div class="flight-info">
+
+  <div>
+    <span class="label">Luogo di partenza:</span>
+    <span class="value">{{ flight()?.departure_location }}</span>
+  </div>
+  <div>
+    <span class="label">Destinazione:</span>
+    <span class="value">{{ flight()?.destination_location }}</span>
+  </div>
+
     <div>
       <span class="label">Partenza:</span>
       <span class="value">{{ flight()?.liftoff_dateLOCAL | date:'short' }}</span>
