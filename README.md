@@ -29,6 +29,14 @@ To quickly set up the entire application stack using Docker Compose, follow thes
     "password": "ciao"
 }
 ```
+- **Normal user**: 
+```json
+{
+    "name": "Mario",
+    "email": "mario@gmail.com",
+    "password": "MarioPassword123"
+}
+```
 - **Enrolled Airline**:
 ```json
 {
