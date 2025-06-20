@@ -29,7 +29,7 @@ import { AirlineFlightCardComponent } from '../../../components/airline-flight-c
     MatDatepickerModule,
     MatNativeDateModule,
     MatSelectModule,
-  AirlineFlightCardComponent],
+    AirlineFlightCardComponent],
   templateUrl: './flights-management.component.html',
   styleUrls: ['./flights-management.component.css']
 })
@@ -53,7 +53,12 @@ export class FlightsManagementComponent implements OnInit {
       stopovers: this.fb.array([]),
       departureDate: ['', Validators.required],
       aircraft: ['', Validators.required],
-      duration: ['', [Validators.required, Validators.min(1)]]
+      duration: ['', [Validators.required, Validators.min(1)]],
+      priceECONOMY: ['', [Validators.required, Validators.min(1)]],
+      priceBUSINESS: ['', [Validators.required, Validators.min(1)]],
+      priceBASE: ['', [Validators.required, Validators.min(1)]],
+      priceDELUXE: ['', [Validators.required, Validators.min(1)]],
+      priceLUXURY: ['', [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -141,6 +146,10 @@ export class FlightsManagementComponent implements OnInit {
     });
   }
 
+removeFlight(flightUUID: string) {
+  this.flights = this.flights.filter(f => f.code !== flightUUID);
+}
+
   onCreateFlight() {
     if (this.flightForm.invalid) return;
     this.loading = true;
@@ -183,12 +192,37 @@ export class FlightsManagementComponent implements OnInit {
     this.http.post<any>(`${environment.apiUrl}/api/navigate/flights`, body, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
     }).subscribe({
-      next: () => {
+      next: (res) => {
+         this.loadFlights();
         this.success = true;
         this.loading = false;
+        const UUIDflight = res.flight.code;
+        const ticketsArray = [
+          { type: 'ECONOMY', price: this.flightForm.value.priceECONOMY },
+          { type: 'BUSINESS', price: this.flightForm.value.priceBUSINESS },
+          { type: 'BASE', price: this.flightForm.value.priceBASE },
+          { type: 'DELUXE', price: this.flightForm.value.priceDELUXE },
+          { type: 'LUXURY', price: this.flightForm.value.priceLUXURY }
+        ];
+
         this.flightForm.reset();
         this.stopovers.clear();
         this.filteredStopoverAirports = [];
+        
+
+        
+
+        const token = localStorage.getItem('postmessages_token');
+        this.http.post<any>(
+          `${environment.apiUrl}/api/airlines/tickets`,
+          {
+            flightCode: UUIDflight,
+            ticketsArray: ticketsArray
+          },
+          {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }
+        ).subscribe();
       },
       error: err => {
         this.error = err.error?.error || 'Errore nella creazione del volo';
@@ -205,8 +239,26 @@ export class FlightsManagementComponent implements OnInit {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
       }
     ).subscribe({
-      next: res => {
-        this.flights = res.flights;
+      next: async res => {
+        // Per ogni volo, recupera info aeroporti
+        const flightsWithLocations = await Promise.all(res.flights.map(async (flight) => {
+          // Fetch departure airport
+          const depRes = await fetch(`${environment.apiUrl}/api/navigate/airports/${flight.route_departure}`);
+          const depData = await depRes.json();
+          const departure = depData.airport;
+          // Fetch destination airport
+          const destRes = await fetch(`${environment.apiUrl}/api/navigate/airports/${flight.route_destination}`);
+          const destData = await destRes.json();
+          const destination = destData.airport;
+
+          return {
+            ...flight,
+              aircraft_details: flight.aircraft_details,
+            departure_location: departure ? `${departure.name} (${departure.city}, ${departure.country})` : '',
+            destination_location: destination ? `${destination.name} (${destination.city}, ${destination.country})` : ''
+          };
+        }));
+        this.flights = flightsWithLocations;
         this.loading = false;
       },
       error: err => {

@@ -8,6 +8,8 @@
 <div *ngIf="flights.length > 0">
   <app-flight-card
     *ngFor="let flight of flights"
-    [flight]="flight">
+    [flight]="flight"
+      (deleted)="removeFlight($event)">
+    
   </app-flight-card>
 </div>

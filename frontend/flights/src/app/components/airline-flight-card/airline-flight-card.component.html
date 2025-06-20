@@ -2,21 +2,24 @@
   <div class="flight-header">
     <span class="flight-code">Codice: {{ flight()?.code }}</span>
     <span class="flight-model">{{ flight()?.aircraft_details?.model }}</span>
+    <button mat-icon-button color="warn" class="delete-btn" (click)="onDeleteFlight()">
+      <mat-icon>delete</mat-icon>
+    </button>
   </div>
   <div class="flight-info">
 
-  <div>
-    <span class="label">Luogo di partenza:</span>
-    <span class="value">{{ flight()?.departure_location }}</span>
-  </div>
-  <div>
-    <span class="label">Destinazione:</span>
-    <span class="value">{{ flight()?.destination_location }}</span>
-  </div>
+    <div>
+      <span class="label">Luogo di partenza:</span>
+      <span class="value">{{ flight()?.departure_location }}</span>
+    </div>
+    <div>
+      <span class="label">Destinazione:</span>
+      <span class="value">{{ flight()?.destination_location }}</span>
+    </div>
 
     <div>
       <span class="label">Partenza:</span>
-      <span class="value">{{ flight()?.liftoff_dateLOCAL | date:'short' }}</span>
+      <span class="value">{{ flight()?.liftoff_dateLOCAL }}</span>
       <span class="airport">[ID: {{ flight()?.route_departure }}]</span>
     </div>
 
@@ -32,5 +35,14 @@
       <span class="label">Fuso orario:</span>
       <span class="value">{{ flight()?.lifoffTimeZone }}</span>
     </div>
+    <div>
+      <span class="label">Modello aereo:</span>
+      <span class="value">{{ flight()?.aircraft_details?.model }}</span>
+    </div>
+    <div>
+      <span class="label">Capacità posti:</span>
+      <span class="value">{{ flight()?.aircraft_details?.seats_capacity }}</span>
+    </div>
+
   </div>
 </div>

@@ -1,0 +1,10 @@
+.price-fields-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.price-field {
+  min-width: 120px;
+  max-width: 140px;
+  flex: 1 1 120px;
+}

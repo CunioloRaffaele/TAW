@@ -22,7 +22,28 @@
           </mat-option>
         </mat-autocomplete>
       </mat-form-field>
-
+     <div class="price-fields-row">
+  <mat-form-field appearance="fill" class="price-field">
+    <mat-label>Prezzo Economy</mat-label>
+    <input matInput formControlName="priceECONOMY" type="number" min="1" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill" class="price-field">
+    <mat-label>Prezzo Business</mat-label>
+    <input matInput formControlName="priceBUSINESS" type="number" min="1" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill" class="price-field">
+    <mat-label>Prezzo Base</mat-label>
+    <input matInput formControlName="priceBASE" type="number" min="1" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill" class="price-field">
+    <mat-label>Prezzo Deluxe</mat-label>
+    <input matInput formControlName="priceDELUXE" type="number" min="1" required>
+  </mat-form-field>
+  <mat-form-field appearance="fill" class="price-field">
+    <mat-label>Prezzo Luxury</mat-label>
+    <input matInput formControlName="priceLUXURY" type="number" min="1" required>
+  </mat-form-field>
+</div>
       <!-- Scali intermedi -->
       <div formArrayName="stopovers">
         <div *ngFor="let stop of stopovers.controls; let i = index">
