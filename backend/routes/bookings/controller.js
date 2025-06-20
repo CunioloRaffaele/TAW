@@ -3,7 +3,7 @@ const prisma = require('../../utils/prisma');
 const { generateTicketPDF } = require('./ticket/ticketGenerator');
 const { DateTime } = require('luxon');
 
-exports.downloadTicket = async (req, res) => {
+exports.downloadBooking = async (req, res) => {
     const { id } = req.params;
     if (!id || isNaN(parseInt(id, 10))) {
         return res.status(400).json({ error: 'Missing ID parameter' });
@@ -84,7 +84,7 @@ exports.downloadTicket = async (req, res) => {
     res.end(pdfBuffer);
 };
 
-exports.getTicketDetails = async (req, res) => {
+exports.getBookingDetails = async (req, res) => {
     const { id } = req.params;
     if (!id || isNaN(parseInt(id, 10))) {
         return res.status(400).json({ error: 'Missing ID parameter' });
@@ -156,4 +156,84 @@ exports.getTicketDetails = async (req, res) => {
     }
 
     res.status(200).json(ticketData);
+};
+
+exports.listTickets = async (req, res) => {
+    const { flightUUID } = req.params;
+    if (!flightUUID) {
+        return res.status(400).json({ error: 'Missing flight UUID parameter' });
+    }
+
+    try {
+        const tickets = await prisma.tickets.findMany({
+            where: {
+                fligt_code: flightUUID
+            }
+        });
+
+        if (tickets.length === 0) {
+            return res.status(404).json({ error: 'No tickets found for this flight' });
+        }
+
+        res.status(200).json(tickets);
+    } catch (error) {
+        console.error('Error fetching tickets:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+exports.getFlightAvailableSeats = async (req, res) => {
+    const { flightUUID } = req.params;
+    if (!flightUUID) {
+        return res.status(400).json({ error: 'Missing flight UUID parameter' });
+    }
+
+    try {
+        // find the flight to get the aircraft_id
+        const flight = await prisma.flights.findUnique({
+            where: { code: flightUUID },
+            select: { aircraft_id: true }
+        });
+
+        if (!flight) {
+            return res.status(404).json({ error: 'Flight not found' });
+        }
+
+        // Find all seat_id already booked for this flight
+        const bookedSeats = await prisma.bookings.findMany({
+            include: {
+                tickets: {
+                    include: {
+                        flights: {
+                            where: { code: flightUUID }
+                        }
+                    }
+                }
+            }
+        });
+        const bookedSeatIds = bookedSeats.map(b => b.seat_id);
+
+        // Find all seats of the aircraft that are NOT among those booked
+        const availableSeats = await prisma.seats.findMany({
+            where: {
+                aircraft_id: flight.aircraft_id,
+                id: { notIn: bookedSeatIds }
+            }
+        });
+
+        res.status(200).json(availableSeats);
+    } catch (error) {
+        console.error('Error fetching available seats:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+exports.getFlightExtras = async (req, res) => {
+    try {
+        const extras = await prisma.extras.findMany();
+        res.status(200).json(extras);
+    } catch (error) {
+        console.error('Error fetching flight extras:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 };

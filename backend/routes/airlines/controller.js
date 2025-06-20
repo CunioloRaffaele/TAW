@@ -520,3 +520,201 @@ exports.listFlights = async (req, res) => {
         });
     }
 };
+
+exports.listActiveFlights = async (req, res) => {
+    const user = req.userToken;
+
+    try {
+        // List active flights for the airline
+        const flights = await prisma.flights.findMany({
+            where: {
+                airline_name: user.airlineName, // middleware verifies that user is an airline so it's safe to use user.name
+                liftoff_date: {
+                    gte: new Date() // Only get flights with liftoff date in the future
+                }
+            },
+            select: {
+                code: true,
+                liftoff_date: true,
+                duration: true,
+                route_departure: true,
+                route_destination: true,
+                aircraft_id: true,
+            }
+        });
+        // for each flight get the details for aircraft and localtimezone
+        for (let flight of flights) {
+            const aircraft = await prisma.aircrafts.findUnique({
+                where: {
+                    id: flight.aircraft_id
+                },
+                select: {
+                    model: true,
+                    seats_capacity: true
+                }
+            });
+
+            // Get departure airport timezone
+            const departureAirport = await prisma.airports.findUnique({
+                where: {
+                    id: flight.route_departure
+                },
+                select: {
+                    time_zone: true
+                }
+            });
+
+            // Convert UTC liftoff_date to local time at departure airport
+            if (flight.liftoff_date && departureAirport?.time_zone) {
+                flight.lifoffTimeZone = departureAirport.time_zone; // Store the timezone for reference
+                flight.liftoff_dateLOCAL = DateTime
+                    .fromJSDate(flight.liftoff_date, { zone: 'utc' })
+                    .setZone(departureAirport.time_zone)
+                    .toFormat("yyyy-MM-dd'T'HH:mm:ss");
+            } else {
+                flight.liftoff_dateLOCAL = null;
+            }
+
+            flight.aircraft_details = aircraft; // Add aircraft details to the flight object
+        }
+
+        res.status(200).json({
+            message: 'List of active flights retrieved successfully',
+            flights: flights
+        });
+    } catch (error) {
+        console.error('Error retrieving active flights:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while retrieving active flights' 
+        });
+    }
+}
+
+exports.createTicket = async (req, res) => {
+    // tickets can be types
+    // ECONOMY, BUSINESS, BASE, DELUXE, LUXURY
+    const user = req.userToken;
+    const { flightCode, ticketsArray } = req.body;
+
+    // Validate required fields
+    if (!flightCode || !Array.isArray(ticketsArray) || ticketsArray.length === 0) {
+        return res.status(400).json({ 
+            error: 'Missing required fields: flightCode, ticketsArray' 
+        });
+    }
+
+    try {
+        // Check if the flight exists
+        const flight = await prisma.flights.findUnique({
+            where: {
+                code: flightCode,
+                airline_name: user.airlineName // middleware verifies that user is an airline so it's safe to use user.name
+            }
+        });
+
+        if (!flight) {
+            return res.status(404).json({ 
+                error: 'Flight not found for this airline' 
+            });
+        }
+
+        let tickets = [];
+        // validation for each ticket in the ticketsArray
+        for (const ticket of ticketsArray) {
+            const { type, price } = ticket;
+            // Validate ticket type and price
+            if (!type || !price || isNaN(price)) {
+                return res.status(400).json({ 
+                    error: 'Missing required fields in ticket: type, price' 
+                });
+            }
+            // verify that ticket does not already exist
+            const existingTicket = await prisma.tickets.findFirst({
+                where: {
+                    type: type,
+                    fligt_code: flightCode
+                }
+            });
+            if (existingTicket) {
+                return res.status(409).json({ 
+                    error: 'Ticket already exists with this type for the flight' 
+                });
+            }
+        }
+        // Create tickets for the flight
+        for (const ticket of ticketsArray) {
+            const { type, price } = ticket;
+            // Create the ticket in the database
+            const newTicket = await prisma.tickets.create({
+                data: {
+                    type: type,
+                    price: parseFloat(price),
+                    fligt_code: flightCode
+                }
+            });
+            tickets.push(newTicket);
+        }
+
+        res.status(200).json({
+            message: 'Tickets created successfully',
+            ticketIds: tickets,
+            flightCode: flightCode
+        });
+    } catch (error) {
+        console.error('Error creating ticket:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while creating ticket' 
+        });
+    }
+}
+
+exports.deleteTicket = async (req, res) => {
+    const user = req.userToken;
+    const ticketUUID = req.params.ticketUUID;
+
+    // Validate required fields
+    if (!ticketUUID) {
+        return res.status(400).json({ 
+            error: 'Missing required param: ticketUUID' 
+        });
+    }
+
+    try {
+        // Check if the ticket belongs to the airline
+        const ticket = await prisma.tickets.findUnique({
+            where: {
+                code: ticketUUID
+            }, include: {
+                flights: true // Include flight details to verify airline ownership
+            }
+        });
+
+        if (!ticket) {
+            return res.status(404).json({ 
+                error: 'Ticket not found and cannot be deleted' 
+            });
+        }
+        if (ticket.flights.airline_name !== user.airlineName) {
+            return res.status(403).json({ 
+                error: 'Ticket does not belong to this airline and cannot be deleted' 
+            });
+        }
+
+        // Delete the ticket
+        await prisma.tickets.delete({
+            where: {
+                code: ticketUUID
+            }
+        });
+
+        res.status(200).json({
+            message: 'Ticket deleted successfully',
+            ticketId: ticket
+        });
+    } catch (error) {
+        console.error('Error deleting ticket:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while deleting ticket' 
+        });
+    }
+}
