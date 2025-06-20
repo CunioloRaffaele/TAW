@@ -12,6 +12,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { environment } from '../../../../environments/environment';
+import { AirlineFlightCardComponent } from '../../../components/airline-flight-card/airline-flight-card.component';
 
 @Component({
   selector: 'app-flights-management',
@@ -27,11 +28,14 @@ import { environment } from '../../../../environments/environment';
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatSelectModule],
+    MatSelectModule,
+  AirlineFlightCardComponent],
   templateUrl: './flights-management.component.html',
   styleUrls: ['./flights-management.component.css']
 })
 export class FlightsManagementComponent implements OnInit {
+  flights: any[] = [];
+
   flightForm: FormGroup;
   aircrafts: any[] = [];
   filteredFromAirports: any[] = [];
@@ -44,7 +48,6 @@ export class FlightsManagementComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.flightForm = this.fb.group({
-      basePrice: ['', [Validators.required, Validators.min(1)]],
       from: ['', Validators.required],
       to: ['', Validators.required],
       stopovers: this.fb.array([]),
@@ -55,6 +58,7 @@ export class FlightsManagementComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadFlights();
     this.loadAircrafts();
   }
 
@@ -192,4 +196,24 @@ export class FlightsManagementComponent implements OnInit {
       }
     });
   }
+
+  loadFlights() {
+    this.loading = true;
+    this.http.get<{ message: string, flights: any[] }>(
+      `${environment.apiUrl}/api/airlines/flights`,
+      {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+      }
+    ).subscribe({
+      next: res => {
+        this.flights = res.flights;
+        this.loading = false;
+      },
+      error: err => {
+        this.error = err.error?.error || 'Errore nel caricamento voli';
+        this.loading = false;
+      }
+    });
+  }
+
 }

@@ -1,0 +1,26 @@
+<div class="airline-flight-card">
+  <div class="flight-header">
+    <span class="flight-code">Codice: {{ flight()?.code }}</span>
+    <span class="flight-model">{{ flight()?.aircraft_details?.model }}</span>
+  </div>
+  <div class="flight-info">
+    <div>
+      <span class="label">Partenza:</span>
+      <span class="value">{{ flight()?.liftoff_dateLOCAL | date:'short' }}</span>
+      <span class="airport">[ID: {{ flight()?.route_departure }}]</span>
+    </div>
+
+    <div>
+      <span class="label">Durata:</span>
+      <span class="value">{{ flight()?.duration }} min</span>
+    </div>
+    <div>
+      <span class="label">Posti:</span>
+      <span class="value">{{ flight()?.aircraft_details?.seats_capacity }}</span>
+    </div>
+    <div>
+      <span class="label">Fuso orario:</span>
+      <span class="value">{{ flight()?.lifoffTimeZone }}</span>
+    </div>
+  </div>
+</div>

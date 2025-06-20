@@ -1,0 +1,26 @@
+.airline-flight-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  box-shadow: 0 2px 8px #0001;
+}
+.flight-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.flight-info .label {
+  font-weight: 500;
+  color: #1976d2;
+  margin-right: 4px;
+}
+.flight-info .value {
+  margin-right: 12px;
+}
+.airport {
+  color: #888;
+  font-size: 0.95em;
+}
