@@ -15,7 +15,7 @@ import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-flights-management',
-    standalone: true,
+  standalone: true,
   imports: [CommonModule,
     ReactiveFormsModule,
     HttpClientModule,
@@ -40,6 +40,7 @@ export class FlightsManagementComponent implements OnInit {
   loading = false;
   error: string | null = null;
   success = false;
+  departureTime: string | null = null;
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.flightForm = this.fb.group({
@@ -48,7 +49,8 @@ export class FlightsManagementComponent implements OnInit {
       to: ['', Validators.required],
       stopovers: this.fb.array([]),
       departureDate: ['', Validators.required],
-      aircraft: ['', Validators.required]
+      aircraft: ['', Validators.required],
+      duration: ['', [Validators.required, Validators.min(1)]]
     });
   }
 
@@ -106,12 +108,24 @@ export class FlightsManagementComponent implements OnInit {
     }
   }
 
+  private getAirlineNameFromToken(): string | null {
+    const token = localStorage.getItem('postmessages_token');
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.airlineName || null;
+    } catch {
+      return null;
+    }
+  }
+
   displayAirport(airport: any): string {
     return airport ? `${airport.name} (${airport.city}, ${airport.country})` : '';
   }
 
   loadAircrafts() {
-    this.http.get<any>(`${environment.apiUrl}/api/airlines/aircrafts`, {
+    const airlineName = this.getAirlineNameFromToken();
+    this.http.get<any>(`${environment.apiUrl}/api/airlines/aircrafts/${airlineName}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
     }).subscribe({
       next: res => {
@@ -129,6 +143,9 @@ export class FlightsManagementComponent implements OnInit {
     this.error = null;
     this.success = false;
 
+    // Salva l'orario di partenza selezionato
+    this.departureTime = this.flightForm.value.departureTime;
+
     // Costruisci l'array delle rotte (partenza, scali, arrivo)
     const from = this.flightForm.value.from.id;
     const to = this.flightForm.value.to.id;
@@ -141,17 +158,25 @@ export class FlightsManagementComponent implements OnInit {
       routes.push({ departure: routeIds[i], destination: routeIds[i + 1] });
     }
 
+    const liftOffDate = new Date(
+      this.flightForm.value.departureDate.getFullYear(),
+      this.flightForm.value.departureDate.getMonth(),
+      this.flightForm.value.departureDate.getDate(),
+      this.flightForm.value.departureTime?.getHours() ?? 0,
+      this.flightForm.value.departureTime?.getMinutes() ?? 0,
+      0
+    ).toISOString().replace(/Z$/, '');
+
     const body = {
-      routes,
-      searchStartDate: this.flightForm.value.departureDate, // puoi aggiungere orario se serve
-      searchEndDate: this.flightForm.value.departureDate, // per creazione puoi usare la stessa data
-      passengers: 1, // per creazione non serve, ma il backend lo richiede
-      classType: 'ECONOMY', // default, puoi aggiungere la scelta se vuoi
-      basePrice: this.flightForm.value.basePrice,
-      aircraftId: this.flightForm.value.aircraft
+      duration: this.flightForm.value.duration,
+      liftOffDateLOCAL: liftOffDate,
+      aircraftId: this.flightForm.value.aircraft,
+      routeDeparture: routes[0].departure,
+      routeDestination: routes[0].destination
     };
 
-    this.http.post<any>(`${environment.apiUrl}/api/airlines/flights`, body, {
+
+    this.http.post<any>(`${environment.apiUrl}/api/navigate/flights`, body, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
     }).subscribe({
       next: () => {

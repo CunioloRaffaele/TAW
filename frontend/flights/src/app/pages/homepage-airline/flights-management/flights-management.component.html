@@ -47,10 +47,20 @@
       </div>
 
       <mat-form-field appearance="outline">
-        <mat-label>Data e ora di partenza</mat-label>
+        <mat-label>Data di partenza</mat-label>
         <input matInput [matDatepicker]="picker" formControlName="departureDate" required>
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Ora di partenza</mat-label>
+        <input matInput formControlName="departureTime" type="time" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Durata (minuti)</mat-label>
+        <input matInput formControlName="duration" type="number" min="1" required>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
