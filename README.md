@@ -19,6 +19,35 @@ To quickly set up the entire application stack using Docker Compose, follow thes
    docker-compose up --build
    docker ps
    ```
+This will start the backend, frontend, and PostgreSQL database in separate containers. The application will be accessible at `http://localhost:80`.
+
+## 🛠️ Manual Setup
+If you prefer to set up the project manually without Docker, follow these steps:
+1. **Clone the repository**:
+   ```sh
+   git clone https://github.com/CunioloRaffaele/TAW.git
+   ```
+2. **Install dependencies**:
+   ```sh
+   cd TAW/backend
+   npm install
+   cd TAW/frontend/flights
+   npm install
+   ```
+3. **Set up the PostgreSQL database**:
+    Use the provided schema in 'deploy/database/airline_database_schema.sql' to create the database structure.
+    Database connection for Prisma ORM is configured in `backend/.env` file. Make sure to set the correct database URL.
+4. **Run the backend**:
+    ```sh
+    cd TAW/backend
+    npm run easyStart
+    ```
+5. **Run the frontend**:
+    ```sh
+    cd TAW/frontend/flights
+    ng serve
+    ```
+Now you can access the application at `http://localhost:4200`.
 
 ## 🧑‍💻 Demo Accounts
 - **Admin**: 

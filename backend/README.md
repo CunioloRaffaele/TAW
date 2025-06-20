@@ -1,31 +1,5 @@
 # Backend Documentation
 
-## Overview
-
-The backend is composed of two main components:
-- A Node.js server running Express
-- A Docker container hosting the database
-
-## Docker Database Setup
-
-### Prerequisites
-- [Docker](https://www.docker.com/get-started) installed on your machine
-
-### Starting the Database Container
-
-To start the database container, run the following command in your terminal:
-
-```bash
-docker compose up
-```
-
-### Verifying the Container is Running
-
-```bash
-docker ps
-```
-The Postgres server will be running on port 5431 by default.
-
 ## Starting the Node.js Server
 
 1. Navigate to the server directory:
