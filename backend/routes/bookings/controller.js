@@ -237,3 +237,134 @@ exports.getFlightExtras = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+exports.createTrip = async (req, res) => {
+    const userId = req.userToken.userId;
+    const { tickets } = req.body;
+
+    if (!tickets || !Array.isArray(tickets) || tickets.length === 0 ) {
+        return res.status(400).json({ error: 'Invalid tickets or seats data' });
+    }
+    // Validate that each ticket has a ticketUUID and seatId
+    for (const ticket of tickets) {
+        if (!ticket.ticketUUID || !ticket.seatId) {
+            return res.status(400).json({ error: 'Each ticket must have a ticketUUID and seatId' });
+        }
+    }
+
+    // request should be like:
+    /* 
+    {
+        "tickets": [
+            {
+                "ticketUUID": "t-uuid-1",
+                "seatId": 1,
+                "extras": [1, 2] // array of extras IDs
+            },
+            {
+                "ticketUUID": "t-uuid-2",
+                "seatId": 2
+            }
+        ]
+    }
+    */
+
+    try{
+        // check if all tickets are valid
+        const ticketUUIDs = tickets.map(t => t.ticketUUID);
+        const validTickets = await prisma.tickets.findMany({
+            where: {
+                code: { in: ticketUUIDs }
+            }
+        });
+        const validTicketCodes = validTickets.map(t => t.code);
+
+        // Check that every ticketUUID in the input exists in the DB result
+        const allValid = ticketUUIDs.every(uuid => validTicketCodes.includes(uuid));
+        if (!allValid) {
+            return res.status(400).json({ error: 'Invalid ticket UUIDs provided' });
+        }
+        
+        // check if the flight for each ticket is not already departed
+        const currentDateTime = DateTime.utc();
+        const flights = await prisma.flights.findMany({
+            where: {
+                code: { in: validTickets.map(t => t.fligt_code) },
+                liftoff_date: {
+                    gt: currentDateTime.toJSDate()
+                }
+            }
+        });
+        if (flights.length !== validTickets.length) {
+            return res.status(400).json({ error: 'Some flights yout are trying to book have already departed' });
+        }
+
+        // check if all seats are valid (aircraft has the seats)
+       const seats = await prisma.seats.findMany ({
+            where: {
+                AND: [
+                    { id: { in: tickets.map(t => t.seatId) } },
+                    { aircraft_id: { in: flights.map(f => f.aircraft_id) } }
+                ]
+            }
+        });
+        if (seats.length !== tickets.length) {
+            return res.status(400).json({ error: 'Invalid seat IDs for the selected flights' });
+        }
+        // check if the seat is not already booked for the flight
+        for (const ticket of tickets) {
+            const seatBookings = await prisma.bookings.findMany({
+                where: {
+                    seat_id: ticket.seatId,
+                    ticket_code: ticket.ticketUUID
+                }
+            });
+            if (seatBookings.length > 0) {
+                return res.status(400).json({ error: `Seat ${tickets.map(t => t.seatId)} is already booked for flight ${tickets.map(t => t.ticketUUID)}` });
+            }
+        }
+
+        // check if all extras are valid
+        const allExtras = await prisma.extras.findMany();
+        const validExtras = allExtras.map(e => e.id);
+        for (const ticket of tickets) {
+            if (ticket.extras) {
+                for (const extraId of ticket.extras) {
+                    if (!validExtras.includes(extraId)) {
+                        return res.status(400).json({ error: `Invalid extra ID ${extraId}` });
+                    }
+                }
+            }
+        }
+
+        // Create the trip and associated bookings
+        const trip = await prisma.trips.create({
+            data: {
+                creation_date: DateTime.utc(),
+                user_id: userId,
+                bookings: {
+                    createMany: {
+                        data: tickets.map(t => ({
+                            ticket_code: t.ticketUUID,
+                            seat_id: t.seatId, // this is an integer
+                            extras_id: t.extras ? t.extras.join(', ') : null // or handle extras as needed
+                        }))
+                    }
+                }
+            }
+        });
+
+        res.status(200).json({
+            message: 'Trip created successfully',
+            tripId: trip.id,
+            tickets: tickets.map(t => ({
+                ticketUUID: t.ticketUUID,
+                seatId: t.seatId,
+                extras: t.extras || []
+            }))
+        });
+    } catch (error) {
+    console.error('Error creating trip:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+    }
+}
