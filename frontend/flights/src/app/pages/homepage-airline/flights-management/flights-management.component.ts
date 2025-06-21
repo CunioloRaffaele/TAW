@@ -35,7 +35,7 @@ import { AirlineFlightCardComponent } from '../../../components/airline-flight-c
 })
 export class FlightsManagementComponent implements OnInit {
   flights: any[] = [];
-
+showAddFlight = false; 
   flightForm: FormGroup;
   aircrafts: any[] = [];
   filteredFromAirports: any[] = [];
@@ -79,6 +79,22 @@ export class FlightsManagementComponent implements OnInit {
   removeStopover(index: number) {
     this.stopovers.removeAt(index);
     this.filteredStopoverAirports.splice(index, 1);
+  }
+
+
+   openAddFlight() {
+    this.showAddFlight = true;
+    this.flightForm.reset();
+    this.stopovers.clear();
+    this.filteredStopoverAirports = [];
+    this.error = null;
+    this.success = false;
+  }
+
+  closeAddFlight() {
+    this.showAddFlight = false;
+    this.error = null;
+    this.success = false;
   }
 
   onAirportInput(field: 'from' | 'to') {
