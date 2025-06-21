@@ -73,3 +73,20 @@ Now you can access the application at `http://localhost:4200`.
     "password": "password123"
 }
 ```
+```json
+{
+    "name": "Emirates",
+    "password": "Rick123"
+}
+```
+```json
+{
+    "name": "Lufthansa",
+    "password": "Berlin111"
+}
+```
+```json
+{
+    "name": "Singapore Airlines",
+    "password": "Taotao123"
+}
