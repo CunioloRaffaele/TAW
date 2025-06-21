@@ -15,7 +15,7 @@ navRouter.get   ('/airports/:departure/routes', controller.getAirportsDesination
 navRouter.get   ('/airports/:destination/incoming-routes', controller.getAirportsDepartures);
 navRouter.post  ('/flights', validateJsonRequest, authMiddleware, checkAirlineEnrolled, controller.newFlight);
 navRouter.delete('/flights/:flightUUID', authMiddleware, checkAirlineEnrolled, controller.deleteFlight);
-navRouter.get   ('/flights', validateJsonRequest, controller.listFlights);
+navRouter.post  ('/flights', validateJsonRequest, controller.listFlights);
 navRouter.get   ('/flights/:flightUUID', controller.getFlightDetails);
 
 module.exports = navRouter;
