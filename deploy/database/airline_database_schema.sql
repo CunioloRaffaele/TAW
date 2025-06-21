@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS Airlines (
     name VARCHAR(255) PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
     country VARCHAR(100) NOT NULL,
-    motto VARCHAR(300) DEFAULT 'Fly with us, fly safe and snug <3',
+    motto VARCHAR(300) DEFAULT 'Fly with us, FlySafe and snug <3',
     enrolled BOOLEAN DEFAULT FALSE
 );
 
@@ -234,9 +234,9 @@ $$ LANGUAGE plpgsql;
 -- 1. Inserimento Airlines (tabella indipendente)
 INSERT INTO Airlines (name, password, country, motto, enrolled) VALUES
 ('FlySafe', '$2b$10$vV47kdLzjVjPHQ4pyZlQQesn1/yqmbNdQt48kXVmHK.Xmqj.lXAWW', 'Francia', 'Vive la france', TRUE),
-('Emirates', 'em1r@t3s2024', 'United Arab Emirates', 'Fly Better', TRUE),
-('Lufthansa', 'luft2024!secure', 'Germany', 'Say yes to the world', TRUE),
-('Singapore Airlines', 'sing@p0r32024', 'Singapore', 'A Great Way to Fly', TRUE);
+('Emirates', '$2b$10$5kyCNowfNdnjcZvl0Mw9NuuJGn9ooPagYV6XjpM9vdTNOd1BP6nKW', 'United Arab Emirates', 'Fly Better', TRUE),
+('Lufthansa', '$2b$10$fO1MLgp4.iK7NU.E3sIdI.eS17yC6UYOySCqJK7aWCgu5I2/6/qdO', 'Germany', 'Say yes to the world', TRUE),
+('Singapore Airlines', '$2b$10$6sfXJkpVCCiYHOJhoOXX4uY6g52wEWS2atUOq5leUfm0kF/927YyK', 'Singapore', 'A Great Way to Fly', TRUE);
 
 -- 2. Inserimento Airports (tabella indipendente)
 INSERT INTO Airports (name, city, country, lat, lan, time_zone) VALUES
@@ -260,11 +260,12 @@ INSERT INTO Airports (name, city, country, lat, lan, time_zone) VALUES
 -- 3. Inserimento Routes (dipende da Airports)
 INSERT INTO Routes (departure, destination) VALUES
 (1, 2), -- Dubai -> Frankfurt
+(2, 1), -- Frankfurt -> Dubai
 (2, 3), -- Frankfurt -> Singapore
 (1, 3), -- Dubai -> Singapore
+(3, 1), -- Singapore -> Dubai
 (4, 5), -- Milano -> Parigi
 (5, 6), -- Parigi -> Londra
-(4, 6), -- Milano -> Londra
 (1, 7),   -- Dubai -> New York JFK
 (7, 8),   -- New York JFK -> Los Angeles LAX
 (8, 9),   -- Los Angeles LAX -> Tokyo Haneda
@@ -277,24 +278,54 @@ INSERT INTO Routes (departure, destination) VALUES
 (15, 16), -- Amsterdam -> Zurich
 (16, 1),  -- Zurich -> Dubai
 (3, 9),   -- Singapore -> Tokyo Haneda
+(9, 3),    -- Tokyo Haneda -> Singapore
 (2, 12),  -- Frankfurt -> Toronto Pearson
 (5, 13),  -- Paris -> Beijing Capital
 (6, 7);   -- London Heathrow -> New York JFK
 
 -- 4. Inserimento Aircrafts (dipende da Airlines)
 INSERT INTO Aircrafts (model, seats_capacity, owner_name) VALUES
-('Airbus A380', 550, 'Emirates'),
-( 'Boeing 747-8', 400, 'FlySafe'),
-( 'Airbus A350', 350, 'Singapore Airlines'),
-( 'Airbus A320', 180, 'Lufthansa'),
-( 'Boeing 777', 396, 'FlySafe'),
-('Airbus A321', 200, 'Singapore Airlines');
+('Airbus A380', 330, 'Emirates'),
+('Boeing 777', 300, 'Emirates'),
+('Boeing 787 Dreamliner', 250, 'Emirates'),
+('Airbus A350', 270, 'Emirates'),
+('Boeing 747-8', 320, 'FlySafe'),
+('Boeing 777', 300, 'FlySafe'),
+('Airbus A320', 180, 'FlySafe'),
+('Airbus A321', 200, 'FlySafe'),
+('Airbus A350', 270, 'Singapore Airlines'),
+('Airbus A321', 200, 'Singapore Airlines'),
+('Boeing 787 Dreamliner', 250, 'Singapore Airlines'),
+('Boeing 777', 270, 'Singapore Airlines'),
+('Airbus A320', 180, 'Lufthansa'),
+('Boeing 747-8', 320, 'Lufthansa'),
+('Airbus A321', 200, 'Lufthansa'),
+('Airbus A350', 270, 'Lufthansa'),
+('Boeing 737', 180, 'Lufthansa');
 
 -- 5. Inserimento Uses (dipende da Routes)
 INSERT INTO Uses (airline_name, route_departure, route_destination) VALUES
-('Emirates', 1, 2),
-('Lufthansa', 2, 3),
-('Singapore Airlines', 1, 3);
+('FlySafe', 1, 2),
+('FlySafe', 2, 1),
+('FlySafe', 1, 3),
+('FlySafe', 3, 1),
+('FlySafe', 3, 9),
+('FlySafe', 9, 3),
+('Emirates', 1, 7),   -- Dubai -> New York JFK
+('Emirates', 7, 8),   -- New York JFK -> Los Angeles LAX
+('Emirates', 8, 9),   -- Los Angeles LAX -> Tokyo Haneda
+('Emirates', 9, 10),  -- Tokyo Haneda -> Sydney Kingsford Smith
+('Emirates', 10, 11), -- Sydney -> Madrid Barajas
+('Lufthansa', 2, 12), -- Frankfurt -> Toronto Pearson
+('Lufthansa', 5, 13), -- Paris -> Beijing Capital
+('Lufthansa', 13, 14),-- Beijing -> Istanbul
+('Lufthansa', 14, 15),-- Istanbul -> Amsterdam Schiphol
+('Lufthansa', 15, 16),-- Amsterdam -> Zurich
+('Lufthansa', 16, 1), -- Zurich -> Dubai
+('Singapore Airlines', 3, 9),  -- Singapore -> Tokyo Haneda
+('Singapore Airlines', 9, 3),  -- Tokyo Haneda -> Singapore
+('Singapore Airlines', 1, 3),  -- Dubai -> Singapore
+('Singapore Airlines', 3, 1);  -- Singapore -> Dubai
 
 -- 6. Inserimento Seats (dipende da Aircrafts)
 /*
@@ -313,25 +344,39 @@ INSERT INTO Users (name, email, password, role) VALUES
 ('Admin', 'adminAccount@gmail.com', '$2b$10$dTV3A7cZwWjBiqKrxEXwuuIJGDkIKqSJOizMDkdwL9s0jQK4bsNx6', 1);
 
 -- 8. Inserimento Flights (dipende da Routes e Aircrafts)
-INSERT INTO Flights ( duration, aircraft_id, liftoff_date, route_departure, route_destination, airline_name) VALUES
-( 368, 1, '2024-06-01 20:20:20', 1, 2, 'Emirates'),
-( 728, 2, '2024-06-02 15:30:00', 2, 3, 'Lufthansa');
+-- Insert flights for each airline with specific timing requirements relative to June 26, 2024 11:00
+INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route_destination, airline_name) VALUES
+-- FlySafe flights
+(240, 5, '2024-06-25 06:00:00', 1, 2, 'FlySafe'),  -- Past flight (Dubai -> Frankfurt)
+(600, 6, '2024-06-26 08:00:00', 2, 1, 'FlySafe'),  -- In-progress flight (Frankfurt -> Dubai)
+(300, 7, '2024-07-01 10:00:00', 3, 9, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
+
+-- Emirates flights
+(360, 1, '2024-06-25 05:00:00', 1, 7, 'Emirates'), -- Past flight (Dubai -> New York)
+(840, 2, '2024-06-26 04:00:00', 7, 8, 'Emirates'), -- In-progress flight (New York -> Los Angeles)
+(420, 3, '2024-07-03 14:30:00', 8, 9, 'Emirates'), -- Future flight (Los Angeles -> Tokyo)
+
+-- Lufthansa flights
+(480, 13, '2024-06-24 20:00:00', 2, 12, 'Lufthansa'), -- Past flight (Frankfurt -> Toronto)
+(720, 14, '2024-06-26 07:00:00', 13, 14, 'Lufthansa'), -- In-progress flight (Beijing -> Istanbul)
+(350, 15, '2024-07-02 12:00:00', 14, 15, 'Lufthansa'), -- Future flight (Istanbul -> Amsterdam)
+
+-- Singapore Airlines flights
+(390, 9, '2024-06-24 18:00:00', 3, 1, 'Singapore Airlines'),  -- Past flight (Singapore -> Dubai)
+(630, 10, '2024-06-25 22:00:00', 9, 3, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
+(330, 11, '2024-07-05 09:00:00', 1, 3, 'Singapore Airlines'); -- Future flight (Dubai -> Singapore)
 
 -- 9. Inserimento Tickets (dipende da Flights)
-WITH 
-ticket_data1 AS (
-  SELECT code AS c1 FROM Flights WHERE duration = 368 LIMIT 1
-),
-ticket_data2 AS (
-  SELECT code AS c2 FROM Flights WHERE duration = 728 LIMIT 1
-),
-ticket_data AS (
-  SELECT 'ECONOMY' AS type, 500.00 AS price, c1 AS flight_code FROM ticket_data1
-  UNION ALL
-  SELECT 'BUSINESS', 1200.00, c2 FROM ticket_data2
-)
 INSERT INTO Tickets (type, price, fligt_code)
-SELECT type, price, flight_code FROM ticket_data;
+SELECT 'ECONOMY', duration * 0.8, code FROM Flights
+UNION ALL
+SELECT 'BUSINESS', duration * 2.0, code FROM Flights
+UNION ALL
+SELECT 'BASE', duration * 0.5, code FROM Flights
+UNION ALL
+SELECT 'DELUXE', duration * 3.0, code FROM Flights
+UNION ALL
+SELECT 'LUXURY', duration * 4.0, code FROM Flights;
 
 -- 10. Inserimento Trips (dipende da Users)
 INSERT INTO Trips (creation_date, user_id) VALUES
