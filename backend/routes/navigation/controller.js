@@ -420,6 +420,12 @@ exports.newFlight = async (req, res) => {
 
         const liftOffDateUTC = DateTime.fromISO(liftOffDateLOCAL, { zone: departureAirport.time_zone }).toUTC().toJSDate();
 
+        // verify liftOffDateUTC is in the future
+        if (liftOffDateUTC <= new Date()) {
+            return res.status(400).json({
+                error: 'Lift-off date must be in the future'
+            });
+        }
         // Verify if the aircraft is available for the specified lift-off date
         const existingFlight = await prisma.flights.findFirst({
             where: {
