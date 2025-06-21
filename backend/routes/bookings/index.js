@@ -10,5 +10,7 @@ bookRouter.get('/tickets/:flightUUID', controller.listTickets);
 bookRouter.get('/seats/:flightUUID', controller.getFlightAvailableSeats);
 bookRouter.get('/extras', controller.getFlightExtras);
 bookRouter.post('/trips', validateJsonRequest, authMiddleware, controller.createTrip);
+bookRouter.get('/trips', authMiddleware, controller.listTrips);
+bookRouter.get('/trips/:tripId', authMiddleware, controller.getTripDetails);
 
 module.exports = bookRouter;

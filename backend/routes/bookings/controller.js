@@ -368,3 +368,92 @@ exports.createTrip = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
     }
 }
+
+exports.listTrips = async (req, res) => {
+    const userId = req.userToken.userId;
+
+    try {
+        let trips = await prisma.trips.findMany({
+            where: {
+                user_id: userId
+            },
+            include: {
+                bookings: {
+                    include: {
+                        tickets: {
+                            include : {
+                                flights : true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // add field to specify if the trip is active
+        trips.forEach(trip => {
+            trip.isActive = trip.bookings.some(booking => {
+                const flightLiftoffDate = booking.tickets.flights.liftoff_date;
+                return DateTime.fromJSDate(flightLiftoffDate) > DateTime.utc();
+            });
+        });
+
+        // return only trip id and isActive status
+        trips = trips.map(trip => ({
+            id: trip.id,
+            isActive: trip.isActive
+        }));
+
+        if (trips.length === 0) {
+            return res.status(404).json({ error: 'No trips found for this user' });
+        }
+
+        res.status(200).json(trips);
+    } catch (error) {
+        console.error('Error fetching trips:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+exports.getTripDetails = async (req, res) => {
+    const { tripId } = req.params;
+    if (!tripId || isNaN(parseInt(tripId, 10))) {
+        return res.status(400).json({ error: 'Missing or invalid trip ID parameter' });
+    }
+    const userId = req.userToken.userId;
+
+    try {
+        const trip = await prisma.trips.findUnique({
+            where: {
+                id: parseInt(tripId, 10)
+            },
+            include: {
+                bookings: {
+                    include: {
+                        tickets: {
+                            include : {
+                                flights : true
+                            }
+                        },
+                        extras: true,
+                    }
+                },
+            }
+        });
+
+        if (!trip || trip.user_id !== userId) {
+            return res.status(404).json({ error: 'Trip not found or does not belong to this user' });
+        }
+
+        // add field to specify if the trip is active
+        trip.isActive = trip.bookings.some(booking => {
+            const flightLiftoffDate = booking.tickets.flights.liftoff_date;
+            return DateTime.fromJSDate(flightLiftoffDate) > DateTime.utc();
+        });
+
+        res.status(200).json(trip);
+    } catch (error) {
+        console.error('Error fetching trip details:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+}
