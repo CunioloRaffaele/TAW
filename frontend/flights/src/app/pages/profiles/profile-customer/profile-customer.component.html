@@ -1,1 +1,15 @@
-<p>profile-customer works!</p>
+<!-- ...existing code... -->
+<mat-card>
+  <mat-card-title>I tuoi viaggi</mat-card-title>
+  <mat-card-content>
+    <div *ngIf="trips.length === 0">
+      Nessun viaggio trovato.
+    </div>
+    <div *ngIf="trips.length > 0">
+      <app-trip-card
+        *ngFor="let trip of trips"
+        [trip]="trip">
+      </app-trip-card>
+    </div>
+  </mat-card-content>
+</mat-card>

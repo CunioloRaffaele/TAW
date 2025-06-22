@@ -73,11 +73,7 @@ export class ToolbarComponent {
     }
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      if (payload.role === 2) {
-        this.router.navigate(['/profile-airline']);
-      } else if (payload.role === 1) {
-        this.router.navigate(['/profile-admin']);
-      } else {
+      if (payload.role === 0) {
         this.router.navigate(['/profile-customer']);
       }
     } catch {

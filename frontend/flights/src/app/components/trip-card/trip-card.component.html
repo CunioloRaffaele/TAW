@@ -1,0 +1,41 @@
+<mat-card class="trip-card">
+  <mat-card-title>
+    Viaggio #{{ trip?.id }}
+  </mat-card-title>
+  <mat-card-content>
+    <div *ngFor="let booking of bookings; let i = index">
+      <h4>Prenotazione {{ i + 1 }}</h4>
+      <div>
+        <span class="label">Data partenza:</span>
+        <span class="value">{{ booking?.tickets?.flights?.liftoff_date | date:'short' }}</span>
+      </div>
+      <div>
+        <span class="label">Da:</span>
+        <span class="value">{{ booking?.departureAirportName || '...' }}</span>
+      </div>
+      <div>
+        <span class="label">A:</span>
+        <span class="value">{{ booking?.destinationAirportName || '...' }}</span>
+      </div>
+      <div>
+        <span class="label">Codice volo:</span>
+        <span class="value">{{ booking?.tickets?.flights?.code }}</span>
+      </div>
+      <div>
+        <span class="label">Classe:</span>
+        <span class="value">{{ booking?.tickets?.type }}</span>
+      </div>
+      <div>
+        <button mat-stroked-button color="primary" (click)="downloadBooking(booking.id)">
+          <mat-icon>download</mat-icon>
+          Scarica dettagli
+        </button>
+      </div>
+      <hr *ngIf="i < bookings.length - 1">
+    </div>
+    <div>
+      <span class="label">Stato viaggio:</span>
+      <span class="value">{{ trip?.isActive ? 'Attivo' : 'Concluso' }}</span>
+    </div>
+  </mat-card-content>
+</mat-card>

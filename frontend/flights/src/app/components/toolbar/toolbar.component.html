@@ -8,36 +8,28 @@
     </button>
     <mat-menu #userMenu="matMenu">
       <!-- Cerca il bottone o elemento per il profilo nella toolbar -->
-      <button mat-menu-item (click)="goToProfile()">
-        <mat-icon>account_circle</mat-icon>
-        Profilo
-      </button>
+      <div *ngIf="getRoleFromToken() === 0" mat-menu-item>
+        <button mat-menu-item (click)="goToProfile()">
+          <mat-icon>account_circle</mat-icon>
+          Profilo
+        </button>
+      </div>
       <!-- SOLO per admin -->
-      <button
-        *ngIf="!isCurrentRoute('/')"
-        mat-menu-item
-        routerLink="/"
-      >
+      <button *ngIf="!isCurrentRoute('/')" mat-menu-item routerLink="/">
         <mat-icon>home</mat-icon>
         Homepage
       </button>
       <!-- SOLO per admin -->
-      <button
-        *ngIf="getRoleFromToken() === 1 && !isCurrentRoute('/admin-dashboard')"
-        mat-menu-item
-        routerLink="/admin-dashboard"
-      >
+      <button *ngIf="getRoleFromToken() === 1 && !isCurrentRoute('/admin-dashboard')" mat-menu-item
+        routerLink="/admin-dashboard">
         <mat-icon>admin_panel_settings</mat-icon>
         Dashboard Admin
       </button>
       <!-- SOLO per airline -->
-      <button 
-        *ngIf="getRoleFromToken() === 2 && !isCurrentRoute('/homepage-airline')"
-        mat-menu-item
-        routerLink="/homepage-airline"
-        >
-         <mat-icon>airline_seat_recline_extra</mat-icon> 
-         Dashboard Airline
+      <button *ngIf="getRoleFromToken() === 2 && !isCurrentRoute('/homepage-airline')" mat-menu-item
+        routerLink="/homepage-airline">
+        <mat-icon>airline_seat_recline_extra</mat-icon>
+        Dashboard Airline
       </button>
       <button mat-menu-item (click)="logout()">
         <mat-icon>logout</mat-icon>
@@ -52,4 +44,3 @@
     </a>
   </ng-template>
 </mat-toolbar>
-

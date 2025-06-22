@@ -17,8 +17,6 @@ import { AircraftsManagementComponent } from './pages/homepage-airline/aircrafts
 import { FlightsManagementComponent } from './pages/homepage-airline/flights-management/flights-management.component';
 import { ServerErrorComponent } from './pages/server-error/server-error.component';
 import { FlightsDisplayComponent } from './pages/flights-display/flights-display.component';
-import { ProfileAirlineComponent } from './pages/profiles/profile-airline/profile-airline.component'; 
-import { ProfileAdminComponent } from './pages/profiles/profile-admin/profile-admin.component';
 import { ProfileCustomerComponent } from './pages/profiles/profile-customer/profile-customer.component';
 
 export const routes: Routes = [
@@ -64,7 +62,5 @@ export const routes: Routes = [
   },
   { path: 'server-error', component: ServerErrorComponent },
   { path: 'flights-display', component: FlightsDisplayComponent },
-  { path: 'profile-airline', component: ProfileAirlineComponent },
-  { path: 'profile-admin', component: ProfileAdminComponent },
   { path: 'profile-customer', component: ProfileCustomerComponent },
 ];
