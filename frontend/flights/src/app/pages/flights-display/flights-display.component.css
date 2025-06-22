@@ -1,0 +1,28 @@
+.flight-display-flex {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  height: 70vh;
+  min-height: 400px;
+}
+
+.flight-map-col {
+  flex: 1 1 40%;
+  min-width: 320px;
+  max-width: 600px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.flight-cards-col {
+  flex: 2 1 60%;
+  min-width: 350px;
+  max-width: 900px;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}

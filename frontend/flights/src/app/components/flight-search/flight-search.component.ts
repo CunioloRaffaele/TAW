@@ -12,8 +12,9 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { debounceTime, switchMap, catchError, tap, map } from 'rxjs/operators';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-flight-search',
@@ -29,7 +30,8 @@ import { Router } from '@angular/router';
     MatSelectModule,
     MatIconModule,
     MatAutocompleteModule,
-    HttpClientModule
+    HttpClientModule,
+    MatCheckbox
   ],
   templateUrl: './flight-search.component.html',
   styleUrls: ['./flight-search.component.css']
@@ -46,10 +48,12 @@ export class FlightSearchComponent {
     this.searchForm = this.fb.group({
       from: ['', Validators.required],
       to: ['', Validators.required],
+      tripType: ['oneway', Validators.required], // default: solo andata
       departureDate: ['', Validators.required],
       returnDate: [''],
       travelers: [1, Validators.required],
-      travelClass: ['Economy', Validators.required]
+      travelClass: ['Economy', Validators.required],
+      directOnly: [false] 
     });
 
     // Autocomplete per "from"
@@ -81,6 +85,12 @@ export class FlightSearchComponent {
         return this.searchAirports(value);
       })
     );
+
+    this.searchForm.get('tripType')!.valueChanges.subscribe(type => {
+      if (type === 'oneway') {
+        this.searchForm.get('returnDate')!.setValue('');
+      }
+    });
   }
 
   // Cerca tutti gli aeroporti (autocomplete base)
@@ -114,11 +124,13 @@ export class FlightSearchComponent {
     if (!query || query.length < 2) return of([]);
     return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(departure)}/routes`).pipe(
       map(res => {
-        // Se la risposta è un array di oggetti con destinationAirport, estrai solo gli aeroporti
         if (Array.isArray(res.airports) && res.airports.length && res.airports[0].destinationAirport) {
-          return res.airports.map((r: any) => r.destinationAirport);
+          // PATCH: aggiungi sempre id
+          return res.airports.map((r: any) => ({
+            ...r.destinationAirport,
+            id: r.destinationAirport.id ?? r.destination // fallback se manca id
+          }));
         }
-        // Altrimenti fallback classico
         return Array.isArray(res) ? res : res.airports ?? [];
       }),
       catchError(() => of([]))
@@ -126,15 +138,32 @@ export class FlightSearchComponent {
   }
 
   onSearch() {
+    const from = this.searchForm.value.from?.id || this.searchForm.value.from;
+    const to = this.searchForm.value.to?.id || this.searchForm.value.to;
+    const departureDate = this.searchForm.value.departureDate;
+    let returnDate = this.searchForm.value.returnDate;
+
+    const formatDate = (date: Date) =>
+      date ? `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')} 00:00:00` : '';
+
+    // Se solo andata, imposta returnDate al giorno dopo la partenza
+    if (this.searchForm.value.tripType === 'oneway') {
+      const nextDay = new Date(departureDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      returnDate = nextDay;
+    }
+
     const searchData = {
-      routes: [
-        { departure: this.searchForm.value.from.id, destination: this.searchForm.value.to.id }
-      ],
-      searchStartDate: this.searchForm.value.startDate, // assicurati sia nel formato richiesto
-      searchEndDate: this.searchForm.value.endDate,
-      passengers: this.searchForm.value.passengers,
-      classType: this.searchForm.value.classType
+      from,
+      to,
+      departureDate: formatDate(departureDate),
+      returnDate: formatDate(returnDate),
+      passengers: this.searchForm.value.travelers,
+      classType: this.searchForm.value.travelClass,
+      directOnly: this.searchForm.value.directOnly,
+      tripType: this.searchForm.value.tripType
     };
+
     this.router.navigate(['/flights-display'], { state: { searchData } });
   }
 

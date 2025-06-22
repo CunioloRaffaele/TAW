@@ -1,15 +1,16 @@
-<div *ngIf="loading" class="loading-container">
-  <mat-spinner diameter="40"></mat-spinner>
-</div>
-<div *ngIf="error" class="error-message">
-  {{ error }}
-</div>
-<div *ngIf="!loading && !error && flights.length === 0">
-  Nessun volo trovato.
-</div>
-<div *ngIf="flights.length > 0">
-  <app-flight-card
-    *ngFor="let flight of flights"
-    [flight]="flight">
-  </app-flight-card>
+<h2>Risultati ricerca voli</h2>
+<div class="flight-display-flex">
+  <div class="flight-map-col">
+    <map></map>
+  </div>
+  <div class="flight-cards-col">
+    <div *ngIf="loading">Caricamento voli...</div>
+    <div *ngIf="error">{{ error }}</div>
+    <ng-container *ngIf="!loading && !error">
+      <ng-container *ngIf="flights.length === 0">
+        Nessun volo trovato.
+      </ng-container>
+      <app-flight-list *ngIf="flights.length > 0" [flights]="flights"></app-flight-list>
+    </ng-container>
+  </div>
 </div>

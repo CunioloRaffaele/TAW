@@ -1,5 +1,14 @@
 <div class="flight-search-container">
   <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="flight-search-form">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo viaggio</mat-label>
+      <mat-select formControlName="tripType">
+        <mat-option value="oneway">Solo andata</mat-option>
+        <mat-option value="roundtrip">Andata e ritorno</mat-option>
+      </mat-select>
+    </mat-form-field>
+
     <mat-form-field appearance="outline">
       <mat-label>Da</mat-label>
       <input
@@ -42,7 +51,8 @@
       <mat-datepicker #picker1></mat-datepicker>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
+    <!-- Mostra la data di ritorno solo se roundtrip -->
+    <mat-form-field appearance="outline" *ngIf="searchForm.value.tripType === 'roundtrip'">
       <mat-label>Data di ritorno</mat-label>
       <input matInput [matDatepicker]="picker2" formControlName="returnDate">
       <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
@@ -62,6 +72,8 @@
         <mat-option *ngFor="let c of classes" [value]="c">{{ c }}</mat-option>
       </mat-select>
     </mat-form-field>
+
+    <mat-checkbox formControlName="directOnly">Solo voli diretti</mat-checkbox>
 
     <button mat-raised-button color="primary" type="submit" [disabled]="searchForm.invalid">
       <mat-icon>search</mat-icon>

@@ -1,15 +1,6 @@
-<p>flight-list works!</p>
-<!-- Mostra messaggio se non ci sono voli -->
-<div *ngIf="!loading && !error && flights.length === 0">
+<div *ngIf="flights.length === 0">
   Nessun volo trovato.
 </div>
-
-<!-- Mostra le card dei voli -->
 <div *ngIf="flights.length > 0">
-  <app-flight-card
-    *ngFor="let flight of flights"
-    [flight]="flight"
-      (deleted)="removeFlight($event)">
-    
-  </app-flight-card>
+  <app-flight-card *ngFor="let flight of flights" [flight]="flight"></app-flight-card>
 </div>
