@@ -347,7 +347,7 @@ exports.createTrip = async (req, res) => {
                         data: tickets.map(t => ({
                             ticket_code: t.ticketUUID,
                             seat_id: t.seatId, // this is an integer
-                            extras_id: t.extras ? t.extras.join(', ') : null // or handle extras as needed
+                            extras_id: t.extras && t.extras.length > 0 ? parseInt(t.extras[0], 10) : null
                         }))
                     }
                 }
