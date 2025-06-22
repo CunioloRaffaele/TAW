@@ -347,24 +347,24 @@ INSERT INTO Users (name, email, password, role) VALUES
 -- Insert flights for each airline with specific timing requirements relative to June 26, 2024 11:00
 INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route_destination, airline_name) VALUES
 -- FlySafe flights
-(240, 5, '2024-06-25 06:00:00', 1, 2, 'FlySafe'),  -- Past flight (Dubai -> Frankfurt)
-(600, 6, '2024-06-26 08:00:00', 2, 1, 'FlySafe'),  -- In-progress flight (Frankfurt -> Dubai)
-(300, 7, '2024-07-01 10:00:00', 3, 9, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
+(240, 5, '2025-06-25 06:00:00', 1, 2, 'FlySafe'),  -- Past flight (Dubai -> Frankfurt)
+(600, 6, '2025-06-26 08:00:00', 2, 1, 'FlySafe'),  -- In-progress flight (Frankfurt -> Dubai)
+(300, 7, '2025-07-01 10:00:00', 3, 9, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
 
 -- Emirates flights
-(360, 1, '2024-06-25 05:00:00', 1, 7, 'Emirates'), -- Past flight (Dubai -> New York)
-(840, 2, '2024-06-26 04:00:00', 7, 8, 'Emirates'), -- In-progress flight (New York -> Los Angeles)
-(420, 3, '2024-07-03 14:30:00', 8, 9, 'Emirates'), -- Future flight (Los Angeles -> Tokyo)
+(360, 1, '2025-06-25 05:00:00', 1, 7, 'Emirates'), -- Past flight (Dubai -> New York)
+(840, 2, '2025-06-26 04:00:00', 7, 8, 'Emirates'), -- In-progress flight (New York -> Los Angeles)
+(420, 3, '2025-07-03 14:30:00', 8, 9, 'Emirates'), -- Future flight (Los Angeles -> Tokyo)
 
 -- Lufthansa flights
-(480, 13, '2024-06-24 20:00:00', 2, 12, 'Lufthansa'), -- Past flight (Frankfurt -> Toronto)
-(720, 14, '2024-06-26 07:00:00', 13, 14, 'Lufthansa'), -- In-progress flight (Beijing -> Istanbul)
-(350, 15, '2024-07-02 12:00:00', 14, 15, 'Lufthansa'), -- Future flight (Istanbul -> Amsterdam)
+(480, 13, '2025-06-24 20:00:00', 2, 12, 'Lufthansa'), -- Past flight (Frankfurt -> Toronto)
+(720, 14, '2025-06-26 07:00:00', 13, 14, 'Lufthansa'), -- In-progress flight (Beijing -> Istanbul)
+(350, 15, '2025-07-02 12:00:00', 14, 15, 'Lufthansa'), -- Future flight (Istanbul -> Amsterdam)
 
 -- Singapore Airlines flights
-(390, 9, '2024-06-24 18:00:00', 3, 1, 'Singapore Airlines'),  -- Past flight (Singapore -> Dubai)
-(630, 10, '2024-06-25 22:00:00', 9, 3, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
-(330, 11, '2024-07-05 09:00:00', 1, 3, 'Singapore Airlines'); -- Future flight (Dubai -> Singapore)
+(390, 9, '2025-06-24 18:00:00', 3, 1, 'Singapore Airlines'),  -- Past flight (Singapore -> Dubai)
+(630, 10, '2025-06-25 22:00:00', 9, 3, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
+(330, 11, '2025-07-05 09:00:00', 1, 3, 'Singapore Airlines'); -- Future flight (Dubai -> Singapore)
 
 -- 9. Inserimento Tickets (dipende da Flights)
 INSERT INTO Tickets (type, price, fligt_code)
