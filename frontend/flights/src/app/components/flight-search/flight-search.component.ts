@@ -44,6 +44,9 @@ export class FlightSearchComponent {
   filteredFromAirports: Observable<any[]> = of([]);
   filteredToAirports: Observable<any[]> = of([]);
 
+  allAirports: any[] = [];
+  allAirportsLoaded = false;
+
   constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
     this.searchForm = this.fb.group({
       from: ['', Validators.required],
@@ -62,12 +65,21 @@ export class FlightSearchComponent {
       switchMap(value => {
         if (typeof value !== 'string') return of([]);
         const toValue = this.searchForm.get('to')!.value;
-        if (toValue && toValue.id) {
-          // Cerca solo aeroporti da cui si può arrivare a "to"
-          return this.searchAvailableDepartures(toValue.id, value);
+        const directOnly = this.searchForm.get('directOnly')!.value;
+
+        if (directOnly) {
+          // Se la box TO è vuota, mostra tutti gli aeroporti e filtra se si digita
+          if (!toValue || !toValue.id) {
+            return this.getAllAirportsFiltered(value);
+          }
+          // Se la box TO è già selezionata, mostra solo aeroporti di partenza collegati a quella destinazione
+          return this.searchAvailableDepartures(toValue.id, value).pipe(
+            map(list => this.filterAirports(list, value))
+          );
         }
-        // Altrimenti mostra tutti gli aeroporti
-        return this.searchAirports(value);
+
+        // SOLO VOLI DIRETTI NON SPUNTATO: mostra tutti e filtra sempre lato frontend
+        return this.getAllAirportsFiltered(value);
       })
     );
 
@@ -77,12 +89,21 @@ export class FlightSearchComponent {
       switchMap(value => {
         if (typeof value !== 'string') return of([]);
         const fromValue = this.searchForm.get('from')!.value;
-        if (fromValue && fromValue.id) {
-          // Cerca solo aeroporti raggiungibili da "from"
-          return this.searchAvailableDestinations(fromValue.id, value);
+        const directOnly = this.searchForm.get('directOnly')!.value;
+
+        if (directOnly) {
+          // Se la box FROM è vuota, mostra tutti gli aeroporti e filtra se si digita
+          if (!fromValue || !fromValue.id) {
+            return this.getAllAirportsFiltered(value);
+          }
+          // Se la box FROM è già selezionata, mostra solo aeroporti di destinazione collegati a quella partenza
+          return this.searchAvailableDestinations(fromValue.id, value).pipe(
+            map(list => this.filterAirports(list, value))
+          );
         }
-        // Altrimenti mostra tutti gli aeroporti
-        return this.searchAirports(value);
+
+        // SOLO VOLI DIRETTI NON SPUNTATO: mostra tutti e filtra sempre lato frontend
+        return this.getAllAirportsFiltered(value);
       })
     );
 
@@ -94,8 +115,39 @@ export class FlightSearchComponent {
   }
 
   // Cerca tutti gli aeroporti (autocomplete base)
-  searchAirports(query: string): Observable<any[]> {
-    if (!query || query.length < 2) return of([]);
+  searchAirports(query: string, all: boolean = false): Observable<any[]> {
+    if (all) {
+      if (!this.allAirportsLoaded) {
+        return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports`).pipe(
+          map(res => {
+            this.allAirports = Array.isArray(res) ? res : res.airports ?? [];
+            this.allAirportsLoaded = true;
+            if (query && query.length > 0) {
+              const q = query.toLowerCase();
+              return this.allAirports.filter((a: any) =>
+                a.name?.toLowerCase().includes(q) ||
+                a.city?.toLowerCase().includes(q) ||
+                a.country?.toLowerCase().includes(q)
+              );
+            }
+            return this.allAirports;
+          }),
+          catchError(() => of([]))
+        );
+      } else {
+        if (query && query.length > 0) {
+          const q = query.toLowerCase();
+          return of(this.allAirports.filter((a: any) =>
+            a.name?.toLowerCase().includes(q) ||
+            a.city?.toLowerCase().includes(q) ||
+            a.country?.toLowerCase().includes(q)
+          ));
+        }
+        return of(this.allAirports);
+      }
+    }
+    // Altrimenti filtra per query (min 1 carattere) lato backend
+    if (!query || query.length < 1) return of([]);
     return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports?query=${encodeURIComponent(query)}`).pipe(
       map(res => Array.isArray(res) ? res : res.airports ?? []),
       catchError(() => of([]))
@@ -104,15 +156,24 @@ export class FlightSearchComponent {
 
   // Cerca partenze disponibili dato una destinazione
   searchAvailableDepartures(departure: string, query: string): Observable<any[]> {
-    if (!query || query.length < 2) return of([]);
     return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(departure)}/incoming-routes`).pipe(
       map(res => {
-        // Se la risposta è un array di oggetti con destinationAirport, estrai solo gli aeroporti
+        let list: any[] = [];
         if (Array.isArray(res.airports) && res.airports.length && res.airports[0].departureAirport) {
-          return res.airports.map((r: any) => r.departureAirport);
+          list = res.airports.map((r: any) => r.departureAirport);
+        } else {
+          list = Array.isArray(res) ? res : res.airports ?? [];
         }
-        // Altrimenti fallback classico
-        return Array.isArray(res) ? res : res.airports ?? [];
+        // Filtra solo se c'è una query
+        if (query && query.length > 0) {
+          const q = query.toLowerCase();
+          return list.filter((a: any) =>
+            a.name?.toLowerCase().includes(q) ||
+            a.city?.toLowerCase().includes(q) ||
+            a.country?.toLowerCase().includes(q)
+          );
+        }
+        return list;
       }),
       catchError(() => of([]))
     );
@@ -121,17 +182,27 @@ export class FlightSearchComponent {
 
   // Cerca destinazioni disponibili dato una partenza
   searchAvailableDestinations(departure: string, query: string): Observable<any[]> {
-    if (!query || query.length < 2) return of([]);
     return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports/${encodeURIComponent(departure)}/routes`).pipe(
       map(res => {
+        let list: any[] = [];
         if (Array.isArray(res.airports) && res.airports.length && res.airports[0].destinationAirport) {
-          // PATCH: aggiungi sempre id
-          return res.airports.map((r: any) => ({
+          list = res.airports.map((r: any) => ({
             ...r.destinationAirport,
-            id: r.destinationAirport.id ?? r.destination // fallback se manca id
+            id: r.destinationAirport.id ?? r.destination
           }));
+        } else {
+          list = Array.isArray(res) ? res : res.airports ?? [];
         }
-        return Array.isArray(res) ? res : res.airports ?? [];
+        // Filtra solo se c'è una query
+        if (query && query.length === 0) {
+          const q = query.toLowerCase();
+          return list.filter((a: any) =>
+            a.name?.toLowerCase().includes(q) ||
+            a.city?.toLowerCase().includes(q) ||
+            a.country?.toLowerCase().includes(q)
+          );
+        }
+        return list;
       }),
       catchError(() => of([]))
     );
@@ -169,5 +240,32 @@ export class FlightSearchComponent {
 
   displayAirport(airport: any): string {
     return airport && airport.name ? `${airport.name} (${airport.city})` : '';
+  }
+
+  // Funzione helper per caricare e filtrare tutti gli aeroporti lato frontend
+  getAllAirportsFiltered(query: string): Observable<any[]> {
+    if (!this.allAirportsLoaded) {
+      return this.http.get<any>(`${environment.apiUrl}/api/navigate/airports`).pipe(
+        map(res => {
+          this.allAirports = Array.isArray(res) ? res : res.airports ?? [];
+          this.allAirportsLoaded = true;
+          return this.filterAirports(this.allAirports, query);
+        }),
+        catchError(() => of([]))
+      );
+    } else {
+      return of(this.filterAirports(this.allAirports, query));
+    }
+  }
+
+  // Funzione helper per filtrare aeroporti lato frontend
+  filterAirports(list: any[], query: string): any[] {
+    if (!query || query.length === 0) return list;
+    const q = query.toLowerCase();
+    return list.filter((a: any) =>
+      a.name?.toLowerCase().includes(q) ||
+      a.city?.toLowerCase().includes(q) ||
+      a.country?.toLowerCase().includes(q)
+    );
   }
 }

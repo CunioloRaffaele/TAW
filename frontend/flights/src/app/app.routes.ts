@@ -18,6 +18,7 @@ import { FlightsManagementComponent } from './pages/homepage-airline/flights-man
 import { ServerErrorComponent } from './pages/server-error/server-error.component';
 import { FlightsDisplayComponent } from './pages/flights-display/flights-display.component';
 import { ProfileCustomerComponent } from './pages/profiles/profile-customer/profile-customer.component';
+import { TicketBookingComponent } from './pages/ticket-booking/ticket-booking.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent }, // homepage pubblica
@@ -63,4 +64,5 @@ export const routes: Routes = [
   { path: 'server-error', component: ServerErrorComponent },
   { path: 'flights-display', component: FlightsDisplayComponent },
   { path: 'profile-customer', component: ProfileCustomerComponent },
+  { path: 'ticket-booking', component: TicketBookingComponent }
 ];

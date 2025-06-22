@@ -41,6 +41,12 @@ export class FlightsDisplayComponent {
     }
   }
 
+  addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} 00:00:00`;
+}
+
   async loadFlights() {
     this.loading = true;
     this.error = null;
@@ -70,12 +76,11 @@ export class FlightsDisplayComponent {
               destination: steps[1]
             }],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: this.searchData.returnDate || this.searchData.departureDate,
+            searchEndDateLOCAL: this.addDays(this.searchData.departureDate, 180), // 6 mesi
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
           const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
-          console.log('Risposta voli:', this.searchData);
           this.flights = res.flights || [];
         } else {
           // Se non è diretto, non mostrare nulla
@@ -91,7 +96,7 @@ export class FlightsDisplayComponent {
               destination: steps[1]
             }],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: this.searchData.returnDate || this.searchData.departureDate,
+            searchEndDateLOCAL: this.addDays(this.searchData.departureDate, 180), // 6 mesi
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
@@ -104,7 +109,7 @@ export class FlightsDisplayComponent {
               { departure: steps[1], destination: steps[2] }
             ],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: this.searchData.returnDate || this.searchData.departureDate,
+            searchEndDateLOCAL: this.addDays(this.searchData.departureDate, 180), // 6 mesi
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
@@ -128,9 +133,9 @@ export class FlightsDisplayComponent {
     this.loading = true;
     this.error = null;
 
-    const addOneDay = (dateStr: string) => {
+    const addDays = (dateStr: string, days: number): string => {
       const d = new Date(dateStr);
-      d.setDate(d.getDate() + 1);
+      d.setDate(d.getDate() + days);
       return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} 00:00:00`;
     };
 
@@ -158,14 +163,14 @@ export class FlightsDisplayComponent {
           const bodyAndata = {
             routes: [{ departure: stepsA[0], destination: stepsA[1] }],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: addOneDay(this.searchData.departureDate),
+            searchEndDateLOCAL: addDays(this.searchData.departureDate, 1),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
           const bodyRitorno = {
             routes: [{ departure: stepsR[0], destination: stepsR[1] }],
             searchStartDateLOCAL: this.searchData.returnDate,
-            searchEndDateLOCAL: addOneDay(this.searchData.returnDate),
+            searchEndDateLOCAL: addDays(this.searchData.returnDate, 1),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
@@ -197,7 +202,7 @@ export class FlightsDisplayComponent {
                   { departure: stepsA[1], destination: stepsA[2] }
                 ],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: addOneDay(this.searchData.departureDate),
+            searchEndDateLOCAL: addDays(this.searchData.departureDate, 1),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
@@ -209,7 +214,7 @@ export class FlightsDisplayComponent {
                   { departure: stepsR[1], destination: stepsR[2] }
                 ],
             searchStartDateLOCAL: this.searchData.returnDate,
-            searchEndDateLOCAL: addOneDay(this.searchData.returnDate),
+            searchEndDateLOCAL: addDays(this.searchData.returnDate, 1),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
@@ -237,7 +242,6 @@ export class FlightsDisplayComponent {
   }
 
   onHoverRoute(flight: any) {
-    console.log('Hover su flight:', flight);
     // Estrai gli aeroporti dalla struttura del volo
     const airports = this.extractAirportsFromFlight(flight);
     if (airports && this.mapRouting) {
