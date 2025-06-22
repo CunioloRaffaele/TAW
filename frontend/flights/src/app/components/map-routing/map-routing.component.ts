@@ -33,7 +33,7 @@ export class MapRoutingComponent implements AfterViewInit {
     this.map.on('drag', () => {
       this.map.panInsideBounds(bounds, { animate: false });
     });
-    this.map.options.minZoom = 2;
+    this.map.options.minZoom = 3;
   }
 
   displayRoute(airports: Array<{ lat: number, lan: number, name: string, city: string, country: string }>): void {
