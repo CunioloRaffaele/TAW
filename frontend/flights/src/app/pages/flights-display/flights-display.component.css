@@ -2,17 +2,12 @@
   display: flex;
   flex-direction: row;
   gap: 32px;
-  height: 70vh;
+  height: 100%;
   min-height: 400px;
 }
 
 .flight-map-col {
   flex: 1 1 40%;
-  min-width: 320px;
-  max-width: 600px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
 }
 
 .flight-cards-col {
