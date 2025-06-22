@@ -549,6 +549,25 @@ exports.listFlights = async (req, res) => {
             });
         }
 
+        // validate if routes are present in routes table
+        const validRoutes = await prisma.routes.findMany({
+            where: {
+                OR: routes.map(route => ({
+                    departure: parseInt(route.departure, 10),
+                    destination: parseInt(route.destination, 10)
+                }))
+            },
+            select: {
+                departure: true,
+                destination: true
+            }
+        });
+        if (validRoutes.length !== routes.length) {
+            return res.status(400).json({ 
+                error: 'One or more routes are invalid or do not exist' 
+            });
+        }
+
         // Validate date formats
         const startDate = new Date(searchStartDateLOCAL).toISOString();
         const endDate = new Date(searchEndDateLOCAL).toISOString();
