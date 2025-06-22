@@ -718,3 +718,102 @@ exports.deleteTicket = async (req, res) => {
         });
     }
 }
+
+exports.routesStats = async (req, res) => {
+    const user = req.userToken;
+
+    try {
+        // Get the list of routes the airline is enrolled in
+        const routes = await prisma.uses.findMany({
+            where: {
+                airline_name: user.airlineName
+            },
+            select: {
+                route_departure: true,
+                route_destination: true
+            }
+        });
+
+        if (routes.length === 0) {
+            return res.status(404).json({ 
+                error: 'No routes found for this airline' 
+            });
+        }
+
+        // Prepare the stats object
+        const stats = {};
+
+        // First, get the max bookingsCount among all routes for trend calculation
+        let maxBookings = 0;
+        const bookingsCounts = [];
+
+        // Gather all bookingsCount first
+        for (const route of routes) {
+            const bookingsCount = await prisma.bookings.count({
+                where: {
+                    tickets: {
+                        flights: {
+                            route_departure: route.route_departure,
+                            route_destination: route.route_destination,
+                            airline_name: user.airlineName
+                        }
+                    }
+                }
+            });
+            bookingsCounts.push(bookingsCount);
+            if (bookingsCount > maxBookings) maxBookings = bookingsCount;
+        }
+
+        // For each route, get the number of flights, tickets sold, bookings, and trend percentage
+        for (let i = 0; i < routes.length; i++) {
+            const { route_departure, route_destination } = routes[i];
+
+            // Count flights for this route
+            const flightCount = await prisma.flights.count({
+                where: {
+                    route_departure: route_departure,
+                    route_destination: route_destination,
+                    airline_name: user.airlineName
+                }
+            });
+
+            // Count tickets sold for this route
+            const ticketCount = await prisma.tickets.count({
+                where: {
+                    flights: {
+                        route_departure: route_departure,
+                        route_destination: route_destination,
+                        airline_name: user.airlineName
+                    }
+                }
+            });
+
+            // Bookings count already calculated
+            const bookingsCount = bookingsCounts[i];
+
+            // Calculate trend percentage (relative to the max bookingsCount)
+            let trend = 0;
+            if (maxBookings > 0) {
+                trend = Math.round((bookingsCount / maxBookings) * 100);
+            }
+
+            // Add to stats object
+            stats[`${route_departure}-${route_destination}`] = {
+                flightCount,
+                ticketCount,
+                bookingsCount,
+                trendPercentage: trend // 0-100, relative to the most booked route
+            };
+        }
+
+        res.status(200).json({
+            message: 'Routes stats retrieved successfully',
+            stats: stats
+        });
+    } catch (error) {
+        console.error('Error retrieving routes stats:', error);
+        res.status(500).json({ 
+            error: 'Internal server error while retrieving routes stats' 
+        });
+    }
+}

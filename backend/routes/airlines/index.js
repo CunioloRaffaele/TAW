@@ -19,5 +19,5 @@ airlineRouter.get   ('/flights', authMiddleware, checkAirlineEnrolled, controlle
 airlineRouter.get   ('/flights/pending', authMiddleware, checkAirlineEnrolled, controller.listActiveFlights);
 airlineRouter.post  ('/tickets', validateJsonRequest, authMiddleware, checkAirlineEnrolled, controller.createTicket);
 airlineRouter.delete('/tickets/:ticketUUID', authMiddleware, checkAirlineEnrolled, controller.deleteTicket);
-
+airlineRouter.get   ('/stats/routes', authMiddleware, checkAirlineEnrolled, controller.routesStats);
 module.exports = airlineRouter;
