@@ -5,7 +5,6 @@ import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FlightListComponent } from '../../components/flight-list/flight-list.component';
 import { MapRoutingComponent } from '../../components/map-routing/map-routing.component';
-import { MapComponent } from "../../components/map/map.component";
 
 @Component({
   selector: 'app-flights-display',
@@ -14,8 +13,7 @@ import { MapComponent } from "../../components/map/map.component";
     CommonModule,
     HttpClientModule,
     FlightListComponent,
-    MapRoutingComponent,
-    MapComponent
+    MapRoutingComponent
 ],
   templateUrl: './flights-display.component.html',
   styleUrls: ['./flights-display.component.css']
