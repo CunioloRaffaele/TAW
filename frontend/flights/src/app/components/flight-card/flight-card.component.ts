@@ -4,11 +4,13 @@ import { environment } from '../../../environments/environment';
 import { MatCardModule } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-flight-card',
   standalone: true,
-  imports: [MatCardModule, MatIcon, CommonModule],
+  imports: [MatCardModule, MatIcon, CommonModule, RouterModule, MatButtonModule],
   templateUrl: './flight-card.component.html',
   styleUrls: ['./flight-card.component.css']
 })
@@ -89,14 +91,39 @@ export class FlightCardComponent implements OnInit {
   }
 
   isRoundTrip(): boolean {
-    return Array.isArray(this.flight);
+    // true solo se flight è un array di 2 voli e rappresenta andata+ritorno
+    return Array.isArray(this.flight) &&
+           this.flight.length === 2 &&
+           this.flight[0].routes.airports_routes_departureToairports.id === this.flight[1].routes.airports_routes_destinationToairports.id &&
+           this.flight[0].routes.airports_routes_destinationToairports.id === this.flight[1].routes.airports_routes_departureToairports.id;
   }
 
   isMultiLeg(): boolean {
-    // È multileg solo se flight è un array di almeno 2 voli
-    // e NON è roundtrip (cioè non è andata+ritorno)
+    // true se flight è un array di almeno 2 voli e NON è roundtrip
     return Array.isArray(this.flight) &&
            this.flight.length > 1 &&
            !this.isRoundTrip();
+  }
+
+  getMultiLegTotalMinutes(flight: any[]): number {
+    return flight.reduce((acc, leg) => acc + (leg.duration || 0), 0);
+  }
+
+  getMultiLegDurationString(flight: any[]): string {
+    const total = flight.reduce((acc, leg) => acc + (leg.duration || 0), 0);
+    const hours = Math.floor(total / 60);
+    const minutes = total % 60;
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  }
+
+  isCustomer(): boolean {
+    const token = localStorage.getItem('jwt_token');
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role === 0; 
+    } catch {
+      return false;
+    }
   }
 }

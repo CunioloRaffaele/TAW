@@ -45,13 +45,24 @@
         <ng-container *ngIf="!loadingPrice && priceAndata !== null">€{{ priceAndata }}</ng-container>
         <ng-container *ngIf="!loadingPrice && priceAndata === null && !errorPrice">---</ng-container>
         <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
+        <!-- ...prezzo... -->
+        <button *ngIf="isCustomer()" mat-raised-button color="primary"
+                [routerLink]="['/ticket-booking']"
+                [queryParams]="{ flightId: flight.uuid || (flight[0]?.uuid) }">
+          Acquista
+        </button>
       </div>
     </ng-container>
 
     <!-- Volo andata e ritorno -->
     <ng-template #roundTrip>
       <div class="flight-section">
-        <h4>Andata</h4>
+        <div class="flight-section-header">
+          <h4>Andata</h4>
+          <span class="flight-section-date">
+            {{ flight[0].liftoff_date_LOCAL | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
         <div class="flight-airline">
           <mat-icon class="flight-airline-logo" *ngIf="flight[0].airline_logo">flight</mat-icon>
           <span>{{ flight[0].airline_name }}</span>
@@ -94,7 +105,12 @@
         </div>
       </div>
       <div class="flight-section">
-        <h4>Ritorno</h4>
+        <div class="flight-section-header">
+          <h4>Ritorno</h4>
+          <span class="flight-section-date">
+            {{ flight[1].liftoff_date_LOCAL | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
         <div class="flight-airline">
           <mat-icon class="flight-airline-logo" *ngIf="flight[1].airline_logo">flight</mat-icon>
           <span>{{ flight[1].airline_name }}</span>
@@ -140,10 +156,45 @@
 
     <!-- Volo multi-tratta -->
     <ng-container *ngIf="isMultiLeg(); else singleLeg">
-      <!-- Mostra info per ogni volo della combinazione -->
-      <div *ngFor="let leg of flight; let i = index">
-        <div>Tratta {{i+1}}: {{ leg.routes.airports_routes_departureToairports.name }} → {{ leg.routes.airports_routes_destinationToairports.name }}</div>
-        <!-- Altri dettagli -->
+      <div class="flight-airline">
+        <mat-icon class="flight-airline-logo" *ngIf="flight[0].airline_logo">flight</mat-icon>
+        <span>{{ flight[0].airline_name }}</span>
+      </div>
+      <div class="flight-main">
+        <!-- Partenza -->
+        <div class="flight-time-airport">
+          <div class="flight-time">{{ flight[0].liftoff_date_LOCAL | date:'HH:mm' }}</div>
+          <div class="flight-airport-code">
+            {{ flight[0].routes.airports_routes_departureToairports.name }} ({{ flight[0].routes.airports_routes_departureToairports.city }})
+          </div>
+        </div>
+        <!-- Linea centrale e scalo -->
+        <div class="flight-middle">
+          <div class="flight-duration">
+            {{ getMultiLegDurationString(flight) }}
+          </div>
+          <div class="flight-line">
+            <span class="flight-line-bar"></span>
+            <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
+            <span class="flight-line-bar"></span>
+          </div>
+          <div class="flight-stop">
+            Scalo: {{ flight[0].routes.airports_routes_destinationToairports.name }}
+          </div>
+        </div>
+        <!-- Arrivo -->
+        <div class="flight-time-airport">
+          <div class="flight-time">{{ getLandingDateLocal(flight[flight.length-1]) | date:'HH:mm' }}</div>
+          <div class="flight-airport-code">
+            {{ flight[flight.length-1].routes.airports_routes_destinationToairports.name }} ({{ flight[flight.length-1].routes.airports_routes_destinationToairports.city }})
+          </div>
+        </div>
+      </div>
+      <div class="flight-price">
+        <ng-container *ngIf="loadingPrice">...</ng-container>
+        <ng-container *ngIf="!loadingPrice && priceAndata !== null">€{{ priceAndata }}</ng-container>
+        <ng-container *ngIf="!loadingPrice && priceAndata === null && !errorPrice">---</ng-container>
+        <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
       </div>
     </ng-container>
     <ng-template #singleLeg>
