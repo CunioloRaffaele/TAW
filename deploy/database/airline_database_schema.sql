@@ -350,6 +350,7 @@ INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route
 (240, 5, '2025-06-25 06:00:00', 1, 2, 'FlySafe'),  -- Past flight (Dubai -> Frankfurt)
 (600, 6, '2025-06-26 08:00:00', 2, 1, 'FlySafe'),  -- In-progress flight (Frankfurt -> Dubai)
 (300, 7, '2025-07-01 10:00:00', 3, 9, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
+(300, 7, '2025-07-03 14:00:00', 9, 3, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
 
 -- Emirates flights
 (360, 1, '2025-06-25 05:00:00', 1, 7, 'Emirates'), -- Past flight (Dubai -> New York)
@@ -364,7 +365,8 @@ INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route
 -- Singapore Airlines flights
 (390, 9, '2025-06-24 18:00:00', 3, 1, 'Singapore Airlines'),  -- Past flight (Singapore -> Dubai)
 (630, 10, '2025-06-25 22:00:00', 9, 3, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
-(330, 11, '2025-07-05 09:00:00', 1, 3, 'Singapore Airlines'); -- Future flight (Dubai -> Singapore)
+(630, 10, '2025-08-25 18:00:00', 3, 9, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
+(330, 11, '2025-08-27 09:00:00', 1, 3, 'Singapore Airlines'); -- Future flight (Dubai -> Singapore)
 
 -- 9. Inserimento Tickets (dipende da Flights)
 INSERT INTO Tickets (type, price, fligt_code)
@@ -380,8 +382,8 @@ SELECT 'LUXURY', duration * 4.0, code FROM Flights;
 
 -- 10. Inserimento Trips (dipende da Users)
 INSERT INTO Trips (creation_date, user_id) VALUES
-('2024-05-15 20:20:20', 1),
-('2024-05-16 15:30:00', 2);
+('2025-06-22 10:30:00', 3),  -- Trip 1: con un booking e un extra
+('2025-06-22 11:45:00', 3);  -- Trip 2: con due booking e nessun extra
 
 -- 11. Inserimento Extras (tabella indipendente)
 INSERT INTO Extras (description, price) VALUES
@@ -389,21 +391,102 @@ INSERT INTO Extras (description, price) VALUES
 ('Airport Lounge', 75.00);
 
 -- 12. Inserimento Bookings (dipende da Tickets, Seats, Trips, Extras)
+-- Crea i booking per ciascun trip
+
+
 WITH 
-booking_data1 AS (
-  SELECT code AS c1 FROM Tickets WHERE type = 'ECONOMY' LIMIT 1
+-- Recupera gli ID dei trip appena creati
+trip_ids AS (
+  SELECT id FROM Trips WHERE user_id = 3 ORDER BY creation_date DESC LIMIT 2
 ),
-booking_data2 AS (
-  SELECT code AS c2 FROM Tickets WHERE type = 'BUSINESS' LIMIT 1
+trip1 AS (
+  SELECT id FROM trip_ids ORDER BY id ASC LIMIT 1
 ),
-booking_data AS (
-  SELECT c1 as code, 1 AS seat, 1 AS trip, 1 AS extra FROM booking_data1
-  UNION ALL
-  SELECT c2, 2, 2, 2 FROM booking_data2
+trip2 AS (
+  SELECT id FROM trip_ids ORDER BY id DESC LIMIT 1
+),
+-- Trova un volo Emirates con il suo aereo, un posto e un ticket per il Trip 1
+emirates_flight AS (
+  SELECT f.code, f.aircraft_id
+  FROM Flights f
+  JOIN Aircrafts a ON f.aircraft_id = a.id
+  WHERE f.airline_name = 'Emirates' AND a.owner_name = 'Emirates'
+  LIMIT 1
+),
+emirates_ticket AS (
+  SELECT t.code
+  FROM Tickets t
+  JOIN emirates_flight f ON t.fligt_code = f.code
+  WHERE t.type = 'ECONOMY'
+  LIMIT 1
+),
+emirates_seat AS (
+  SELECT s.id
+  FROM Seats s
+  JOIN emirates_flight f ON s.aircraft_id = f.aircraft_id
+  LIMIT 1
+),
+-- Trova due voli differenti per il Trip 2
+flysafe_flight AS (
+  SELECT f.code, f.aircraft_id
+  FROM Flights f
+  JOIN Aircrafts a ON f.aircraft_id = a.id
+  WHERE f.airline_name = 'FlySafe' AND a.owner_name = 'FlySafe'
+  LIMIT 1
+),
+flysafe_ticket AS (
+  SELECT t.code
+  FROM Tickets t
+  JOIN flysafe_flight f ON t.fligt_code = f.code
+  WHERE t.type = 'BUSINESS'
+  LIMIT 1
+),
+flysafe_seat AS (
+  SELECT s.id
+  FROM Seats s
+  JOIN flysafe_flight f ON s.aircraft_id = f.aircraft_id
+  LIMIT 1
+),
+
+lufthansa_flight AS (
+  SELECT f.code, f.aircraft_id
+  FROM Flights f
+  JOIN Aircrafts a ON f.aircraft_id = a.id
+  WHERE f.airline_name = 'Lufthansa' AND a.owner_name = 'Lufthansa'
+  LIMIT 1
+),
+lufthansa_ticket AS (
+  SELECT t.code
+  FROM Tickets t
+  JOIN lufthansa_flight f ON t.fligt_code = f.code
+  WHERE t.type = 'DELUXE'
+  LIMIT 1
+),
+lufthansa_seat AS (
+  SELECT s.id
+  FROM Seats s
+  JOIN lufthansa_flight f ON s.aircraft_id = f.aircraft_id
+  LIMIT 1
 )
 
+--Inserisci i tre booking
 INSERT INTO Bookings (ticket_code, seat_id, trip_id, extras_id)
-SELECT code, seat, trip, extra FROM booking_data;
+VALUES
+-- Booking 1: per Trip 1, con extra "Extra Baggage" (id = 1)
+((SELECT code FROM emirates_ticket), 
+ (SELECT id FROM emirates_seat), 
+ (SELECT id FROM trip1), 
+ 1),
+-- Booking 2: primo booking per Trip 2
+((SELECT code FROM flysafe_ticket), 
+ (SELECT id FROM flysafe_seat), 
+ (SELECT id FROM trip2), 
+ NULL),
+-- Booking 3: secondo booking per Trip 2
+((SELECT code FROM lufthansa_ticket), 
+ (SELECT id FROM lufthansa_seat), 
+ (SELECT id FROM trip2), 
+ NULL);
 
 -- 13. Inserimento blJWTs (tabella indipendente)
 INSERT INTO blJWTs (jwt) VALUES
