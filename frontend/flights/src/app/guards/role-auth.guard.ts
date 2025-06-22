@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn, ActivatedRouteSnapshot } from '@angular/router';
 
 export const roleAuthGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
-  const token = localStorage.getItem('postmessages_token');
+  const token = localStorage.getItem('jwt_token');
   if (!token) {
     inject(Router).navigate(['/signin']);
     return false;

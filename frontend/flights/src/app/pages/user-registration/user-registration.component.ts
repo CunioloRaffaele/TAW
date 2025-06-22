@@ -68,7 +68,7 @@ export class UserRegistrationComponent {
     ).subscribe({
       next: (res) => {
         // Login automatico
-        localStorage.setItem('postmessages_token', res.token);
+        localStorage.setItem('jwt_token', res.token);
         const role = this.getRoleFromToken(res.token);
         this.loading = false;
         // Redirect in base al ruolo

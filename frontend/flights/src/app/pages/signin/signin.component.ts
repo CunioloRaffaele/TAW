@@ -64,7 +64,7 @@ export class SigninComponent {
       }
     ).subscribe({
       next: (res) => {
-        localStorage.setItem('postmessages_token', res.token);
+        localStorage.setItem('jwt_token', res.token);
         const role = this.getRoleFromToken(res.token);
         this.loading = false;
         if (role === 1) {

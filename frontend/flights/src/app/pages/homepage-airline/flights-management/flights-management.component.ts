@@ -134,7 +134,7 @@ showAddFlight = false;
   }
 
   private getAirlineNameFromToken(): string | null {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -151,7 +151,7 @@ showAddFlight = false;
   loadAircrafts() {
     const airlineName = this.getAirlineNameFromToken();
     this.http.get<any>(`${environment.apiUrl}/api/airlines/aircrafts/${airlineName}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     }).subscribe({
       next: res => {
         this.aircrafts = res.aircrafts ?? [];
@@ -206,7 +206,7 @@ removeFlight(flightUUID: string) {
 
 
     this.http.post<any>(`${environment.apiUrl}/api/navigate/flights`, body, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     }).subscribe({
       next: (res) => {
          this.loadFlights();
@@ -228,7 +228,7 @@ removeFlight(flightUUID: string) {
 
         
 
-        const token = localStorage.getItem('postmessages_token');
+        const token = localStorage.getItem('jwt_token');
         this.http.post<any>(
           `${environment.apiUrl}/api/airlines/tickets`,
           {
@@ -252,7 +252,7 @@ removeFlight(flightUUID: string) {
     this.http.get<{ message: string, flights: any[] }>(
       `${environment.apiUrl}/api/airlines/flights`,
       {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
       }
     ).subscribe({
       next: async res => {

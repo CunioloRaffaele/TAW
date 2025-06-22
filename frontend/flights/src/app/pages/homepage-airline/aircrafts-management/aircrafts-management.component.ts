@@ -70,7 +70,7 @@ export class AircraftsManagementComponent implements OnInit {
       aircraftType,
       capacity
     }, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     }).subscribe({
       next: () => {
         this.loadingAddAircraft = false;
@@ -107,7 +107,7 @@ export class AircraftsManagementComponent implements OnInit {
 
 
   private getAirlineNameFromToken(): string | null {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -120,7 +120,7 @@ export class AircraftsManagementComponent implements OnInit {
   ondeleteAircraft(aircraftId: number) {
     this.loading = true;
     this.http.delete(`${environment.apiUrl}/api/airlines/aircrafts/${aircraftId}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     }).subscribe({
       next: () => {
         this.loadAircrafts();

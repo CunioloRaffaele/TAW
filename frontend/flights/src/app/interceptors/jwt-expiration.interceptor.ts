@@ -5,10 +5,10 @@ import { Observable, throwError } from 'rxjs';
 @Injectable()
 export class JwtExpiryInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     if (token && this.isJwtExpired(token)) {
       alert('Session expired. Please log in again.');
-      localStorage.removeItem('postmessages_token');
+      localStorage.removeItem('jwt_token');
       // Optionally, redirect to login page here
       return throwError(() => new Error('JWT expired'));
     }

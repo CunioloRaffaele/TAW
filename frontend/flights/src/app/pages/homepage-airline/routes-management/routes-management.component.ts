@@ -113,7 +113,7 @@ onCreateRoute() {
     origin: from.id,
     destination: to.id
   }, {
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+    headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
   }).subscribe({
     next: () => {
       this.loadingCreate = false;
@@ -128,7 +128,7 @@ onCreateRoute() {
 }
 
 private getAirlineNameFromToken(): string | null {
-  const token = localStorage.getItem('postmessages_token');
+  const token = localStorage.getItem('jwt_token');
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -149,7 +149,7 @@ private getAirlineNameFromToken(): string | null {
   this.http.get<{ routes: any[] }>(
     `${environment.apiUrl}/api/airlines/routes`,
     {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` },
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` },
       params: { airline: this.airlineName ?? '' }
     }
   ).subscribe({
@@ -167,7 +167,7 @@ private getAirlineNameFromToken(): string | null {
   onDisconnect(routeId: number) {
     this.loading = true;
     this.http.delete(`${environment.apiUrl}/api/airlines/routes/${routeId}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     }).subscribe({
       next: () => this.loadRoutes(),
       error: err => {
@@ -225,7 +225,7 @@ private getAirlineNameFromToken(): string | null {
       departure: from.id,
       destination: to.id
     }, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}` }
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
     }).subscribe({
       next: () => {
         this.loadingAdd = false;

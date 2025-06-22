@@ -51,7 +51,7 @@ export class AirlineRegistrationComponent {
     this.copied = false;
 
     // Prendi il token dell'admin dal localStorage
-    const token = localStorage.getItem('postmessages_token') || '';
+    const token = localStorage.getItem('jwt_token') || '';
     const endpoint = `${environment.apiUrl}/api/airlines/invite`;
 
     const airlineName = this.inviteForm.value.name;

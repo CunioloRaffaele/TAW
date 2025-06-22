@@ -52,7 +52,7 @@ export class AirlineLoginComponent {
     ).subscribe({
       next: (res) => {
         // Salva il token dove preferisci (localStorage/sessionStorage)
-        localStorage.setItem('postmessages_token', res.token);
+        localStorage.setItem('jwt_token', res.token);
         this.loading = false;
         // Reindirizza alla dashboard airline o mostra messaggio di successo
         this.router.navigate(['/homepage-airline']);

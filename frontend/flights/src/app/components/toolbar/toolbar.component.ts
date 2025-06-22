@@ -25,11 +25,11 @@ export class ToolbarComponent {
   constructor(public router: Router) {}
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('postmessages_token');
+    return !!localStorage.getItem('jwt_token');
   }
 
   getUserName(): string | null {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -43,7 +43,7 @@ export class ToolbarComponent {
   }
 
   getRoleFromToken(): number | null {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     if (!token) return null;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
@@ -54,7 +54,7 @@ export class ToolbarComponent {
   }
 
   logout() {
-    localStorage.removeItem('postmessages_token');
+    localStorage.removeItem('jwt_token');
     this.router.navigate(['/']).then(() => window.location.reload());
   }
 
@@ -66,7 +66,7 @@ export class ToolbarComponent {
   }
 
   goToProfile() {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     if (!token) {
       this.router.navigate(['/signin']);
       return;
@@ -82,7 +82,7 @@ export class ToolbarComponent {
   }
 
   isAirline(): boolean {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     if (!token) return false;
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));

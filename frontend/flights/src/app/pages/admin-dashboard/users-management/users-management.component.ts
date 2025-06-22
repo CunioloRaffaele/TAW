@@ -60,7 +60,7 @@ export class UsersManagementComponent implements OnInit {
 
     // Assicuriamoci di inviare l'Authorization header
     const headers = {
-      'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}`
+      'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
     };
 
     this.http.get<{ users: User[] }>(`${environment.apiUrl}/api/users/accounts`, { headers }).subscribe({
@@ -81,7 +81,7 @@ export class UsersManagementComponent implements OnInit {
   deleteUser(userId: number): void {
     this.loading = true;
     const headers = {
-      'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}`
+      'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
     };
 
     this.http.delete<{ message: string }>(`${environment.apiUrl}/api/users/accounts/${userId}`, { headers })

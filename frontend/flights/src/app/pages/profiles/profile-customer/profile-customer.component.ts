@@ -50,7 +50,7 @@ export class ProfileCustomerComponent {
     this.http
       .get<any[]>(`${environment.apiUrl}/api/bookings/trips`,{
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}`
+          'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
         }
       })
       .subscribe({
@@ -65,7 +65,7 @@ export class ProfileCustomerComponent {
           const tripRequests = this.tripsId.map(tripId => 
             this.http.get<any>(`${environment.apiUrl}/api/bookings/trips/${tripId}`, {
               headers: {
-                'Authorization': `Bearer ${localStorage.getItem('postmessages_token')}`
+                'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
               }
             })
           );

@@ -20,7 +20,7 @@ export class AirlineFlightCardComponent {
   onDeleteFlight() {
     const flightUUID = this.flight()?.code;
     if (!flightUUID) return;
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     this.http.delete(`${environment.apiUrl}/api/navigate/flights/${flightUUID}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     }).subscribe({

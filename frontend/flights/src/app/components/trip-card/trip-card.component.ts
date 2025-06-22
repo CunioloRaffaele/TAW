@@ -47,7 +47,7 @@ export class TripCardComponent {
   }
 
   downloadBooking(bookingId: number) {
-    const token = localStorage.getItem('postmessages_token');
+    const token = localStorage.getItem('jwt_token');
     this.http
       .get(`${environment.apiUrl}/api/bookings/booking/${bookingId}/download`, {
         headers: { Authorization: `Bearer ${token}` },
