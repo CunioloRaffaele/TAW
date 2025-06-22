@@ -1,16 +1,29 @@
 <h2>Risultati ricerca voli</h2>
 <div class="flight-display-flex">
   <div class="flight-map-col">
-    <app-map-routing></app-map-routing>
+    <app-map-routing #mapRouting></app-map-routing>
   </div>
   <div class="flight-cards-col">
     <div *ngIf="loading">Caricamento voli...</div>
-    <div *ngIf="error">{{ error }}</div>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
     <ng-container *ngIf="!loading && !error">
       <ng-container *ngIf="flights.length === 0">
-        Nessun volo trovato.
+        <div class="no-flights-message">
+          Nessun volo trovato per la tratta selezionata.
+          <ng-container *ngIf="searchData?.directOnly">
+            <br>
+            <span style="font-size:0.95em;color:#1976d2;">
+              Prova a deselezionare "Solo voli diretti" per vedere anche i voli con scalo.
+            </span>
+          </ng-container>
+        </div>
       </ng-container>
-      <app-flight-list *ngIf="flights.length > 0" [flights]="flights"></app-flight-list>
+      <app-flight-list
+        *ngIf="flights.length > 0"
+        [flights]="flights"
+        (hoverRoute)="onHoverRoute($event)"
+        (leaveRoute)="onLeaveRoute()"
+      ></app-flight-list>
     </ng-container>
   </div>
 </div>

@@ -14,7 +14,8 @@ import { CommonModule } from '@angular/common';
 })
 export class FlightCardComponent implements OnInit {
   @Input() flight: any;
-  price: number | null = null;
+  priceAndata: number | null = null;
+  priceRitorno: number | null = null;
   loadingPrice = false;
   errorPrice: string | null = null;
 
@@ -22,23 +23,20 @@ export class FlightCardComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.isRoundTrip()) {
-      // Per roundtrip, mostra solo il prezzo totale (somma dei due voli)
-      this.price = null;
+      this.priceAndata = null;
+      this.priceRitorno = null;
       this.loadingPrice = true;
       this.errorPrice = null;
       Promise.all([
         this.fetchPricePromise(this.flight[0].code),
         this.fetchPricePromise(this.flight[1].code)
       ]).then(([priceAndata, priceRitorno]) => {
-        if (priceAndata !== null && priceRitorno !== null) {
-          this.price = priceAndata + priceRitorno;
-        } else {
-          this.price = null;
-          this.errorPrice = 'Prezzo non disponibile';
-        }
+        this.priceAndata = priceAndata;
+        this.priceRitorno = priceRitorno;
         this.loadingPrice = false;
       }).catch(() => {
-        this.price = null;
+        this.priceAndata = null;
+        this.priceRitorno = null;
         this.errorPrice = 'Errore prezzo';
         this.loadingPrice = false;
       });
@@ -54,11 +52,11 @@ export class FlightCardComponent implements OnInit {
         // Adatta questa parte in base alla struttura della risposta!
         // Esempio: res.tickets[0].price
         if (Array.isArray(res) && res.length > 0 && res[0].price) {
-          this.price = res[0].price;
+          this.priceAndata = res[0].price;
         } else if (res.tickets && res.tickets.length > 0 && res.tickets[0].price) {
-          this.price = res.tickets[0].price;
+          this.priceAndata = res.tickets[0].price;
         } else {
-          this.price = null;
+          this.priceAndata = null;
         }
         this.loadingPrice = false;
       },
@@ -92,5 +90,13 @@ export class FlightCardComponent implements OnInit {
 
   isRoundTrip(): boolean {
     return Array.isArray(this.flight);
+  }
+
+  isMultiLeg(): boolean {
+    // È multileg solo se flight è un array di almeno 2 voli
+    // e NON è roundtrip (cioè non è andata+ritorno)
+    return Array.isArray(this.flight) &&
+           this.flight.length > 1 &&
+           !this.isRoundTrip();
   }
 }

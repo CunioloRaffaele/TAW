@@ -2,5 +2,10 @@
   Nessun volo trovato.
 </div>
 <div *ngIf="flights.length > 0">
-  <app-flight-card *ngFor="let flight of flights" [flight]="flight"></app-flight-card>
+  <app-flight-card
+    *ngFor="let flight of flights"
+    [flight]="flight"
+    (mouseenter)="hoverRoute.emit(flight)"
+    (mouseleave)="leaveRoute.emit()"
+  ></app-flight-card>
 </div>

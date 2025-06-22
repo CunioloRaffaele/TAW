@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -19,6 +19,8 @@ import { MapRoutingComponent } from '../../components/map-routing/map-routing.co
   styleUrls: ['./flights-display.component.css']
 })
 export class FlightsDisplayComponent {
+  @ViewChild('mapRouting') mapRouting!: MapRoutingComponent;
+
   flights: any[] = [];
   loading = false;
   error: string | null = null;
@@ -39,44 +41,90 @@ export class FlightsDisplayComponent {
     }
   }
 
-  loadFlights() {
+  async loadFlights() {
     this.loading = true;
     this.error = null;
 
-    const body = {
-      routes: [{
-        departure: this.searchData.from,
-        destination: this.searchData.to
-      }],
-      searchStartDateLOCAL: this.searchData.departureDate,
-      searchEndDateLOCAL: this.searchData.returnDate || this.searchData.departureDate,
-      passengers: this.searchData.passengers,
-      classType: this.searchData.classType
-    };
+    try {
+      // 1. Chiedi la rotta
+      const pathRes = await this.http.get<any>(
+        `${environment.apiUrl}/api/navigate/routes/path?from=${this.searchData.from}&to=${this.searchData.to}`
+      ).toPromise();
 
-    this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body)
-      .subscribe({
-        next: (res) => {
-          console.log('Risposta voli:', res.flights);
+      if (!pathRes || !pathRes.steps || !Array.isArray(pathRes.steps)) {
+        this.error = 'Nessun percorso trovato tra questi aeroporti';
+        this.flights = [];
+        this.loading = false;
+        return;
+      }
 
-          // Se roundtrip e ci sono due voli, raggruppali in un array
-          if (this.searchData.tripType === 'roundtrip' && res.flights.length === 2) {
-            this.flights = [ [res.flights[0], res.flights[1]] ];
-          } else {
-            this.flights = res.flights || [];
-          }
+      const steps = pathRes.steps;
+      const stepsCount = pathRes.stepsCount;
 
-          this.loading = false;
-        },
-        error: (err) => {
-          this.error = 'Errore nel caricamento dei voli';
-          this.loading = false;
+      if (this.searchData.directOnly) {
+        // SOLO voli diretti (stepsCount === 2)
+        if (stepsCount === 2) {
+          const body = {
+            routes: [{
+              departure: steps[0],
+              destination: steps[1]
+            }],
+            searchStartDateLOCAL: this.searchData.departureDate,
+            searchEndDateLOCAL: this.searchData.returnDate || this.searchData.departureDate,
+            passengers: this.searchData.passengers,
+            classType: this.searchData.classType
+          };
+          const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
+          console.log('Risposta voli:', this.searchData);
+          this.flights = res.flights || [];
+        } else {
+          // Se non è diretto, non mostrare nulla
+          this.flights = [];
+          this.error = 'Nessun volo diretto disponibile per questa tratta';
         }
-      });
+      } else {
+        // Mostra voli diretti (stepsCount === 2) e con uno scalo (stepsCount === 3)
+        if (stepsCount === 2) {
+          const body = {
+            routes: [{
+              departure: steps[0],
+              destination: steps[1]
+            }],
+            searchStartDateLOCAL: this.searchData.departureDate,
+            searchEndDateLOCAL: this.searchData.returnDate || this.searchData.departureDate,
+            passengers: this.searchData.passengers,
+            classType: this.searchData.classType
+          };
+          const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
+          this.flights = res.flights || [];
+        } else if (stepsCount === 3) {
+          const body = {
+            routes: [
+              { departure: steps[0], destination: steps[1] },
+              { departure: steps[1], destination: steps[2] }
+            ],
+            searchStartDateLOCAL: this.searchData.departureDate,
+            searchEndDateLOCAL: this.searchData.returnDate || this.searchData.departureDate,
+            passengers: this.searchData.passengers,
+            classType: this.searchData.classType
+          };
+          const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
+          this.flights = res.flights || [];
+        } else {
+          // Più di uno scalo: non mostrare voli
+          this.flights = [];
+          this.error = 'Nessun volo disponibile con massimo uno scalo';
+        }
+      }
+    } catch (err) {
+      this.error = 'Errore nel caricamento dei voli';
+      this.flights = [];
+    } finally {
+      this.loading = false;
+    }
   }
 
   async loadRoundTripFlights() {
-    console.log('Chiamo loadRoundTripFlights con:', this.searchData);
     this.loading = true;
     this.error = null;
 
@@ -86,41 +134,164 @@ export class FlightsDisplayComponent {
       return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')} 00:00:00`;
     };
 
-    // Richiesta andata
-    const bodyAndata = {
-      routes: [{ departure: this.searchData.from, destination: this.searchData.to }],
-      searchStartDateLOCAL: this.searchData.departureDate,
-      searchEndDateLOCAL: addOneDay(this.searchData.departureDate),
-      passengers: this.searchData.passengers,
-      classType: this.searchData.classType
-    };
-
-    // Richiesta ritorno
-    const bodyRitorno = {
-      routes: [{ departure: this.searchData.to, destination: this.searchData.from }],
-      searchStartDateLOCAL: this.searchData.returnDate,
-      searchEndDateLOCAL: addOneDay(this.searchData.returnDate),
-      passengers: this.searchData.passengers,
-      classType: this.searchData.classType
-    };
-
     try {
-      const [andataRes, ritornoRes] = await Promise.all([
-        this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyAndata).toPromise(),
-        this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyRitorno).toPromise()
-      ]);
+      // 1. Chiedi la rotta per l'andata
+      const pathAndata = await this.http.get<any>(
+        `${environment.apiUrl}/api/navigate/routes/path?from=${this.searchData.from}&to=${this.searchData.to}`
+      ).toPromise();
 
-      if (andataRes.flights.length > 0 && ritornoRes.flights.length > 0) {
-        // Prendi il primo volo di andata e il primo di ritorno
-        this.flights = [[andataRes.flights[0], ritornoRes.flights[0]]];
+      // 2. Chiedi la rotta per il ritorno
+      const pathRitorno = await this.http.get<any>(
+        `${environment.apiUrl}/api/navigate/routes/path?from=${this.searchData.to}&to=${this.searchData.from}`
+      ).toPromise();
+
+      // Controlli per l'andata
+      const stepsA = pathAndata?.steps;
+      const stepsCountA = pathAndata?.stepsCount;
+      // Controlli per il ritorno
+      const stepsR = pathRitorno?.steps;
+      const stepsCountR = pathRitorno?.stepsCount;
+
+      // Se "solo voli diretti", mostra solo se entrambi sono diretti
+      if (this.searchData.directOnly) {
+        if (stepsCountA === 2 && stepsCountR === 2) {
+          const bodyAndata = {
+            routes: [{ departure: stepsA[0], destination: stepsA[1] }],
+            searchStartDateLOCAL: this.searchData.departureDate,
+            searchEndDateLOCAL: addOneDay(this.searchData.departureDate),
+            passengers: this.searchData.passengers,
+            classType: this.searchData.classType
+          };
+          const bodyRitorno = {
+            routes: [{ departure: stepsR[0], destination: stepsR[1] }],
+            searchStartDateLOCAL: this.searchData.returnDate,
+            searchEndDateLOCAL: addOneDay(this.searchData.returnDate),
+            passengers: this.searchData.passengers,
+            classType: this.searchData.classType
+          };
+          const [andataRes, ritornoRes] = await Promise.all([
+            this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyAndata).toPromise(),
+            this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyRitorno).toPromise()
+          ]);
+          if (andataRes.flights.length > 0 && ritornoRes.flights.length > 0) {
+            this.flights = [[andataRes.flights[0], ritornoRes.flights[0]]];
+          } else {
+            this.flights = [];
+            this.error = 'Nessun volo andata e ritorno disponibile';
+          }
+        } else {
+          this.flights = [];
+          this.error = 'Nessun volo diretto andata e ritorno disponibile';
+        }
       } else {
-        this.flights = [];
-        this.error = 'Nessun volo andata e ritorno disponibile';
+        // Mostra solo se entrambi sono diretti o con uno scalo (stepsCount === 2 o 3)
+        if (
+          (stepsCountA === 2 || stepsCountA === 3) &&
+          (stepsCountR === 2 || stepsCountR === 3)
+        ) {
+          const bodyAndata = {
+            routes: stepsCountA === 2
+              ? [{ departure: stepsA[0], destination: stepsA[1] }]
+              : [
+                  { departure: stepsA[0], destination: stepsA[1] },
+                  { departure: stepsA[1], destination: stepsA[2] }
+                ],
+            searchStartDateLOCAL: this.searchData.departureDate,
+            searchEndDateLOCAL: addOneDay(this.searchData.departureDate),
+            passengers: this.searchData.passengers,
+            classType: this.searchData.classType
+          };
+          const bodyRitorno = {
+            routes: stepsCountR === 2
+              ? [{ departure: stepsR[0], destination: stepsR[1] }]
+              : [
+                  { departure: stepsR[0], destination: stepsR[1] },
+                  { departure: stepsR[1], destination: stepsR[2] }
+                ],
+            searchStartDateLOCAL: this.searchData.returnDate,
+            searchEndDateLOCAL: addOneDay(this.searchData.returnDate),
+            passengers: this.searchData.passengers,
+            classType: this.searchData.classType
+          };
+          const [andataRes, ritornoRes] = await Promise.all([
+            this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyAndata).toPromise(),
+            this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyRitorno).toPromise()
+          ]);
+          if (andataRes.flights.length > 0 && ritornoRes.flights.length > 0) {
+            this.flights = [[andataRes.flights[0], ritornoRes.flights[0]]];
+          } else {
+            this.flights = [];
+            this.error = 'Nessun volo andata e ritorno disponibile';
+          }
+        } else {
+          this.flights = [];
+          this.error = 'Nessun volo disponibile con massimo uno scalo per andata e ritorno';
+        }
       }
     } catch (err) {
       this.error = 'Errore nel caricamento dei voli';
+      this.flights = [];
     } finally {
       this.loading = false;
     }
+  }
+
+  onHoverRoute(flight: any) {
+    console.log('Hover su flight:', flight);
+    // Estrai gli aeroporti dalla struttura del volo
+    const airports = this.extractAirportsFromFlight(flight);
+    if (airports && this.mapRouting) {
+      this.mapRouting.displayRoute(airports);
+    }
+  }
+
+  onLeaveRoute() {
+    if (this.mapRouting) {
+      this.mapRouting.displayRoute([]); // Svuota la mappa o resetta la rotta
+    }
+  }
+
+  extractAirportsFromFlight(flight: any): any[] {
+    // Per voli diretti
+    if (!Array.isArray(flight)) {
+      return [
+        {
+          lat: flight.routes.airports_routes_departureToairports.lat,
+          lan: flight.routes.airports_routes_departureToairports.lan,
+          name: flight.routes.airports_routes_departureToairports.name,
+          city: flight.routes.airports_routes_departureToairports.city,
+          country: flight.routes.airports_routes_departureToairports.country
+        },
+        {
+          lat: flight.routes.airports_routes_destinationToairports.lat,
+          lan: flight.routes.airports_routes_destinationToairports.lan,
+          name: flight.routes.airports_routes_destinationToairports.name,
+          city: flight.routes.airports_routes_destinationToairports.city,
+          country: flight.routes.airports_routes_destinationToairports.country
+        }
+      ];
+    }
+    // Per voli multileg
+    const airports = [];
+    for (let i = 0; i < flight.length; i++) {
+      const leg = flight[i];
+      if (i === 0) {
+        airports.push({
+          lat: leg.routes.airports_routes_departureToairports.lat,
+          lan: leg.routes.airports_routes_departureToairports.lan,
+          name: leg.routes.airports_routes_departureToairports.name,
+          city: leg.routes.airports_routes_departureToairports.city,
+          country: leg.routes.airports_routes_departureToairports.country
+        });
+      }
+      airports.push({
+        lat: leg.routes.airports_routes_destinationToairports.lat,
+        lan: leg.routes.airports_routes_destinationToairports.lan,
+        name: leg.routes.airports_routes_destinationToairports.name,
+        city: leg.routes.airports_routes_destinationToairports.city,
+        country: leg.routes.airports_routes_destinationToairports.country
+      });
+    }
+    return airports;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FlightCardComponent } from '../flight-card/flight-card.component';
 import { CommonModule } from '@angular/common';
 
@@ -11,4 +11,6 @@ import { CommonModule } from '@angular/common';
 })
 export class FlightListComponent {
   @Input() flights: any[] = [];
+  @Output() hoverRoute = new EventEmitter<any>();
+  @Output() leaveRoute = new EventEmitter<void>();
 }

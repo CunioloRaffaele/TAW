@@ -11,17 +11,17 @@
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   background: #fff;
-  padding: 0;
+  padding: 12px 16px;
 }
 
 .flight-card-row {
   display: flex;
-  flex-direction: row;
+  flex-direction: column; /* <--- aggiungi questa riga */
   align-items: center;
   justify-content: space-between;
   min-height: 90px;
   padding: 0 18px;
-  gap: 18px;
+  gap: 4px;
 }
 
 .flight-price {
@@ -65,7 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 32px;
+  gap: 10px;
 }
 
 .flight-row {
@@ -81,10 +81,11 @@
   flex-direction: column;
   align-items: center;
   min-width: 60px;
+  margin-bottom: 2px;
 }
 
 .flight-time {
-  font-size: 1.1em;
+  font-size: 0.95em;
   font-weight: 600;
   color: #222;
   line-height: 1.1;
@@ -103,6 +104,7 @@
   flex-direction: column;
   align-items: center;
   min-width: 120px;
+  margin-bottom: 2px;
 }
 
 .flight-duration {
@@ -114,28 +116,47 @@
 .flight-line {
   display: flex;
   align-items: center;
-  justify-content: center;
   width: 100%;
 }
 
 .flight-line-bar {
   display: inline-block;
   height: 2px;
-  width: 32px;
-  background: #1976d2;
-  border-radius: 2px;
+  background: #bbb;
+  flex-grow: 1;
+  margin-right: 4px;
+}
+
+.plane-arrow {
+  transform: rotate(90deg); /* Punta verso destra */
+  color: #1976d2;
+  font-size: 28px;
+  margin-left: 0;
+  margin-right: -8px; /* Avvicina l'aereo alla fine della linea */
 }
 
 .flight-plane {
-  font-size: 1.5em;
+  font-size: 22px !important;
   color: #1976d2;
   margin: 0 6px;
 }
 
 .flight-stop {
-  font-size: 0.93em;
+  font-size: 0.95em;
   color: #666;
   margin-top: 2px;
+}
+
+.flight-section {
+  margin-bottom: 12px;
+  /* opzionale: aggiungi separatore */
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+.flight-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 @media (max-width: 600px) {
@@ -169,4 +190,9 @@
     min-width: 0;
     margin: 0;
   }
+}
+
+h4 {
+  margin: 4px 0 4px 0;
+  font-size: 1.05em;
 }

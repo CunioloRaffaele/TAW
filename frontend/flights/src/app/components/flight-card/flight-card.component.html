@@ -19,7 +19,7 @@
           <div class="flight-duration">{{ (flight.duration/60) | number:'1.0-0' }}h{{ (flight.duration%60) ? ' ' + (flight.duration%60) + 'm' : '' }}</div>
           <div class="flight-line">
             <span class="flight-line-bar"></span>
-            <mat-icon class="flight-plane">flight</mat-icon>
+            <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
             <span class="flight-line-bar"></span>
           </div>
           <div class="flight-stop">
@@ -42,8 +42,8 @@
       <!-- Prezzo -->
       <div class="flight-price">
         <ng-container *ngIf="loadingPrice">...</ng-container>
-        <ng-container *ngIf="!loadingPrice && price !== null">€{{ price }}</ng-container>
-        <ng-container *ngIf="!loadingPrice && price === null && !errorPrice">---</ng-container>
+        <ng-container *ngIf="!loadingPrice && priceAndata !== null">€{{ priceAndata }}</ng-container>
+        <ng-container *ngIf="!loadingPrice && priceAndata === null && !errorPrice">---</ng-container>
         <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
       </div>
     </ng-container>
@@ -67,7 +67,7 @@
             <div class="flight-duration">{{ (flight[0].duration/60) | number:'1.0-0' }}h{{ (flight[0].duration%60) ? ' ' + (flight[0].duration%60) + 'm' : '' }}</div>
             <div class="flight-line">
               <span class="flight-line-bar"></span>
-              <mat-icon class="flight-plane">flight</mat-icon>
+              <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
               <span class="flight-line-bar"></span>
             </div>
             <div class="flight-stop">
@@ -88,8 +88,8 @@
         </div>
         <div class="flight-price">
           <ng-container *ngIf="loadingPrice">...</ng-container>
-          <ng-container *ngIf="!loadingPrice && price !== null">€{{ price }}</ng-container>
-          <ng-container *ngIf="!loadingPrice && price === null && !errorPrice">---</ng-container>
+          <ng-container *ngIf="!loadingPrice && priceAndata !== null">€{{ priceAndata }}</ng-container>
+          <ng-container *ngIf="!loadingPrice && priceAndata === null && !errorPrice">---</ng-container>
           <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
         </div>
       </div>
@@ -110,7 +110,7 @@
             <div class="flight-duration">{{ (flight[1].duration/60) | number:'1.0-0' }}h{{ (flight[1].duration%60) ? ' ' + (flight[1].duration%60) + 'm' : '' }}</div>
             <div class="flight-line">
               <span class="flight-line-bar"></span>
-              <mat-icon class="flight-plane">flight</mat-icon>
+              <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
               <span class="flight-line-bar"></span>
             </div>
             <div class="flight-stop">
@@ -131,11 +131,23 @@
         </div>
         <div class="flight-price">
           <ng-container *ngIf="loadingPrice">...</ng-container>
-          <ng-container *ngIf="!loadingPrice && price !== null">€{{ price }}</ng-container>
-          <ng-container *ngIf="!loadingPrice && price === null && !errorPrice">---</ng-container>
+          <ng-container *ngIf="!loadingPrice && priceRitorno !== null">€{{ priceRitorno }}</ng-container>
+          <ng-container *ngIf="!loadingPrice && priceRitorno === null && !errorPrice">---</ng-container>
           <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
         </div>
       </div>
+    </ng-template>
+
+    <!-- Volo multi-tratta -->
+    <ng-container *ngIf="isMultiLeg(); else singleLeg">
+      <!-- Mostra info per ogni volo della combinazione -->
+      <div *ngFor="let leg of flight; let i = index">
+        <div>Tratta {{i+1}}: {{ leg.routes.airports_routes_departureToairports.name }} → {{ leg.routes.airports_routes_destinationToairports.name }}</div>
+        <!-- Altri dettagli -->
+      </div>
+    </ng-container>
+    <ng-template #singleLeg>
+      <!-- Mostra info per volo diretto -->
     </ng-template>
   </div>
 </mat-card>
