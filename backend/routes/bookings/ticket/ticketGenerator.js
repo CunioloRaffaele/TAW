@@ -1,12 +1,31 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
+const QRCode = require('qrcode');
+
 
 async function generateTicketPDF(ticketData) {
     // Load your HTML template (could use a template engine for dynamic data)
     const templatePath = path.join(__dirname, 'template.html');
 
     let html = fs.readFileSync(templatePath, 'utf8');
+
+    // generate QR code image
+    let qrCodeDataURL;
+    if (ticketData.tickets && ticketData.tickets.code) {
+        try {
+            qrCodeDataURL = await QRCode.toDataURL(ticketData.tickets.code, {
+                errorCorrectionLevel: 'H',
+                type: 'image/png',
+                width: 300,
+                margin: 1,
+            });
+        }
+        catch (error) {
+            console.error('Error generating QR code:', error);
+            throw new Error('Failed to generate QR code');
+        }
+    }
 
     // Replace placeholders with actual ticket data
     html = html.replace(/{{name}}/g, ticketData.trips.users.name)
@@ -20,9 +39,9 @@ async function generateTicketPDF(ticketData) {
                .replace(/{{class}}/g, ticketData.tickets.type)
                .replace(/{{ticket_code}}/g, ticketData.tickets.code)
                .replace(/{{airline}}/g, ticketData.tickets.flights.airline_name)
-               .replace(/{{barcode}}/g, ticketData.tickets.code)
+               .replace(/{{barcodeIMG}}/g, qrCodeDataURL)
                .replace(/{{extras_description}}/g, ticketData.extras ? ticketData.extras.description : '')
-               .replace(/{{extras_price}}/g, ticketData.extras && ticketData.extras.price !== undefined ? ticketData.extras.price + ' €' : '');
+               .replace(/{{extras_price}}/g, ticketData.extras && ticketData.extras.price !== undefined ? ticketData.extras.price + ' €' : 'No extras included');
 
     // Launch Puppeteer and generate PDF
     try {

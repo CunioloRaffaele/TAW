@@ -76,8 +76,8 @@
       margin: 24px auto 0 auto;
       display: block;
       width: 60%;
-      height: 100px;
-      background: url('https://api.qrserver.com/v1/create-qr-code/?size=400x100&data={{barcode}}') no-repeat center/contain;
+      /*height: 100px;*/
+      /*background: url('https://api.qrserver.com/v1/create-qr-code/?size=400x100&data={{barcode}}') no-repeat center/contain;*/
     }
   </style>
 </head>
@@ -125,7 +125,9 @@
         <span class="value">{{extras_description}} {{extras_price}}</span>
       </div>
     </div>
-    <div class="barcode"></div>
+    <div class="barcode">
+      <img class="barcode" src="{{barcodeIMG}}" alt="QR Code" />
+    </div>
     <div class="footer">
       2025 TAW flights UNIVE.<br>
     </div>
