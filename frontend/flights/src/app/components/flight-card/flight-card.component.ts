@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { MatCardModule } from '@angular/material/card';
@@ -14,8 +14,16 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './flight-card.component.html',
   styleUrls: ['./flight-card.component.css']
 })
-export class FlightCardComponent implements OnInit {
+export class FlightCardComponent implements OnInit, OnChanges {
   @Input() flight: any;
+  @Input() set classType(value: string) {
+    this._classType = (value || 'ECONOMY').toUpperCase();
+    console.log('[FlightCard] classType set:', this._classType);
+  }
+  get classType(): string {
+    return this._classType;
+  }
+  private _classType: string = 'ECONOMY'; // Imposta un valore predefinito per classType
   priceAndata: number | null = null;
   priceRitorno: number | null = null;
   loadingPrice = false;
@@ -24,17 +32,31 @@ export class FlightCardComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
+    this.fetchAllPrices();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['classType'] && !changes['classType'].firstChange) {
+      console.log('[FlightCard] ngOnChanges classType:', this.classType);
+      this.fetchAllPrices();
+    }
+  }
+
+  fetchAllPrices() {
+    console.log('[FlightCard] fetchAllPrices, classType:', this.classType, 'flight:', this.flight);
+    this.errorPrice = null;
+    this.loadingPrice = true;
+    // Roundtrip
     if (this.isRoundTrip()) {
       this.priceAndata = null;
       this.priceRitorno = null;
-      this.loadingPrice = true;
-      this.errorPrice = null;
       Promise.all([
-        this.fetchPricePromise(this.flight[0].code),
-        this.fetchPricePromise(this.flight[1].code)
+        this.fetchPricePromise(this.flight[0].code, this.classType),
+        this.fetchPricePromise(this.flight[1].code, this.classType)
       ]).then(([priceAndata, priceRitorno]) => {
         this.priceAndata = priceAndata;
         this.priceRitorno = priceRitorno;
+        console.log('[FlightCard] roundtrip prices:', priceAndata, priceRitorno);
         this.loadingPrice = false;
       }).catch(() => {
         this.priceAndata = null;
@@ -42,24 +64,64 @@ export class FlightCardComponent implements OnInit {
         this.errorPrice = 'Errore prezzo';
         this.loadingPrice = false;
       });
-    } else if (this.flight?.code) {
-      this.fetchPrice(this.flight.code);
+      return;
     }
+    // Multi-leg
+    if (this.isMultiLeg()) {
+      for (const leg of this.flight) {
+        leg.price = null;
+      }
+      Promise.all(
+        this.flight.map((leg: any) =>
+          this.fetchPricePromise(leg.code, this.classType).then(price => {
+            leg.price = price;
+            console.log('[FlightCard] multi-leg leg.code:', leg.code, 'classType:', this.classType, 'price:', price);
+            return price;
+          })
+        )
+      ).then(() => {
+        this.loadingPrice = false;
+      }).catch(() => {
+        this.errorPrice = 'Errore prezzo';
+        this.loadingPrice = false;
+      });
+      return;
+    }
+    // Single leg
+    if (this.flight?.code) {
+      this.priceAndata = null;
+      this.fetchPrice(this.flight.code, this.classType);
+      return;
+    }
+    this.loadingPrice = false;
   }
 
-  fetchPrice(flightUUID: string) {
+  fetchPrice(flightUUID: string, classType: string) {
     this.loadingPrice = true;
-    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`).subscribe({
+    console.log('[FlightCard] fetchPrice', flightUUID, 'classType:', classType);
+    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`).subscribe({
       next: (res) => {
-        // Adatta questa parte in base alla struttura della risposta!
-        // Esempio: res.tickets[0].price
-        if (Array.isArray(res) && res.length > 0 && res[0].price) {
-          this.priceAndata = res[0].price;
-        } else if (res.tickets && res.tickets.length > 0 && res.tickets[0].price) {
-          this.priceAndata = res.tickets[0].price;
+        let prezzo = null;
+        if (Array.isArray(res)) {
+          const found = res.find((t: any) => (t.type || '').toUpperCase() === classType.toUpperCase());
+          if (found && found.price) {
+            prezzo = found.price;
+            this.priceAndata = prezzo;
+          } else {
+            this.priceAndata = null;
+          }
+        } else if (res.tickets && Array.isArray(res.tickets)) {
+          const found = res.tickets.find((t: any) => (t.type || '').toUpperCase() === classType.toUpperCase());
+          if (found && found.price) {
+            prezzo = found.price;
+            this.priceAndata = prezzo;
+          } else {
+            this.priceAndata = null;
+          }
         } else {
           this.priceAndata = null;
         }
+        console.log('[FlightCard] fetchPrice result', flightUUID, 'classType:', classType, 'price:', prezzo);
         this.loadingPrice = false;
       },
       error: () => {
@@ -69,17 +131,25 @@ export class FlightCardComponent implements OnInit {
     });
   }
 
-  fetchPricePromise(flightUUID: string): Promise<number | null> {
-    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`)
+  fetchPricePromise(flightUUID: string, classType: string): Promise<number | null> {
+    console.log('[FlightCard] fetchPricePromise', flightUUID, 'classType:', classType);
+    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`)
       .toPromise()
       .then(res => {
-        if (Array.isArray(res) && res.length > 0 && res[0].price) {
-          return res[0].price;
-        } else if (res.tickets && res.tickets.length > 0 && res.tickets[0].price) {
-          return res.tickets[0].price;
-        } else {
-          return null;
+        let prezzo = null;
+        if (Array.isArray(res)) {
+          const found = res.find((t: any) => (t.type || '').toUpperCase() === classType.toUpperCase());
+          if (found && found.price) {
+            prezzo = found.price;
+          }
+        } else if (res.tickets && Array.isArray(res.tickets)) {
+          const found = res.tickets.find((t: any) => (t.type || '').toUpperCase() === classType.toUpperCase());
+          if (found && found.price) {
+            prezzo = found.price;
+          }
         }
+        console.log('[FlightCard] fetchPricePromise result', flightUUID, 'classType:', classType, 'price:', prezzo);
+        return prezzo;
       })
       .catch(() => null);
   }
@@ -126,4 +196,16 @@ export class FlightCardComponent implements OnInit {
       return false;
     }
   }
+
+  getMultiLegTotalPrice(): number | null {
+    if (!Array.isArray(this.flight)) return null;
+    let total = 0;
+    for (const leg of this.flight) {
+      if (leg.price == null) return null;
+      total += leg.price;
+    }
+    return total;
+  }
+
+  
 }

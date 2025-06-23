@@ -26,12 +26,11 @@ export class FlightsDisplayComponent {
   error: string | null = null;
   searchData: any;
 
-  constructor(private http: HttpClient, private router: Router) {
-    const nav = this.router.getCurrentNavigation();
-    this.searchData = nav?.extras?.state?.['searchData'];
-  }
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit() {
+    this.searchData = history.state.searchData;
+
     if (this.searchData) {
       if (this.searchData.tripType === 'roundtrip') {
         this.loadRoundTripFlights();

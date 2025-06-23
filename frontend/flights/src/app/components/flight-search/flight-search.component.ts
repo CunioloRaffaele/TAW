@@ -38,7 +38,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 })
 export class FlightSearchComponent {
   searchForm: FormGroup;
-  classes = ['Economy', 'Business', 'First'];
+  classes = ['BASE', 'ECONOMY', 'BUSINESS', 'DELUXE', 'LUXURY'];
   travelers = [1, 2, 3, 4, 5, 6, 7, 8];
 
   filteredFromAirports: Observable<any[]> = of([]);
@@ -51,11 +51,11 @@ export class FlightSearchComponent {
     this.searchForm = this.fb.group({
       from: ['', Validators.required],
       to: ['', Validators.required],
-      tripType: ['oneway', Validators.required], // default: solo andata
+      tripType: ['oneway', Validators.required], 
       departureDate: ['', Validators.required],
       returnDate: [''],
       travelers: [1, Validators.required],
-      travelClass: ['Economy', Validators.required],
+      travelClass: ['ECONOMY', Validators.required],
       directOnly: [false] 
     });
 

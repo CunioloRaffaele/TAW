@@ -21,6 +21,7 @@
       <app-flight-list
         *ngIf="flights.length > 0"
         [flights]="flights"
+        [classType]="searchData?.classType"
         (hoverRoute)="onHoverRoute($event)"
         (leaveRoute)="onLeaveRoute()"
       ></app-flight-list>

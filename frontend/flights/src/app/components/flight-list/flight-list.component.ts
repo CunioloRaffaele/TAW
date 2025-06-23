@@ -13,4 +13,5 @@ export class FlightListComponent {
   @Input() flights: any[] = [];
   @Output() hoverRoute = new EventEmitter<any>();
   @Output() leaveRoute = new EventEmitter<void>();
+  @Input() classType: string = 'ECONOMY';
 }

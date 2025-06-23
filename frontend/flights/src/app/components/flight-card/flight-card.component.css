@@ -24,14 +24,133 @@
   gap: 32px; 
 }
 
-.flight-price {
-  min-width: 90px;
+.flight-main-vertical {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  width: 100%;
+  align-items: center;
+}
+
+.flight-segments-col {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flight-prices-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center; /* centra verticalmente il prezzo totale */
+  flex: 0 0 auto;
+  min-width: 70px;
+  margin-left: 8px;
+  gap: 0;
+  margin-top: 0;
+  height: 100%; /* assicura l'allineamento verticale */
+}
+
+.flight-segment-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  min-height: 56px;
+  position: relative;
+}
+
+.flight-airline.left {
+  min-width: 120px;
+  max-width: 160px;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
-  font-size: 1.25em;
+  justify-content: flex-start;
+  padding-right: 8px;
+  margin-bottom: 0;
+  height: 100%;
+}
+
+.flight-segment-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+}
+
+.flight-segment-row-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0;
+}
+
+.flight-time-airport {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+  margin-bottom: 2px;
+}
+
+.flight-time-airport.left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.flight-time-airport.right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.flight-middle {
+  min-width: 120px;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flight-main {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 16px;
+}
+
+.flight-main-flex {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.flight-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.flight-price {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end; /* allinea il prezzo a destra nella colonna */
+  gap: 12px;
+  font-size: 1.35em;
   font-weight: 700;
   color: #1976d2;
 }
@@ -64,49 +183,6 @@
   color: #1976d2;
 }
 
-.flight-main {
-  flex: 1;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 0 16px;
-}
-
-.flight-time-airport,
-.flight-middle {
-  min-width: 120px;
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.flight-main-flex {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.flight-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-  justify-content: center;
-}
-
-.flight-time-airport {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 60px;
-  margin-bottom: 2px;
-}
-
 .flight-time {
   font-size: 0.95em;
   font-weight: 600;
@@ -120,14 +196,6 @@
   font-weight: 500;
   letter-spacing: 1px;
   line-height: 1.1;
-}
-
-.flight-middle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 120px;
-  margin-bottom: 2px;
 }
 
 .flight-duration {
@@ -183,6 +251,26 @@
   color: #555;
   font-weight: 400;
   margin-left: 12px;
+}
+
+.flight-segment-price.right {
+  display: none !important; /* nasconde eventuali prezzi segmentati */
+}
+
+/* Migliora la responsività per mobile */
+@media (max-width: 700px) {
+  .flight-prices-col {
+    align-items: stretch;
+    min-width: 0;
+    margin-left: 0;
+    margin-top: 12px;
+    height: auto;
+  }
+  .flight-price {
+    justify-content: flex-end;
+    min-width: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 600px) {
