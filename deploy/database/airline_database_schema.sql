@@ -268,6 +268,10 @@ INSERT INTO Routes (departure, destination) VALUES
 (5, 6), -- Parigi -> Londra
 (1, 7),   -- Dubai -> New York JFK
 (7, 8),   -- New York JFK -> Los Angeles LAX
+(8, 7),
+(7, 1),
+(8, 5),
+(5, 1),
 (8, 9),   -- Los Angeles LAX -> Tokyo Haneda
 (9, 10),  -- Tokyo Haneda -> Sydney Kingsford Smith
 (10, 11), -- Sydney -> Madrid Barajas
@@ -311,6 +315,8 @@ INSERT INTO Uses (airline_name, route_departure, route_destination) VALUES
 ('FlySafe', 3, 1),
 ('FlySafe', 3, 9),
 ('FlySafe', 9, 3),
+('FlySafe', 8, 5),
+('FlySafe', 5, 1),
 ('Emirates', 1, 7),   -- Dubai -> New York JFK
 ('Emirates', 7, 8),   -- New York JFK -> Los Angeles LAX
 ('Emirates', 8, 9),   -- Los Angeles LAX -> Tokyo Haneda
@@ -326,6 +332,8 @@ INSERT INTO Uses (airline_name, route_departure, route_destination) VALUES
 ('Singapore Airlines', 9, 3),  -- Tokyo Haneda -> Singapore
 ('Singapore Airlines', 1, 3),  -- Dubai -> Singapore
 ('Singapore Airlines', 3, 1);  -- Singapore -> Dubai
+('Singapore Airlines', 8, 7);
+('Singapore Airlines', 7, 1); 
 
 -- 6. Inserimento Seats (dipende da Aircrafts)
 /*
