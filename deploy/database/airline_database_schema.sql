@@ -376,7 +376,7 @@ INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route
 (390, 9, '2025-06-24 18:00:00', 3, 1, 'Singapore Airlines'),  -- Past flight (Singapore -> Dubai)
 (630, 10, '2025-06-25 22:00:00', 9, 3, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
 (630, 10, '2025-08-25 18:00:00', 3, 9, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
-(330, 11, '2025-08-27 09:00:00', 1, 3, 'Singapore Airlines'); -- Future flight (Dubai -> Singapore)
+(330, 11, '2025-08-27 09:00:00', 1, 3, 'Singapore Airlines'), -- Future flight (Dubai -> Singapore)
 (630, 10, '2025-08-27 18:00:00', 8, 7, 'Singapore Airlines'), 
 (330, 11, '2025-08-29 09:00:00', 7, 1, 'Singapore Airlines'); 
 
