@@ -27,7 +27,8 @@
       </div>
       <div>
         <button mat-stroked-button color="primary" (click)="downloadBooking(booking.id)">
-          <mat-icon>download</mat-icon>
+          <mat-icon *ngIf="downloadingId !== booking.id">download</mat-icon>
+          <span *ngIf="downloadingId === booking.id">Caricamento...</span>
           Scarica dettagli
         </button>
       </div>
@@ -39,3 +40,9 @@
     </div>
   </mat-card-content>
 </mat-card>
+<div class="fullscreen-loading" *ngIf="downloadingId !== null">
+  <div class="fullscreen-loading-content">
+    <img src="assets/Loading_icon.gif" alt="Loading..." />
+    <div>Download in corso...</div>
+  </div>
+</div>

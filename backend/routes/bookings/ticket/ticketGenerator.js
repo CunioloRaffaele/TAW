@@ -4,6 +4,13 @@ const path = require('path');
 const QRCode = require('qrcode');
 
 
+let browserPromise = puppeteer.launch({
+    headless: true,
+    executablePath: '/usr/bin/chromium-browser',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
+
+
 async function generateTicketPDF(ticketData) {
     // Load your HTML template (could use a template engine for dynamic data)
     const templatePath = path.join(__dirname, 'template.html');
@@ -45,30 +52,19 @@ async function generateTicketPDF(ticketData) {
 
     // Launch Puppeteer and generate PDF
     try {
-        const chromiumPath = fs.existsSync('/usr/bin/chromium-browser')
-            ? '/usr/bin/chromium-browser'
-            : '/usr/bin/chromium';
-
-        const browser = await puppeteer.launch({
-            headless: true,
-            executablePath: chromiumPath,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        const browser = await browserPromise; // Reuse the same browser
         const page = await browser.newPage();
         await page.setContent(html, {
             timeout: 0,
             waitUntil: 'domcontentloaded',
         });
         await page.emulateMediaType('print');
-        // Wait for you to check the page
         const pdfBuffer = await page.pdf({
             preferCSSPageSize: true,
             timeout: 0,
             format: 'A4'
         });
-        //fs.writeFileSync(path.join(__dirname, 'ticket.pdf'), pdfBuffer);
         await page.close();
-        await browser.close();
         return pdfBuffer;
     } catch (error) {
         console.error('Error generating PDF:', error);

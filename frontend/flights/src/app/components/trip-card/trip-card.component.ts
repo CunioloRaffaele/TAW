@@ -14,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class TripCardComponent {
   @Input() trip: any;
   bookings: any[] = [];
+  downloadingId: number | null = null; // Add this line
 
   constructor(private http: HttpClient) {}
   ngOnInit() {
@@ -47,19 +48,26 @@ export class TripCardComponent {
   }
 
   downloadBooking(bookingId: number) {
+    this.downloadingId = bookingId; // Set loading
     const token = localStorage.getItem('jwt_token');
     this.http
       .get(`${environment.apiUrl}/api/bookings/booking/${bookingId}/download`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob',
       })
-      .subscribe((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `booking_${bookingId}.pdf`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `booking_${bookingId}.pdf`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          this.downloadingId = null; // Reset loading
+        },
+        error: () => {
+          this.downloadingId = null; // Reset loading on error
+        }
       });
   }
 }
