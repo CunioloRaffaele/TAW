@@ -359,10 +359,12 @@ INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route
 (600, 6, '2025-06-26 08:00:00', 2, 1, 'FlySafe'),  -- In-progress flight (Frankfurt -> Dubai)
 (300, 7, '2025-07-01 10:00:00', 3, 9, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
 (300, 7, '2025-07-03 14:00:00', 9, 3, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
+(300, 6, '2025-07-03 13:00:00', 8, 5, 'FlySafe'),  
+(300, 5, '2025-07-05 17:00:00', 5, 1, 'FlySafe'), 
 
 -- Emirates flights
 (360, 1, '2025-06-25 05:00:00', 1, 7, 'Emirates'), -- Past flight (Dubai -> New York)
-(840, 2, '2025-06-26 04:00:00', 7, 8, 'Emirates'), -- In-progress flight (New York -> Los Angeles)
+(840, 2, '2025-07-03 04:00:00', 7, 8, 'Emirates'), -- In-progress flight (New York -> Los Angeles)
 (420, 3, '2025-07-03 14:30:00', 8, 9, 'Emirates'), -- Future flight (Los Angeles -> Tokyo)
 
 -- Lufthansa flights
@@ -375,6 +377,8 @@ INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route
 (630, 10, '2025-06-25 22:00:00', 9, 3, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
 (630, 10, '2025-08-25 18:00:00', 3, 9, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
 (330, 11, '2025-08-27 09:00:00', 1, 3, 'Singapore Airlines'); -- Future flight (Dubai -> Singapore)
+(630, 10, '2025-08-27 18:00:00', 8, 7, 'Singapore Airlines'), 
+(330, 11, '2025-08-29 09:00:00', 7, 1, 'Singapore Airlines'); 
 
 -- 9. Inserimento Tickets (dipende da Flights)
 INSERT INTO Tickets (type, price, fligt_code)
