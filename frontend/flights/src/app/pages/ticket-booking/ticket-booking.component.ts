@@ -47,6 +47,9 @@ export class TicketBookingComponent implements OnInit {
     this.returnFlightId = state.returnFlightId || qp.get('returnFlightId');
     this.passengers = Number(state.passengers ?? qp.get('passengers') ?? 1);
     this.classType = state.classType || qp.get('classType') || 'ECONOMY';
+    if (state.totalPrice !== undefined && state.totalPrice !== null) {
+      this.totalPrice = state.totalPrice;
+    }
 
     // LOG DATI
     console.log('[TicketBooking] flightId:', this.flightId);
@@ -109,6 +112,8 @@ export class TicketBookingComponent implements OnInit {
   }
 
   calculateTotal() {
+    // Se il prezzo totale è già stato propagato, non sovrascriverlo
+    if (this.totalPrice !== null) return;
     let total = 0;
     if (this.priceAndata != null) total += this.priceAndata * this.selectedSeatsAndata.length;
     if (this.priceRitorno != null) total += this.priceRitorno * this.selectedSeatsRitorno.length;

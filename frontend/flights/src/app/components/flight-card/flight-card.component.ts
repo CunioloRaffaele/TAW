@@ -108,7 +108,7 @@ export class FlightCardComponent implements OnInit, OnChanges {
   fetchPrice(flightUUID: string, classType: string) {
     this.loadingPrice = true;
     console.log('[FlightCard] fetchPrice', flightUUID, 'classType:', classType);
-    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`).subscribe({
       next: (res) => {
         let prezzo = null;
         if (Array.isArray(res)) {
@@ -142,7 +142,7 @@ export class FlightCardComponent implements OnInit, OnChanges {
 
   fetchPricePromise(flightUUID: string, classType: string): Promise<number | null> {
     console.log('[FlightCard] fetchPricePromise', flightUUID, 'classType:', classType);
-    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`)
+    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`)
       .toPromise()
       .then(res => {
         let prezzo = null;
@@ -217,14 +217,31 @@ export class FlightCardComponent implements OnInit, OnChanges {
   }
 
   goToBooking() {
-    console.log('[FlightCard] goToBooking passengers:', this.passengers, '(typeof:', typeof this.passengers, ')');
+    let totalPrice = null;
+    if (this.isRoundTrip()) {
+      // Andata e ritorno
+      if (this.priceAndata != null && this.priceRitorno != null) {
+        totalPrice = (this.priceAndata + this.priceRitorno) * this.passengers;
+      }
+    } else if (this.isMultiLeg()) {
+      // Multi-leg
+      const multiLegTotal = this.getMultiLegTotalPrice();
+      if (multiLegTotal != null) {
+        totalPrice = multiLegTotal * this.passengers;
+      }
+    } else {
+      // Single leg
+      if (this.priceAndata != null) {
+        totalPrice = this.priceAndata * this.passengers;
+      }
+    }
     this.router.navigate(['/ticket-booking'], {
       state: {
         flightId: this.isRoundTrip() ? this.flight[0].code : this.flight.code,
         returnFlightId: this.isRoundTrip() ? this.flight[1].code : null,
         passengers: this.passengers,
         classType: this.classType,
-        // puoi aggiungere anche il prezzo se vuoi
+        totalPrice: totalPrice
       }
     });
   }
