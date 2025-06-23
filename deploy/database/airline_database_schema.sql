@@ -331,8 +331,8 @@ INSERT INTO Uses (airline_name, route_departure, route_destination) VALUES
 ('Singapore Airlines', 3, 9),  -- Singapore -> Tokyo Haneda
 ('Singapore Airlines', 9, 3),  -- Tokyo Haneda -> Singapore
 ('Singapore Airlines', 1, 3),  -- Dubai -> Singapore
-('Singapore Airlines', 3, 1);  -- Singapore -> Dubai
-('Singapore Airlines', 8, 7);
+('Singapore Airlines', 3, 1),  -- Singapore -> Dubai
+('Singapore Airlines', 8, 7),
 ('Singapore Airlines', 7, 1); 
 
 -- 6. Inserimento Seats (dipende da Aircrafts)
