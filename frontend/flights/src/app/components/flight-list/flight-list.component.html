@@ -5,7 +5,8 @@
   <app-flight-card
     *ngFor="let flight of flights"
     [flight]="flight"
-    [classType]="classType"
+    [classType]="classType || 'ECONOMY'"
+    [passengers]="passengers * 1"
     (mouseenter)="hoverRoute.emit(flight)"
     (mouseleave)="leaveRoute.emit()"
   ></app-flight-card>

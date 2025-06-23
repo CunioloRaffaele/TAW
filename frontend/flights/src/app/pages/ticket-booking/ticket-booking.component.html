@@ -1,1 +1,10 @@
-<p>ticket-booking works!</p>
+<div class="ticket-booking-summary">
+  <h2>Riepilogo prenotazione</h2>
+  <div>Classe selezionata: <b>{{ classType }}</b></div>
+  <div>Numero posti: <b>{{ passengers }}</b></div>
+  <div *ngIf="priceAndata !== null">Prezzo andata: €{{ priceAndata }}</div>
+  <div *ngIf="priceRitorno !== null">Prezzo ritorno: €{{ priceRitorno }}</div>
+  <div *ngIf="totalPrice !== null" class="total-price">
+    <b>Totale: €{{ totalPrice }}</b>
+  </div>
+</div>

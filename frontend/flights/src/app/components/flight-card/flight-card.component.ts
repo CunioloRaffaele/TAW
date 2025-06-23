@@ -6,6 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-flight-card',
@@ -24,12 +25,20 @@ export class FlightCardComponent implements OnInit, OnChanges {
     return this._classType;
   }
   private _classType: string = 'ECONOMY'; // Imposta un valore predefinito per classType
+  @Input() set passengers(value: number) {
+    this._passengers = value;
+    console.log('[FlightCard] passengers set:', value, '(typeof:', typeof value, ')');
+  }
+  get passengers(): number {
+    return this._passengers;
+  }
+  private _passengers: number = 1;
   priceAndata: number | null = null;
   priceRitorno: number | null = null;
   loadingPrice = false;
   errorPrice: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     this.fetchAllPrices();
@@ -207,5 +216,16 @@ export class FlightCardComponent implements OnInit, OnChanges {
     return total;
   }
 
-  
+  goToBooking() {
+    console.log('[FlightCard] goToBooking passengers:', this.passengers, '(typeof:', typeof this.passengers, ')');
+    this.router.navigate(['/ticket-booking'], {
+      state: {
+        flightId: this.isRoundTrip() ? this.flight[0].code : this.flight.code,
+        returnFlightId: this.isRoundTrip() ? this.flight[1].code : null,
+        passengers: this.passengers,
+        classType: this.classType,
+        // puoi aggiungere anche il prezzo se vuoi
+      }
+    });
+  }
 }

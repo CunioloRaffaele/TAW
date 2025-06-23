@@ -30,8 +30,9 @@ export class FlightsDisplayComponent {
 
   ngOnInit() {
     this.searchData = history.state.searchData;
-
+    console.log('[FlightsDisplay] searchData:', this.searchData);
     if (this.searchData) {
+      console.log('[FlightsDisplay] passengers:', this.searchData.passengers, '(typeof:', typeof this.searchData.passengers, ')');
       if (this.searchData.tripType === 'roundtrip') {
         this.loadRoundTripFlights();
       } else {

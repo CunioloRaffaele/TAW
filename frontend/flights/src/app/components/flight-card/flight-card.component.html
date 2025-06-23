@@ -78,11 +78,7 @@
         </ng-container>
         <ng-container *ngIf="!loadingPrice && (priceAndata === null || priceRitorno === null) && !errorPrice">---</ng-container>
         <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
-        <button *ngIf="isCustomer()" mat-raised-button color="primary"
-                [routerLink]="['/ticket-booking']"
-                [queryParams]="{ flightId: flight[0]?.uuid, returnFlightId: flight[1]?.uuid }">
-          Acquista
-        </button>
+        <button *ngIf="isCustomer()" mat-raised-button color="primary" (click)="goToBooking()">Acquista</button>
       </div>
     </ng-container>
 
@@ -131,11 +127,7 @@
           </ng-container>
           <ng-container *ngIf="!loadingPrice && getMultiLegTotalPrice() === null && !errorPrice">---</ng-container>
           <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
-          <button *ngIf="isCustomer()" mat-raised-button color="primary"
-                  [routerLink]="['/ticket-booking']"
-                  [queryParams]="{ flightId: flight[0]?.uuid }">
-            Acquista
-          </button>
+          <button *ngIf="isCustomer()" mat-raised-button color="primary" (click)="goToBooking()">Acquista</button>
         </div>
       </ng-container>
 
@@ -183,11 +175,7 @@
           <ng-container *ngIf="!loadingPrice && priceAndata !== null">€{{ priceAndata }}</ng-container>
           <ng-container *ngIf="!loadingPrice && priceAndata === null && !errorPrice">---</ng-container>
           <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
-          <button *ngIf="isCustomer()" mat-raised-button color="primary"
-                  [routerLink]="['/ticket-booking']"
-                  [queryParams]="{ flightId: flight.uuid }">
-            Acquista
-          </button>
+          <button *ngIf="isCustomer()" mat-raised-button color="primary" (click)="goToBooking()">Acquista</button>
         </div>
       </ng-template>
     </ng-template>
