@@ -64,10 +64,5 @@ export const routes: Routes = [
   { path: 'server-error', component: ServerErrorComponent },
   { path: 'flights-display', component: FlightsDisplayComponent },
   { path: 'profile-customer', component: ProfileCustomerComponent },
-  {
-    path: 'ticket-booking',
-    component: TicketBookingComponent,
-    canActivate: [roleAuthGuard],
-    data: { roles: [0] } // Solo clienti (ruolo 0)
-  }
+  { path: 'ticket-booking', component: TicketBookingComponent }
 ];

@@ -22,7 +22,6 @@
         *ngIf="flights.length > 0"
         [flights]="flights"
         [classType]="searchData?.classType"
-        [passengers]="searchData?.passengers"
         (hoverRoute)="onHoverRoute($event)"
         (leaveRoute)="onLeaveRoute()"
       ></app-flight-list>

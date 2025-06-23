@@ -6,7 +6,6 @@ import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-flight-card',
@@ -25,20 +24,12 @@ export class FlightCardComponent implements OnInit, OnChanges {
     return this._classType;
   }
   private _classType: string = 'ECONOMY'; // Imposta un valore predefinito per classType
-  @Input() set passengers(value: number) {
-    this._passengers = value;
-    console.log('[FlightCard] passengers set:', value, '(typeof:', typeof value, ')');
-  }
-  get passengers(): number {
-    return this._passengers;
-  }
-  private _passengers: number = 1;
   priceAndata: number | null = null;
   priceRitorno: number | null = null;
   loadingPrice = false;
   errorPrice: string | null = null;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.fetchAllPrices();
@@ -108,7 +99,7 @@ export class FlightCardComponent implements OnInit, OnChanges {
   fetchPrice(flightUUID: string, classType: string) {
     this.loadingPrice = true;
     console.log('[FlightCard] fetchPrice', flightUUID, 'classType:', classType);
-    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`).subscribe({
       next: (res) => {
         let prezzo = null;
         if (Array.isArray(res)) {
@@ -142,7 +133,7 @@ export class FlightCardComponent implements OnInit, OnChanges {
 
   fetchPricePromise(flightUUID: string, classType: string): Promise<number | null> {
     console.log('[FlightCard] fetchPricePromise', flightUUID, 'classType:', classType);
-    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`)
+    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`)
       .toPromise()
       .then(res => {
         let prezzo = null;
@@ -216,33 +207,5 @@ export class FlightCardComponent implements OnInit, OnChanges {
     return total;
   }
 
-  goToBooking() {
-    let totalPrice = null;
-    if (this.isRoundTrip()) {
-      // Andata e ritorno
-      if (this.priceAndata != null && this.priceRitorno != null) {
-        totalPrice = (this.priceAndata + this.priceRitorno) * this.passengers;
-      }
-    } else if (this.isMultiLeg()) {
-      // Multi-leg
-      const multiLegTotal = this.getMultiLegTotalPrice();
-      if (multiLegTotal != null) {
-        totalPrice = multiLegTotal * this.passengers;
-      }
-    } else {
-      // Single leg
-      if (this.priceAndata != null) {
-        totalPrice = this.priceAndata * this.passengers;
-      }
-    }
-    this.router.navigate(['/ticket-booking'], {
-      state: {
-        flightId: this.isRoundTrip() ? this.flight[0].code : this.flight.code,
-        returnFlightId: this.isRoundTrip() ? this.flight[1].code : null,
-        passengers: this.passengers,
-        classType: this.classType,
-        totalPrice: totalPrice
-      }
-    });
-  }
+  
 }

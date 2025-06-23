@@ -30,9 +30,8 @@ export class FlightsDisplayComponent {
 
   ngOnInit() {
     this.searchData = history.state.searchData;
-    console.log('[FlightsDisplay] searchData:', this.searchData);
+
     if (this.searchData) {
-      console.log('[FlightsDisplay] passengers:', this.searchData.passengers, '(typeof:', typeof this.searchData.passengers, ')');
       if (this.searchData.tripType === 'roundtrip') {
         this.loadRoundTripFlights();
       } else {
@@ -163,14 +162,14 @@ export class FlightsDisplayComponent {
           const bodyAndata = {
             routes: [{ departure: stepsA[0], destination: stepsA[1] }],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: addDays(this.searchData.departureDate, 1),
+            searchEndDateLOCAL: addDays(this.searchData.departureDate, 180),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
           const bodyRitorno = {
             routes: [{ departure: stepsR[0], destination: stepsR[1] }],
             searchStartDateLOCAL: this.searchData.returnDate,
-            searchEndDateLOCAL: addDays(this.searchData.returnDate, 1),
+            searchEndDateLOCAL: addDays(this.searchData.returnDate, 180),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
@@ -202,7 +201,7 @@ export class FlightsDisplayComponent {
                   { departure: stepsA[1], destination: stepsA[2] }
                 ],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: addDays(this.searchData.departureDate, 1),
+            searchEndDateLOCAL: addDays(this.searchData.departureDate, 180),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
@@ -214,7 +213,7 @@ export class FlightsDisplayComponent {
                   { departure: stepsR[1], destination: stepsR[2] }
                 ],
             searchStartDateLOCAL: this.searchData.returnDate,
-            searchEndDateLOCAL: addDays(this.searchData.returnDate, 1),
+            searchEndDateLOCAL: addDays(this.searchData.returnDate, 180),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
