@@ -33,15 +33,17 @@ export class TicketBookingComponent implements OnInit {
   selectedSeatsAndata: number[] = [];
   selectedSeatsRitorno: number[] = [];
 
-  // Extras
-  extrasList: any[] = [];
-  selectedExtrasAndata: (number | null)[] = [];
-  selectedExtrasRitorno: (number | null)[] = [];
-
   totalPrice: number | null = null;
   bookingResult: any = null;
   bookingError: string | null = null;
   loading: boolean = false;
+
+  // Extra services
+  extraBaggageSelected: boolean = false;
+  airportLoungeSelected: boolean = false;
+  globalExtra: 'baggage' | 'lounge' | 'none' = 'none';
+
+  baseTotal: number = 0;
 
   constructor(private route: ActivatedRoute, private http: HttpClient) {}
 
@@ -53,7 +55,10 @@ export class TicketBookingComponent implements OnInit {
     this.returnFlightId = state.returnFlightId || qp.get('returnFlightId');
     this.passengers = Number(state.passengers ?? qp.get('passengers') ?? 1);
     this.classType = state.classType || qp.get('classType') || 'ECONOMY';
+
+    // Se arrivi dalla selezione voli, salva il prezzo base
     if (state.totalPrice !== undefined && state.totalPrice !== null) {
+      this.baseTotal = state.totalPrice;
       this.totalPrice = state.totalPrice;
     }
 
@@ -71,9 +76,10 @@ export class TicketBookingComponent implements OnInit {
       return;
     }
 
-    // Carica lista extra disponibili
+    // Seleziona solo gli extra globali disponibili
     this.http.get<any[]>('/api/bookings/extras').subscribe(list => {
-      this.extrasList = list || [];
+      this.extraBaggageSelected = list?.some(e => e.id === 1) || false;
+      this.airportLoungeSelected = list?.some(e => e.id === 2) || false;
     });
 
     if (this.flightId) {
@@ -86,32 +92,25 @@ export class TicketBookingComponent implements OnInit {
 
   loadTicketAndSeats(flightUUID: string, type: 'andata' | 'ritorno') {
     // 1. Carica i ticket disponibili per la classe scelta
-    this.http.get(`/api/bookings/tickets/${flightUUID}`, { responseType: 'text' }).subscribe(ticketResRaw => {
-      let ticketRes: any[] = [];
-      try {
-        ticketRes = ticketResRaw ? JSON.parse(ticketResRaw) : [];
-      } catch (e) {
-        ticketRes = [];
-      }
-      const found = ticketRes.find(t => (t.type || '').toUpperCase() === this.classType.toUpperCase());
+    this.http.get<any[]>(`/api/bookings/tickets/${flightUUID}`).subscribe(ticketRes => {
+      const found = ticketRes?.find(t => (t.type || '').toUpperCase() === this.classType.toUpperCase());
       if (type === 'andata') {
-        this.ticketsAndata = ticketRes;
+        this.ticketsAndata = ticketRes || [];
         if (found) {
           this.priceAndata = found.price;
           this.ticketUUIDAndata = found.code;
         }
       } else {
-        this.ticketsRitorno = ticketRes;
+        this.ticketsRitorno = ticketRes || [];
         if (found) {
           this.priceRitorno = found.price;
           this.ticketUUIDRitorno = found.code;
         }
       }
-      this.calculateTotal();
+      this.updateTotalIfReady();
     });
     // 2. Carica i posti disponibili
-    this.http.get<any[]>(`/api/bookings/seats/${flightUUID}`).subscribe((seatsRes: any[]) => {
-      // Normalizza il campo posizione (postion -> position)
+    this.http.get<any[]>(`/api/bookings/seats/${flightUUID}`).subscribe((seatsRes: any[] = []) => {
       const seats = (seatsRes || []).map(seat => ({
         ...seat,
         position: seat.position || seat.postion || seat.label || seat.id
@@ -119,35 +118,40 @@ export class TicketBookingComponent implements OnInit {
       if (type === 'andata') {
         this.seatsAndata = seats;
         this.selectedSeatsAndata = seats.slice(0, this.passengers).map(seat => seat.id);
-        this.selectedExtrasAndata = Array(this.selectedSeatsAndata.length).fill(null);
       } else {
         this.seatsRitorno = seats;
         this.selectedSeatsRitorno = seats.slice(0, this.passengers).map(seat => seat.id);
-        this.selectedExtrasRitorno = Array(this.selectedSeatsRitorno.length).fill(null);
       }
       this.calculateTotal();
     });
   }
 
+  updateTotalIfReady() {
+    // Calcola il totale solo se almeno uno dei prezzi è stato caricato
+    if ((this.flightId && this.priceAndata != null) || (this.returnFlightId && this.priceRitorno != null)) {
+      this.calculateTotal();
+    }
+  }
+
+  // Ogni volta che cambiano extra o posti, chiama questa funzione:
   calculateTotal() {
-    if (this.totalPrice !== null) return;
-    let total = 0;
-    if (this.priceAndata != null) total += this.priceAndata * this.selectedSeatsAndata.length;
-    if (this.priceRitorno != null) total += this.priceRitorno * this.selectedSeatsRitorno.length;
-    // Somma extra selezionati
-    for (const extraId of this.selectedExtrasAndata) {
-      if (extraId) {
-        const extra = this.extrasList.find(e => e.id === extraId);
-        if (extra) total += extra.price;
-      }
-    }
-    for (const extraId of this.selectedExtrasRitorno) {
-      if (extraId) {
-        const extra = this.extrasList.find(e => e.id === extraId);
-        if (extra) total += extra.price;
-      }
-    }
+    // Usa sempre il prezzo base come partenza
+    let total = this.baseTotal;
+
+    // Extra globali
+    if (this.extraBaggageSelected) total += 50 * this.passengers;
+    if (this.airportLoungeSelected) total += 75 * this.passengers;
+
     this.totalPrice = total;
+  }
+
+  // Se cambi i posti o i prezzi dei voli, aggiorna anche il base:
+  updateBaseTotal() {
+    let base = 0;
+    if (this.priceAndata != null) base += this.priceAndata * this.selectedSeatsAndata.length;
+    if (this.priceRitorno != null) base += this.priceRitorno * this.selectedSeatsRitorno.length;
+    this.baseTotal = base;
+    this.calculateTotal();
   }
 
   // Call this after selecting/deselecting a seat
@@ -180,57 +184,86 @@ export class TicketBookingComponent implements OnInit {
     return found?.position || seatId;
   }
 
-  onExtraChange(type: 'andata' | 'ritorno', idx: number) {
-    this.totalPrice = null;
-    this.calculateTotal();
-  }
-
-  onExtraCheckboxChange(type: 'andata' | 'ritorno', idx: number, extraId: number | null, event: Event) {
-    const checked = (event.target as HTMLInputElement).checked;
-    if (type === 'andata') {
-      if (checked) {
-        this.selectedExtrasAndata[idx] = extraId;
-      } else {
-        this.selectedExtrasAndata[idx] = null;
-      }
-    } else {
-      if (checked) {
-        this.selectedExtrasRitorno[idx] = extraId;
-      } else {
-        this.selectedExtrasRitorno[idx] = null;
-      }
-    }
-    this.totalPrice = null;
-    this.calculateTotal();
-  }
-
   // Chiamata di prenotazione
-  bookTickets() {
+  async bookTickets() {
     this.bookingError = null;
-    const tickets: any[] = [];
-    // Andata
-    if (this.ticketUUIDAndata && this.selectedSeatsAndata.length === this.passengers) {
-      for (let i = 0; i < this.selectedSeatsAndata.length; i++) {
-        const seatId = this.selectedSeatsAndata[i];
-        const extra = this.selectedExtrasAndata[i];
-        tickets.push({ ticketUUID: this.ticketUUIDAndata, seatId, extras: extra ? [extra] : [] });
+    this.bookingResult = null;
+    const apiUrl = 'http://129.152.7.218:3000';
+    let selectedExtra: number | null = null;
+    if (this.globalExtra === 'baggage') selectedExtra = 1;
+    if (this.globalExtra === 'lounge') selectedExtra = 2;
+
+    try {
+      // Recupera ticket e seats per andata
+      let ticketAndata: any = null, seatsAndata: any[] = [];
+      if (this.flightId) {
+        const ticketRes: any[] = (await this.http.get<any[]>(`${apiUrl}/api/bookings/tickets/${this.flightId}`).toPromise()) || [];
+        ticketAndata = ticketRes.find(t => (t.type || '').toUpperCase() === this.classType.toUpperCase());
+        seatsAndata = (await this.http.get<any[]>(`${apiUrl}/api/bookings/seats/${this.flightId}`).toPromise()) || [];
       }
-    }
-    // Ritorno
-    if (this.ticketUUIDRitorno && this.selectedSeatsRitorno.length === this.passengers) {
-      for (let i = 0; i < this.selectedSeatsRitorno.length; i++) {
-        const seatId = this.selectedSeatsRitorno[i];
-        const extra = this.selectedExtrasRitorno[i];
-        tickets.push({ ticketUUID: this.ticketUUIDRitorno, seatId, extras: extra ? [extra] : [] });
+      // Recupera ticket e seats per ritorno
+      let ticketRitorno: any = null, seatsRitorno: any[] = [];
+      if (this.returnFlightId) {
+        const ticketRes: any[] = (await this.http.get<any[]>(`${apiUrl}/api/bookings/tickets/${this.returnFlightId}`).toPromise()) || [];
+        ticketRitorno = ticketRes.find(t => (t.type || '').toUpperCase() === this.classType.toUpperCase());
+        seatsRitorno = (await this.http.get<any[]>(`${apiUrl}/api/bookings/seats/${this.returnFlightId}`).toPromise()) || [];
       }
+
+      // Verifica disponibilità posti
+      if ((this.flightId && seatsAndata.length < this.passengers) ||
+          (this.returnFlightId && seatsRitorno.length < this.passengers)) {
+        this.bookingError = 'Non ci sono abbastanza posti disponibili.';
+        return;
+      }
+
+      const results: any[] = [];
+      for (let i = 0; i < this.passengers; i++) {
+        const tickets: any[] = [];
+        if (this.flightId && ticketAndata && seatsAndata[i]) {
+          tickets.push({
+            ticketUUID: ticketAndata.code,
+            seatId: seatsAndata[i].id,
+            extras: selectedExtra ? [selectedExtra] : []
+          });
+        }
+        if (this.returnFlightId && ticketRitorno && seatsRitorno[i]) {
+          tickets.push({
+            ticketUUID: ticketRitorno.code,
+            seatId: seatsRitorno[i].id,
+            extras: selectedExtra ? [selectedExtra] : []
+          });
+        }
+        // Fai la POST per ogni passeggero
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const res = await this.http.post<any>(
+            `${apiUrl}/api/bookings/trips`,
+            { tickets },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+              },
+            }
+          ).toPromise();
+          results.push({ success: true, data: res });
+        } catch (err: any) {
+          results.push({ success: false, error: err?.error?.message || 'Errore nella prenotazione.' });
+        }
+      }
+
+      this.bookingResult = results;
+      if (results.some(r => !r.success)) {
+        this.bookingError = 'Alcune prenotazioni non sono andate a buon fine.';
+      }
+    } catch (err: any) {
+      this.bookingError = 'Errore nel recupero dei posti o dei ticket.';
     }
-    if (tickets.length === 0) {
-      this.bookingError = 'Seleziona i posti per tutti i passeggeri.';
-      return;
-    }
-    this.http.post<any>('/api/bookings/trips', { tickets }).subscribe({
-      next: res => { this.bookingResult = res; },
-      error: err => { this.bookingError = err?.error?.message || 'Errore nella prenotazione.'; }
-    });
+  }
+
+  selectGlobalExtra(type: 'baggage' | 'lounge' | 'none') {
+    this.extraBaggageSelected = type === 'baggage';
+    this.airportLoungeSelected = type === 'lounge';
+    this.globalExtra = type; // Aggiorna anche il globalExtra!
+    this.calculateTotal();
   }
 }

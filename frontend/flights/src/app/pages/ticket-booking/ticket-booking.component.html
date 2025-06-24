@@ -2,7 +2,7 @@
   <h2>Prenotazione Biglietto</h2>
 
   <div *ngIf="bookingError" class="error">{{ bookingError }}</div>
-  <div *ngIf="bookingResult" class="success">Prenotazione completata! Codice: {{ bookingResult?.code || bookingResult }}</div>
+  <div *ngIf="bookingResult" class="success">Prenotazione completata!</div>
 
   <div class="section">
     <h3>Riepilogo viaggio</h3>
@@ -24,38 +24,37 @@
     </div>
   </div>
 
+  <!-- Extra (applicati a tutti i passeggeri) -->
   <div class="section">
-    <h3>Extra per passeggero</h3>
-    <!-- Andata -->
-    <div *ngIf="selectedSeatsAndata.length > 0">
-      <b>Andata</b>
-      <div *ngFor="let seatId of selectedSeatsAndata; let i = index">
-        <div>
-          Passeggero {{ i + 1 }} (Posto: {{ getSeatPosition('andata', seatId) }})
-          <select [(ngModel)]="selectedExtrasAndata[i]" (change)="onExtraChange('andata', i)">
-            <option [ngValue]="null">Nessun extra</option>
-            <option *ngFor="let extra of extrasList" [ngValue]="extra.id">
-              {{ extra.name }} (+{{ extra.price | currency:'EUR' }})
-            </option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Ritorno -->
-    <div *ngIf="selectedSeatsRitorno.length > 0">
-      <b>Ritorno</b>
-      <div *ngFor="let seatId of selectedSeatsRitorno; let i = index">
-        <div>
-          Passeggero {{ i + 1 }} (Posto: {{ getSeatPosition('ritorno', seatId) }})
-          <select [(ngModel)]="selectedExtrasRitorno[i]" (change)="onExtraChange('ritorno', i)">
-            <option [ngValue]="null">Nessun extra</option>
-            <option *ngFor="let extra of extrasList" [ngValue]="extra.id">
-              {{ extra.name }} (+{{ extra.price | currency:'EUR' }})
-            </option>
-          </select>
-        </div>
-      </div>
+    <h3>Extra (applicati a tutti i passeggeri)</h3>
+    <div>
+      <label>
+        <input
+          type="radio"
+          name="globalExtra"
+          [checked]="extraBaggageSelected"
+          (change)="selectGlobalExtra('baggage')"
+        />
+        Extra Baggage (+50€)
+      </label>
+      <label style="margin-left: 24px;">
+        <input
+          type="radio"
+          name="globalExtra"
+          [checked]="airportLoungeSelected"
+          (change)="selectGlobalExtra('lounge')"
+        />
+        Airport Lounge (+75€)
+      </label>
+      <label style="margin-left: 24px;">
+        <input
+          type="radio"
+          name="globalExtra"
+          [checked]="!extraBaggageSelected && !airportLoungeSelected"
+          (change)="selectGlobalExtra('none')"
+        />
+        Nessun extra
+      </label>
     </div>
   </div>
 
