@@ -2,11 +2,15 @@
   Nessun volo trovato.
 </div>
 <div *ngIf="flights.length > 0">
-  <app-flight-card
-    *ngFor="let flight of flights"
-    [flight]="flight"
-    [classType]="classType"
-    (mouseenter)="hoverRoute.emit(flight)"
-    (mouseleave)="leaveRoute.emit()"
-  ></app-flight-card>
+  <div *ngFor="let combo of flights">
+    <div (mouseenter)="hoverRoute.emit(combo[0])" (mouseleave)="leaveRoute.emit()">
+      <app-flight-card
+        [andataSegments]="combo[0]"
+        [ritornoSegments]="combo[1] || null"
+        [classType]="classType"
+        [passengers]="passengers"
+      >
+      </app-flight-card>
+    </div>
+  </div>
 </div>

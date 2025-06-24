@@ -1,10 +1,72 @@
-<div class="ticket-booking-summary">
-  <h2>Riepilogo prenotazione</h2>
-  <div>Classe selezionata: <b>{{ classType }}</b></div>
-  <div>Numero posti: <b>{{ passengers }}</b></div>
-  <div *ngIf="priceAndata !== null">Prezzo andata: €{{ priceAndata }}</div>
-  <div *ngIf="priceRitorno !== null">Prezzo ritorno: €{{ priceRitorno }}</div>
-  <div *ngIf="totalPrice !== null" class="total-price">
-    <b>Totale: €{{ totalPrice }}</b>
+<div class="ticket-booking-container">
+  <h2>Prenotazione Biglietto</h2>
+
+  <div *ngIf="bookingError" class="error">{{ bookingError }}</div>
+  <div *ngIf="bookingResult" class="success">Prenotazione completata! Codice: {{ bookingResult?.code || bookingResult }}</div>
+
+  <div class="section">
+    <h3>Riepilogo viaggio</h3>
+    <div class="summary-row">
+      <span>Volo di andata:</span>
+      <span *ngIf="flightId">#{{ flightId }}</span>
+    </div>
+    <div class="summary-row" *ngIf="returnFlightId">
+      <span>Volo di ritorno:</span>
+      <span>#{{ returnFlightId }}</span>
+    </div>
+    <div class="summary-row">
+      <span>Classe:</span>
+      <span>{{ classType }}</span>
+    </div>
+    <div class="summary-row">
+      <span>Passeggeri:</span>
+      <span>{{ passengers }}</span>
+    </div>
   </div>
+
+  <div class="section">
+    <h3>Extra per passeggero</h3>
+    <!-- Andata -->
+    <div *ngIf="selectedSeatsAndata.length > 0">
+      <b>Andata</b>
+      <div *ngFor="let seatId of selectedSeatsAndata; let i = index">
+        <div>
+          Passeggero {{ i + 1 }} (Posto: {{ getSeatPosition('andata', seatId) }})
+          <select [(ngModel)]="selectedExtrasAndata[i]" (change)="onExtraChange('andata', i)">
+            <option [ngValue]="null">Nessun extra</option>
+            <option *ngFor="let extra of extrasList" [ngValue]="extra.id">
+              {{ extra.name }} (+{{ extra.price | currency:'EUR' }})
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ritorno -->
+    <div *ngIf="selectedSeatsRitorno.length > 0">
+      <b>Ritorno</b>
+      <div *ngFor="let seatId of selectedSeatsRitorno; let i = index">
+        <div>
+          Passeggero {{ i + 1 }} (Posto: {{ getSeatPosition('ritorno', seatId) }})
+          <select [(ngModel)]="selectedExtrasRitorno[i]" (change)="onExtraChange('ritorno', i)">
+            <option [ngValue]="null">Nessun extra</option>
+            <option *ngFor="let extra of extrasList" [ngValue]="extra.id">
+              {{ extra.name }} (+{{ extra.price | currency:'EUR' }})
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Prezzo totale</h3>
+    <div class="summary-row" style="font-size:1.2em; font-weight:bold;">
+      <span>Totale:</span>
+      <span class="price" *ngIf="totalPrice !== null">€{{ totalPrice }}</span>
+      <span *ngIf="totalPrice === null">-</span>
+    </div>
+  </div>
+
+  <button mat-raised-button color="primary" (click)="bookTickets()" [disabled]="bookingResult || loading">Conferma Prenotazione</button>
 </div>

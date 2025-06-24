@@ -30,8 +30,9 @@ export class FlightsDisplayComponent {
 
   ngOnInit() {
     this.searchData = history.state.searchData;
-
+    console.log('[FlightsDisplay] searchData:', this.searchData);
     if (this.searchData) {
+      console.log('[FlightsDisplay] passengers:', this.searchData.passengers, '(typeof:', typeof this.searchData.passengers, ')');
       if (this.searchData.tripType === 'roundtrip') {
         this.loadRoundTripFlights();
       } else {
@@ -80,7 +81,13 @@ export class FlightsDisplayComponent {
             classType: this.searchData.classType
           };
           const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
-          this.flights = res.flights || [];
+          // Per sola andata (loadFlights), uniforma così:
+          if (res.flights && res.flights.length > 0) {
+            this.flights = res.flights.map((f: any) => [Array.isArray(f) ? f : [f]]);
+          } else {
+            this.flights = [];
+            this.error = 'Nessun volo disponibile';
+          }
         } else {
           // Se non è diretto, non mostrare nulla
           this.flights = [];
@@ -100,7 +107,13 @@ export class FlightsDisplayComponent {
             classType: this.searchData.classType
           };
           const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
-          this.flights = res.flights || [];
+          // Per sola andata (loadFlights), uniforma così:
+          if (res.flights && res.flights.length > 0) {
+            this.flights = res.flights.map((f: any) => [Array.isArray(f) ? f : [f]]);
+          } else {
+            this.flights = [];
+            this.error = 'Nessun volo disponibile';
+          }
         } else if (stepsCount === 3) {
           const body = {
             routes: [
@@ -113,7 +126,13 @@ export class FlightsDisplayComponent {
             classType: this.searchData.classType
           };
           const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
-          this.flights = res.flights || [];
+          // Per sola andata (loadFlights), uniforma così:
+          if (res.flights && res.flights.length > 0) {
+            this.flights = res.flights.map((f: any) => [Array.isArray(f) ? f : [f]]);
+          } else {
+            this.flights = [];
+            this.error = 'Nessun volo disponibile';
+          }
         } else {
           // Più di uno scalo: non mostrare voli
           this.flights = [];
@@ -178,7 +197,16 @@ export class FlightsDisplayComponent {
             this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyRitorno).toPromise()
           ]);
           if (andataRes.flights.length > 0 && ritornoRes.flights.length > 0) {
-            this.flights = [[andataRes.flights[0], ritornoRes.flights[0]]];
+            this.flights = [];
+            for (const andata of andataRes.flights) {
+              for (const ritorno of ritornoRes.flights) {
+                // Ogni "andata" e "ritorno" può essere un oggetto (diretto) o un array (multi-leg)
+                this.flights.push([
+                  Array.isArray(andata) ? andata : [andata],
+                  Array.isArray(ritorno) ? ritorno : [ritorno]
+                ]);
+              }
+            }
           } else {
             this.flights = [];
             this.error = 'Nessun volo andata e ritorno disponibile';
@@ -222,7 +250,16 @@ export class FlightsDisplayComponent {
             this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, bodyRitorno).toPromise()
           ]);
           if (andataRes.flights.length > 0 && ritornoRes.flights.length > 0) {
-            this.flights = [[andataRes.flights[0], ritornoRes.flights[0]]];
+            this.flights = [];
+            for (const andata of andataRes.flights) {
+              for (const ritorno of ritornoRes.flights) {
+                // Ogni "andata" e "ritorno" può essere un oggetto (diretto) o un array (multi-leg)
+                this.flights.push([
+                  Array.isArray(andata) ? andata : [andata],
+                  Array.isArray(ritorno) ? ritorno : [ritorno]
+                ]);
+              }
+            }
           } else {
             this.flights = [];
             this.error = 'Nessun volo andata e ritorno disponibile';

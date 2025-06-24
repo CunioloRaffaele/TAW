@@ -18,6 +18,7 @@ export class RouteCardComponent implements OnInit {
   @Input() destinationId!: number;
   @Input() routeId!: number;
   @Output() disconnect = new EventEmitter<number>();
+  @Input() stats: any;
 
   departureAirport: any = null;
   destinationAirport: any = null;

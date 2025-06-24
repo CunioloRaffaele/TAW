@@ -6,6 +6,7 @@ import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-flight-card',
@@ -15,48 +16,98 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrls: ['./flight-card.component.css']
 })
 export class FlightCardComponent implements OnInit, OnChanges {
-  @Input() flight: any;
+  // RIMUOVI flight
+  // @Input() flight: any;
+  @Input() andataSegments: any[] = [];
+  @Input() ritornoSegments: any[] = [];
   @Input() set classType(value: string) {
-    this._classType = (value || 'ECONOMY').toUpperCase();
-    console.log('[FlightCard] classType set:', this._classType);
+    const newClass = (value || 'ECONOMY').toUpperCase();
+    if (this._classType !== newClass) {
+      this._classType = newClass;
+      this.fetchAllPrices();
+    }
   }
   get classType(): string {
     return this._classType;
   }
-  private _classType: string = 'ECONOMY'; // Imposta un valore predefinito per classType
+  private _classType: string = 'ECONOMY';
+  @Input() set passengers(value: number) {
+    if (this._passengers !== value) {
+      this._passengers = value;
+      this.fetchAllPrices();
+    }
+  }
+  get passengers(): number {
+    return this._passengers;
+  }
+  private _passengers: number = 1;
   priceAndata: number | null = null;
   priceRitorno: number | null = null;
   loadingPrice = false;
   errorPrice: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     this.fetchAllPrices();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['classType'] && !changes['classType'].firstChange) {
-      console.log('[FlightCard] ngOnChanges classType:', this.classType);
+    if (
+      (changes['classType'] && !changes['classType'].firstChange) ||
+      (changes['passengers'] && !changes['passengers'].firstChange) ||
+      changes['andataSegments'] || changes['ritornoSegments']
+    ) {
       this.fetchAllPrices();
     }
   }
 
   fetchAllPrices() {
-    console.log('[FlightCard] fetchAllPrices, classType:', this.classType, 'flight:', this.flight);
+    console.log('[FlightCard] fetchAllPrices - classType:', this.classType, 'passengers:', this.passengers, 'andataSegments:', this.andataSegments, 'ritornoSegments:', this.ritornoSegments);
     this.errorPrice = null;
     this.loadingPrice = true;
-    // Roundtrip
+    // Roundtrip (anche multi-leg)
     if (this.isRoundTrip()) {
-      this.priceAndata = null;
-      this.priceRitorno = null;
+      // Caso roundtrip single leg (1 segmento per tratta)
+      if (this.andataSegments.length === 1 && this.ritornoSegments.length === 1) {
+        this.priceAndata = null;
+        this.priceRitorno = null;
+        Promise.all([
+          this.fetchPricePromise(this.andataSegments[0].code, this.classType),
+          this.fetchPricePromise(this.ritornoSegments[0].code, this.classType)
+        ]).then(([priceAndata, priceRitorno]) => {
+          this.priceAndata = priceAndata;
+          this.priceRitorno = priceRitorno;
+          this.loadingPrice = false;
+        }).catch(() => {
+          this.priceAndata = null;
+          this.priceRitorno = null;
+          this.errorPrice = 'Errore prezzo';
+          this.loadingPrice = false;
+        });
+        return;
+      }
+      // Caso roundtrip multi-leg (almeno un segmento multiplo)
+      for (const leg of this.andataSegments) leg.price = null;
+      for (const leg of this.ritornoSegments) leg.price = null;
+      const andataPromises = this.andataSegments.map((leg: any) =>
+        this.fetchPricePromise(leg.code, this.classType).then(price => {
+          leg.price = price;
+          return price;
+        })
+      );
+      const ritornoPromises = this.ritornoSegments.map((leg: any) =>
+        this.fetchPricePromise(leg.code, this.classType).then(price => {
+          leg.price = price;
+          return price;
+        })
+      );
       Promise.all([
-        this.fetchPricePromise(this.flight[0].code, this.classType),
-        this.fetchPricePromise(this.flight[1].code, this.classType)
-      ]).then(([priceAndata, priceRitorno]) => {
-        this.priceAndata = priceAndata;
-        this.priceRitorno = priceRitorno;
-        console.log('[FlightCard] roundtrip prices:', priceAndata, priceRitorno);
+        Promise.all(andataPromises),
+        Promise.all(ritornoPromises)
+      ]).then(([andataPrices, ritornoPrices]) => {
+        this.priceAndata = this.getSegmentsTotalPrice(this.andataSegments);
+        this.priceRitorno = this.getSegmentsTotalPrice(this.ritornoSegments);
         this.loadingPrice = false;
       }).catch(() => {
         this.priceAndata = null;
@@ -66,20 +117,20 @@ export class FlightCardComponent implements OnInit, OnChanges {
       });
       return;
     }
-    // Multi-leg
+    // Multi-leg (solo andata)
     if (this.isMultiLeg()) {
-      for (const leg of this.flight) {
+      for (const leg of this.andataSegments) {
         leg.price = null;
       }
       Promise.all(
-        this.flight.map((leg: any) =>
+        this.andataSegments.map((leg: any) =>
           this.fetchPricePromise(leg.code, this.classType).then(price => {
             leg.price = price;
-            console.log('[FlightCard] multi-leg leg.code:', leg.code, 'classType:', this.classType, 'price:', price);
             return price;
           })
         )
-      ).then(() => {
+      ).then((prices) => {
+        console.log('[FlightCard] Prezzi multi-leg:', prices);
         this.loadingPrice = false;
       }).catch(() => {
         this.errorPrice = 'Errore prezzo';
@@ -88,9 +139,9 @@ export class FlightCardComponent implements OnInit, OnChanges {
       return;
     }
     // Single leg
-    if (this.flight?.code) {
+    if (this.andataSegments?.[0]?.code) {
       this.priceAndata = null;
-      this.fetchPrice(this.flight.code, this.classType);
+      this.fetchPrice(this.andataSegments[0].code, this.classType);
       return;
     }
     this.loadingPrice = false;
@@ -98,8 +149,7 @@ export class FlightCardComponent implements OnInit, OnChanges {
 
   fetchPrice(flightUUID: string, classType: string) {
     this.loadingPrice = true;
-    console.log('[FlightCard] fetchPrice', flightUUID, 'classType:', classType);
-    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`).subscribe({
       next: (res) => {
         let prezzo = null;
         if (Array.isArray(res)) {
@@ -121,7 +171,6 @@ export class FlightCardComponent implements OnInit, OnChanges {
         } else {
           this.priceAndata = null;
         }
-        console.log('[FlightCard] fetchPrice result', flightUUID, 'classType:', classType, 'price:', prezzo);
         this.loadingPrice = false;
       },
       error: () => {
@@ -132,8 +181,7 @@ export class FlightCardComponent implements OnInit, OnChanges {
   }
 
   fetchPricePromise(flightUUID: string, classType: string): Promise<number | null> {
-    console.log('[FlightCard] fetchPricePromise', flightUUID, 'classType:', classType);
-    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}?type=${classType}`)
+    return this.http.get<any>(`${environment.apiUrl}/api/bookings/tickets/${flightUUID}`)
       .toPromise()
       .then(res => {
         let prezzo = null;
@@ -148,7 +196,6 @@ export class FlightCardComponent implements OnInit, OnChanges {
             prezzo = found.price;
           }
         }
-        console.log('[FlightCard] fetchPricePromise result', flightUUID, 'classType:', classType, 'price:', prezzo);
         return prezzo;
       })
       .catch(() => null);
@@ -161,29 +208,91 @@ export class FlightCardComponent implements OnInit, OnChanges {
   }
 
   isRoundTrip(): boolean {
-    // true solo se flight è un array di 2 voli e rappresenta andata+ritorno
-    return Array.isArray(this.flight) &&
-           this.flight.length === 2 &&
-           this.flight[0].routes.airports_routes_departureToairports.id === this.flight[1].routes.airports_routes_destinationToairports.id &&
-           this.flight[0].routes.airports_routes_destinationToairports.id === this.flight[1].routes.airports_routes_departureToairports.id;
+    return Array.isArray(this.andataSegments) && Array.isArray(this.ritornoSegments) &&
+           this.andataSegments.length > 0 && this.ritornoSegments.length > 0;
   }
 
   isMultiLeg(): boolean {
-    // true se flight è un array di almeno 2 voli e NON è roundtrip
-    return Array.isArray(this.flight) &&
-           this.flight.length > 1 &&
-           !this.isRoundTrip();
+    return Array.isArray(this.andataSegments) && this.andataSegments.length > 1 && !this.isRoundTrip();
   }
 
-  getMultiLegTotalMinutes(flight: any[]): number {
-    return flight.reduce((acc, leg) => acc + (leg.duration || 0), 0);
+  getMultiLegTotalMinutes(): number {
+    return this.andataSegments.reduce((acc, leg) => acc + (leg.duration || 0), 0);
   }
 
-  getMultiLegDurationString(flight: any[]): string {
-    const total = flight.reduce((acc, leg) => acc + (leg.duration || 0), 0);
+  getMultiLegDurationString(): string {
+    const total = this.getMultiLegTotalMinutes();
     const hours = Math.floor(total / 60);
     const minutes = total % 60;
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  }
+
+  getMultiLegTotalPrice(): number | null {
+    if (!Array.isArray(this.andataSegments)) return null;
+    let total = 0;
+    for (const leg of this.andataSegments) {
+      if (leg.price == null) return null;
+      total += leg.price;
+    }
+    return total;
+  }
+
+  /**
+   * Calcola il prezzo totale per roundtrip multi-leg (somma tutti i segmenti di andata e ritorno)
+   */
+  getRoundTripMultiLegTotalPrice(): number | null {
+    const andata = this.getAndataTotalPrice();
+    const ritorno = this.getRitornoTotalPrice();
+    if (andata === null || ritorno === null) {
+      return null;
+    }
+    const total = andata + ritorno;
+    return total;
+  }
+
+  /**
+   * Calcola il prezzo totale di una lista di segmenti (multi-leg o single-leg)
+   * Non logga warning se loadingPrice è true (evita spam in fase di fetch)
+   */
+  private getSegmentsTotalPrice(segments: any[]): number | null {
+    if (!Array.isArray(segments)) return null;
+    let total = 0;
+    for (const leg of segments) {
+      if (leg.price == null) {
+        return null;
+      }
+      total += leg.price;
+    }
+    return total;
+  }
+
+  /**
+   * Somma i prezzi di tutti i segmenti di andata (multi-leg o single-leg)
+   */
+  getAndataTotalPrice(): number | null {
+    const total = this.getSegmentsTotalPrice(this.andataSegments);
+    return total;
+  }
+
+  /**
+   * Somma i prezzi di tutti i segmenti di ritorno (multi-leg o single-leg)
+   */
+  getRitornoTotalPrice(): number | null {
+    const total = this.getSegmentsTotalPrice(this.ritornoSegments);
+    return total;
+  }
+
+  getAndataDeparture() {
+    return this.andataSegments[0]?.routes?.airports_routes_departureToairports;
+  }
+  getAndataArrival() {
+    return this.andataSegments[this.andataSegments.length - 1]?.routes?.airports_routes_destinationToairports;
+  }
+  getRitornoDeparture() {
+    return this.ritornoSegments?.[0]?.routes?.airports_routes_departureToairports;
+  }
+  getRitornoArrival() {
+    return this.ritornoSegments?.[this.ritornoSegments.length - 1]?.routes?.airports_routes_destinationToairports;
   }
 
   isCustomer(): boolean {
@@ -197,15 +306,30 @@ export class FlightCardComponent implements OnInit, OnChanges {
     }
   }
 
-  getMultiLegTotalPrice(): number | null {
-    if (!Array.isArray(this.flight)) return null;
-    let total = 0;
-    for (const leg of this.flight) {
-      if (leg.price == null) return null;
-      total += leg.price;
+  goToBooking() {
+    let totalPrice = null;
+    if (this.isRoundTrip()) {
+      if (this.priceAndata != null && this.priceRitorno != null) {
+        totalPrice = (this.priceAndata + this.priceRitorno) * this.passengers;
+      }
+    } else if (this.isMultiLeg()) {
+      const multiLegTotal = this.getMultiLegTotalPrice();
+      if (multiLegTotal != null) {
+        totalPrice = multiLegTotal * this.passengers;
+      }
+    } else {
+      if (this.priceAndata != null) {
+        totalPrice = this.priceAndata * this.passengers;
+      }
     }
-    return total;
+    this.router.navigate(['/ticket-booking'], {
+      state: {
+        flightId: this.andataSegments[0]?.code,
+        returnFlightId: this.ritornoSegments?.[0]?.code || null,
+        passengers: this.passengers,
+        classType: this.classType,
+        totalPrice: totalPrice
+      }
+    });
   }
-
-  
 }

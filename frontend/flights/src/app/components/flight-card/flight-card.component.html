@@ -1,195 +1,233 @@
 <mat-card class="flight-card-mat">
   <div class="flight-card-row">
-
-    <!-- Volo andata e ritorno -->
-    <ng-container *ngIf="isRoundTrip(); else notRoundTrip">
-      <div class="flight-main-vertical">
-        <div class="flight-segments-col">
-          <!-- Andata -->
-          <div class="flight-segment-row">
-            <div class="flight-airline left">
-              <mat-icon class="flight-airline-logo" *ngIf="flight[0]?.airline_logo">flight</mat-icon>
-              <span>{{ flight[0]?.airline_name }}</span>
-            </div>
-            <div class="flight-segment-content">
-              <div class="flight-segment-title">Andata</div>
-              <div class="flight-segment-row-inner">
-                <div class="flight-time-airport left">
-                  <div class="flight-time">{{ flight[0]?.liftoff_date_LOCAL | date:'HH:mm' }}</div>
-                  <div class="flight-airport-code">
-                    {{ flight[0]?.routes?.airports_routes_departureToairports?.name }} ({{ flight[0]?.routes?.airports_routes_departureToairports?.city }})
-                  </div>
-                </div>
-                <div class="flight-middle">
-                  <div class="flight-duration">{{ (flight[0]?.duration/60) | number:'1.0-0' }}h{{ (flight[0]?.duration%60) ? ' ' + (flight[0]?.duration%60) + 'm' : '' }}</div>
-                  <div class="flight-line">
-                    <span class="flight-line-bar"></span>
-                    <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
-                    <span class="flight-line-bar"></span>
-                  </div>
-                </div>
-                <div class="flight-time-airport right">
-                  <div class="flight-time">{{ getLandingDateLocal(flight[0]) | date:'HH:mm' }}</div>
-                  <div class="flight-airport-code">
-                    {{ flight[0]?.routes?.airports_routes_destinationToairports?.name }} ({{ flight[0]?.routes?.airports_routes_destinationToairports?.city }})
-                  </div>
-                </div>
+    <div class="flight-card">
+      <!-- Volo andata e ritorno -->
+      <ng-container *ngIf="isRoundTrip(); else notRoundTrip">
+        <div class="flight-leg">
+          <h4>Andata</h4>
+          <div class="flight-airline">
+            <mat-icon class="flight-airline-logo" *ngIf="andataSegments[0]?.airline_logo">flight</mat-icon>
+            <span>{{ andataSegments[0]?.airline_name }}</span>
+          </div>
+          <div class="flight-main">
+            <!-- Partenza -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ andataSegments[0]?.liftoff_date_LOCAL | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ andataSegments[0]?.routes?.airports_routes_departureToairports?.name }} ({{ andataSegments[0]?.routes?.airports_routes_departureToairports?.city }})
               </div>
             </div>
-          </div>
-          <!-- Ritorno -->
-          <div class="flight-segment-row">
-            <div class="flight-airline left">
-              <mat-icon class="flight-airline-logo" *ngIf="flight[1]?.airline_logo">flight</mat-icon>
-              <span>{{ flight[1]?.airline_name }}</span>
+            <!-- Linea centrale e durata -->
+            <div class="flight-middle">
+              <!-- Durata -->
+              <div class="flight-duration">
+                <span *ngIf="andataSegments.length === 1">
+                  {{ (andataSegments[0]?.duration/60) | number:'1.0-0' }}h
+                  <ng-container *ngIf="andataSegments[0]?.duration%60">
+                    {{ ' ' + (andataSegments[0]?.duration%60) + 'm' }}
+                  </ng-container>
+                </span>
+                <span *ngIf="andataSegments.length > 1">
+                  {{ getMultiLegDurationString() }}
+                </span>
+              </div>
+              <!-- Linea centrale -->
+              <div class="flight-line">
+                <span class="flight-line-bar"></span>
+                <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
+                <span class="flight-line-bar"></span>
+              </div>
+              <!-- Scali/Diretto -->
+              <div class="flight-stop" style="text-align: center; width: 100%;">
+                <span *ngIf="andataSegments.length === 1">Diretto</span>
+                <span *ngIf="andataSegments.length > 1">
+                  Scalo:
+                  <span *ngFor="let seg of andataSegments.slice(0, andataSegments.length-1); let i = index">
+                    {{ seg.routes?.airports_routes_destinationToairports?.name }}<span *ngIf="i < andataSegments.length-2">, </span>
+                  </span>
+                </span>
+              </div>
             </div>
-            <div class="flight-segment-content">
-              <div class="flight-segment-title">Ritorno</div>
-              <div class="flight-segment-row-inner">
-                <div class="flight-time-airport left">
-                  <div class="flight-time">{{ flight[1]?.liftoff_date_LOCAL | date:'HH:mm' }}</div>
-                  <div class="flight-airport-code">
-                    {{ flight[1]?.routes?.airports_routes_departureToairports?.name }} ({{ flight[1]?.routes?.airports_routes_departureToairports?.city }})
-                  </div>
-                </div>
-                <div class="flight-middle">
-                  <div class="flight-duration">{{ (flight[1]?.duration/60) | number:'1.0-0' }}h{{ (flight[1]?.duration%60) ? ' ' + (flight[1]?.duration%60) + 'm' : '' }}</div>
-                  <div class="flight-line">
-                    <span class="flight-line-bar"></span>
-                    <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
-                    <span class="flight-line-bar"></span>
-                  </div>
-                </div>
-                <div class="flight-time-airport right">
-                  <div class="flight-time">{{ getLandingDateLocal(flight[1]) | date:'HH:mm' }}</div>
-                  <div class="flight-airport-code">
-                    {{ flight[1]?.routes?.airports_routes_destinationToairports?.name }} ({{ flight[1]?.routes?.airports_routes_destinationToairports?.city }})
-                  </div>
-                </div>
+            <!-- Arrivo -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ getLandingDateLocal(andataSegments[andataSegments.length-1]) | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ andataSegments[andataSegments.length-1]?.routes?.airports_routes_destinationToairports?.name }} ({{ andataSegments[andataSegments.length-1]?.routes?.airports_routes_destinationToairports?.city }})
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="flight-price">
-        <ng-container *ngIf="loadingPrice">...</ng-container>
-        <ng-container *ngIf="!loadingPrice && priceAndata !== null && priceRitorno !== null">
-          €{{ priceAndata + priceRitorno }}
-        </ng-container>
-        <ng-container *ngIf="!loadingPrice && (priceAndata === null || priceRitorno === null) && !errorPrice">---</ng-container>
-        <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
-        <button *ngIf="isCustomer()" mat-raised-button color="primary"
-                [routerLink]="['/ticket-booking']"
-                [queryParams]="{ flightId: flight[0]?.uuid, returnFlightId: flight[1]?.uuid }">
-          Acquista
-        </button>
-      </div>
-    </ng-container>
-
-    <ng-template #notRoundTrip>
-      <!-- Volo multi-leg -->
-      <ng-container *ngIf="isMultiLeg(); else singleLeg">
-        <div class="flight-airline">
-          <mat-icon class="flight-airline-logo" *ngIf="flight[0].airline_logo">flight</mat-icon>
-          <span>{{ flight[0].airline_name }}</span>
-        </div>
-        <div class="flight-main">
-          <!-- Partenza -->
-          <div class="flight-time-airport">
-            <div class="flight-time">{{ flight[0].liftoff_date_LOCAL | date:'HH:mm' }}</div>
-            <div class="flight-airport-code">
-              {{ flight[0].routes?.airports_routes_departureToairports?.name }} ({{ flight[0].routes?.airports_routes_departureToairports?.city }})
-            </div>
+        <div class="flight-leg" *ngIf="ritornoSegments && ritornoSegments.length">
+          <h4>Ritorno</h4>
+          <div class="flight-airline">
+            <mat-icon class="flight-airline-logo" *ngIf="ritornoSegments[0]?.airline_logo">flight</mat-icon>
+            <span>{{ ritornoSegments[0]?.airline_name }}</span>
           </div>
-          <!-- Linea centrale e scalo -->
-          <div class="flight-middle">
-            <div class="flight-duration">
-              {{ getMultiLegDurationString(flight) }}
+          <div class="flight-main">
+            <!-- Partenza -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ ritornoSegments[0]?.liftoff_date_LOCAL | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ ritornoSegments[0]?.routes?.airports_routes_departureToairports?.name }} ({{ ritornoSegments[0]?.routes?.airports_routes_departureToairports?.city }})
+              </div>
             </div>
-            <div class="flight-line">
-              <span class="flight-line-bar"></span>
-              <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
-              <span class="flight-line-bar"></span>
+            <!-- Linea centrale e durata -->
+            <div class="flight-middle">
+              <!-- Durata -->
+              <div class="flight-duration">
+                <span *ngIf="ritornoSegments.length === 1">
+                  {{ (ritornoSegments[0]?.duration/60) | number:'1.0-0' }}h
+                  <ng-container *ngIf="ritornoSegments[0]?.duration%60">
+                    {{ ' ' + (ritornoSegments[0]?.duration%60) + 'm' }}
+                  </ng-container>
+                </span>
+                <span *ngIf="ritornoSegments.length > 1">
+                  {{ getMultiLegDurationString() }}
+                </span>
+              </div>
+              <!-- Linea centrale -->
+              <div class="flight-line">
+                <span class="flight-line-bar"></span>
+                <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
+                <span class="flight-line-bar"></span>
+              </div>
+              <!-- Scali/Diretto -->
+              <div class="flight-stop" style="text-align: center; width: 100%;">
+                <span *ngIf="ritornoSegments.length === 1">Diretto</span>
+                <span *ngIf="ritornoSegments.length > 1">
+                  Scalo:
+                  <span *ngFor="let seg of ritornoSegments.slice(0, ritornoSegments.length-1); let i = index">
+                    {{ seg.routes?.airports_routes_destinationToairports?.name }}<span *ngIf="i < ritornoSegments.length-2">, </span>
+                  </span>
+                </span>
+              </div>
             </div>
-            <div class="flight-stop">
-              Scalo: {{ flight[0].routes?.airports_routes_destinationToairports?.name }}
-              ({{ flight[0].routes?.airports_routes_destinationToairports?.city }})
-            </div>
-          </div>
-          <!-- Arrivo -->
-          <div class="flight-time-airport">
-            <div class="flight-time">{{ getLandingDateLocal(flight[flight.length-1]) | date:'HH:mm' }}</div>
-            <div class="flight-airport-code">
-              {{ flight[flight.length-1].routes?.airports_routes_destinationToairports?.name }} ({{ flight[flight.length-1].routes?.airports_routes_destinationToairports?.city }})
+            <!-- Arrivo -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ getLandingDateLocal(ritornoSegments[ritornoSegments.length-1]) | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ ritornoSegments[ritornoSegments.length-1]?.routes?.airports_routes_destinationToairports?.name }} ({{ ritornoSegments[ritornoSegments.length-1]?.routes?.airports_routes_destinationToairports?.city }})
+              </div>
             </div>
           </div>
         </div>
         <div class="flight-price">
           <ng-container *ngIf="loadingPrice">...</ng-container>
-          <ng-container *ngIf="!loadingPrice && getMultiLegTotalPrice() !== null">
-            €{{ getMultiLegTotalPrice() }}
+          <!-- Prezzo roundtrip: sempre somma priceAndata + priceRitorno, anche per multi-leg -->
+          <ng-container *ngIf="!loadingPrice && priceAndata !== null && priceRitorno !== null">
+            €{{ priceAndata + priceRitorno }}
           </ng-container>
-          <ng-container *ngIf="!loadingPrice && getMultiLegTotalPrice() === null && !errorPrice">---</ng-container>
+          <ng-container *ngIf="!loadingPrice && (priceAndata === null || priceRitorno === null) && !errorPrice">---</ng-container>
           <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
-          <button *ngIf="isCustomer()" mat-raised-button color="primary"
-                  [routerLink]="['/ticket-booking']"
-                  [queryParams]="{ flightId: flight[0]?.uuid }">
-            Acquista
-          </button>
+          <button *ngIf="isCustomer()" mat-raised-button color="primary" (click)="goToBooking()">Acquista</button>
+        </div>
+        <div style="display:none">
+          {{ getAndataTotalPrice() }} {{ getRitornoTotalPrice() }} {{ getRoundTripMultiLegTotalPrice() }}
         </div>
       </ng-container>
 
-      <!-- Volo diretto (single leg) -->
-      <ng-template #singleLeg>
-        <div class="flight-airline">
-          <mat-icon class="flight-airline-logo" *ngIf="flight.airline_logo">flight</mat-icon>
-          <span>{{ flight.airline_name }}</span>
-        </div>
-        <div class="flight-main">
-          <!-- Partenza -->
-          <div class="flight-time-airport">
-            <div class="flight-time">{{ flight.liftoff_date_LOCAL | date:'HH:mm' }}</div>
-            <div class="flight-airport-code">
-              {{ flight.routes?.airports_routes_departureToairports?.name }} ({{ flight.routes?.airports_routes_departureToairports?.city }})
-            </div>
+      <ng-template #notRoundTrip>
+        <!-- Volo multi-leg -->
+        <ng-container *ngIf="isMultiLeg(); else singleLeg">
+          <div class="flight-airline">
+            <mat-icon class="flight-airline-logo" *ngIf="andataSegments[0]?.airline_logo">flight</mat-icon>
+            <span>{{ andataSegments[0]?.airline_name }}</span>
           </div>
-          <!-- Linea centrale e durata -->
-          <div class="flight-middle">
-            <div class="flight-duration">{{ (flight.duration/60) | number:'1.0-0' }}h{{ (flight.duration%60) ? ' ' + (flight.duration%60) + 'm' : '' }}</div>
-            <div class="flight-line">
-              <span class="flight-line-bar"></span>
-              <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
-              <span class="flight-line-bar"></span>
+          <div class="flight-main">
+            <!-- Partenza -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ andataSegments[0]?.liftoff_date_LOCAL | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ andataSegments[0]?.routes?.airports_routes_departureToairports?.name }} ({{ andataSegments[0]?.routes?.airports_routes_departureToairports?.city }})
+              </div>
             </div>
-            <div class="flight-stop">
-              <ng-container *ngIf="!flight.scali || flight.scali.length === 0; else scalo">
+            <!-- Linea centrale e scalo -->
+            <div class="flight-middle">
+              <div class="flight-duration">
+                {{ getMultiLegDurationString() }}
+              </div>
+              <div class="flight-line">
+                <span class="flight-line-bar"></span>
+                <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
+                <span class="flight-line-bar"></span>
+              </div>
+              <div class="flight-stop" *ngIf="andataSegments.length > 1">
+                Scalo:
+                <span *ngFor="let seg of andataSegments.slice(0, andataSegments.length-1); let i = index">
+                  {{ seg.routes?.airports_routes_destinationToairports?.name }}<span *ngIf="i < andataSegments.length-2">, </span>
+                </span>
+              </div>
+              <div class="flight-stop" *ngIf="andataSegments.length === 1">
                 Diretto
-              </ng-container>
-              <ng-template #scalo>
-                {{ flight.scali[0]?.iata_code || 'Scalo' }}
-              </ng-template>
+              </div>
+            </div>
+            <!-- Arrivo -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ getLandingDateLocal(andataSegments[andataSegments.length-1]) | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ andataSegments[andataSegments.length-1]?.routes?.airports_routes_destinationToairports?.name }} ({{ andataSegments[andataSegments.length-1]?.routes?.airports_routes_destinationToairports?.city }})
+              </div>
             </div>
           </div>
-          <!-- Arrivo -->
-          <div class="flight-time-airport">
-            <div class="flight-time">{{ getLandingDateLocal(flight) | date:'HH:mm' }}</div>
-            <div class="flight-airport-code">
-              {{ flight.routes?.airports_routes_destinationToairports?.name }} ({{ flight.routes?.airports_routes_destinationToairports?.city }})
+          <div class="flight-price">
+            <ng-container *ngIf="loadingPrice">...</ng-container>
+            <ng-container *ngIf="!loadingPrice && getMultiLegTotalPrice() !== null">
+              €{{ getMultiLegTotalPrice() }}
+            </ng-container>
+            <ng-container *ngIf="!loadingPrice && getMultiLegTotalPrice() === null && !errorPrice">---</ng-container>
+            <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
+            <button *ngIf="isCustomer()" mat-raised-button color="primary" (click)="goToBooking()">Acquista</button>
+          </div>
+        </ng-container>
+
+        <!-- Volo diretto (single leg) -->
+        <ng-template #singleLeg>
+          <div class="flight-airline">
+            <mat-icon class="flight-airline-logo" *ngIf="andataSegments[0]?.airline_logo">flight</mat-icon>
+            <span>{{ andataSegments[0]?.airline_name }}</span>
+          </div>
+          <div class="flight-main">
+            <!-- Partenza -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ andataSegments[0]?.liftoff_date_LOCAL | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ andataSegments[0]?.routes?.airports_routes_departureToairports?.name }} ({{ andataSegments[0]?.routes?.airports_routes_departureToairports?.city }})
+              </div>
+            </div>
+            <!-- Linea centrale e durata -->
+            <div class="flight-middle">
+              <div class="flight-duration">{{ (andataSegments[0]?.duration/60) | number:'1.0-0' }}h{{ (andataSegments[0]?.duration%60) ? ' ' + (andataSegments[0]?.duration%60) + 'm' : '' }}</div>
+              <div class="flight-line">
+                <span class="flight-line-bar"></span>
+                <mat-icon class="flight-plane plane-arrow">flight</mat-icon>
+                <span class="flight-line-bar"></span>
+              </div>
+              <div class="flight-stop" [ngStyle]="{'text-align': (!andataSegments[0]?.scali || andataSegments[0]?.scali.length === 0) ? 'center' : 'left', 'width': '100%'}">
+                <ng-container *ngIf="!andataSegments[0]?.scali || andataSegments[0]?.scali.length === 0; else scalo">
+                  Diretto
+                </ng-container>
+                <ng-template #scalo>
+                  {{ andataSegments[0]?.scali[0]?.iata_code || 'Scalo' }}
+                </ng-template>
+              </div>
+            </div>
+            <!-- Arrivo -->
+            <div class="flight-time-airport">
+              <div class="flight-time">{{ getLandingDateLocal(andataSegments[0]) | date:'HH:mm' }}</div>
+              <div class="flight-airport-code">
+                {{ andataSegments[0]?.routes?.airports_routes_destinationToairports?.name }} ({{ andataSegments[0]?.routes?.airports_routes_destinationToairports?.city }})
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flight-price">
-          <ng-container *ngIf="loadingPrice">...</ng-container>
-          <ng-container *ngIf="!loadingPrice && priceAndata !== null">€{{ priceAndata }}</ng-container>
-          <ng-container *ngIf="!loadingPrice && priceAndata === null && !errorPrice">---</ng-container>
-          <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
-          <button *ngIf="isCustomer()" mat-raised-button color="primary"
-                  [routerLink]="['/ticket-booking']"
-                  [queryParams]="{ flightId: flight.uuid }">
-            Acquista
-          </button>
-        </div>
+          <div class="flight-price">
+            <ng-container *ngIf="loadingPrice">...</ng-container>
+            <ng-container *ngIf="!loadingPrice && priceAndata !== null">€{{ priceAndata }}</ng-container>
+            <ng-container *ngIf="!loadingPrice && priceAndata === null && !errorPrice">---</ng-container>
+            <ng-container *ngIf="errorPrice">{{ errorPrice }}</ng-container>
+            <button *ngIf="isCustomer()" mat-raised-button color="primary" (click)="goToBooking()">Acquista</button>
+          </div>
+        </ng-template>
       </ng-template>
-    </ng-template>
+    </div>
   </div>
 </mat-card>
