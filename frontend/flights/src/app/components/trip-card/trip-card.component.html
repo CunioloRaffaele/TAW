@@ -1,42 +1,52 @@
 <mat-card class="trip-card">
   <mat-card-title>
+    <mat-icon color="primary" style="vertical-align: middle;">flight_takeoff</mat-icon>
     Viaggio #{{ trip?.id }}
   </mat-card-title>
   <mat-card-content>
-    <div *ngFor="let booking of bookings; let i = index">
-      <h4>Prenotazione {{ i + 1 }}</h4>
-      <div>
+    <div *ngFor="let booking of bookings; let i = index" class="booking-block">
+      <h4>
+        <mat-icon color="accent" style="vertical-align: middle;">confirmation_number</mat-icon>
+        Prenotazione {{ i + 1 }}
+      </h4>
+      <div class="booking-row">
         <span class="label">Data partenza:</span>
-        <span class="value">{{ booking?.tickets?.flights?.liftoff_date | date:'short' }}</span>
+        <span class="value">{{ booking?.localDepartureDate }}</span>
       </div>
-      <div>
+      <div class="booking-row">
         <span class="label">Da:</span>
         <span class="value">{{ booking?.departureAirportName || '...' }}</span>
       </div>
-      <div>
+      <div class="booking-row">
         <span class="label">A:</span>
         <span class="value">{{ booking?.destinationAirportName || '...' }}</span>
       </div>
-      <div>
+      <div class="booking-row">
         <span class="label">Codice volo:</span>
-        <span class="value">{{ booking?.tickets?.flights?.code }}</span>
+        <span class="value code">{{ booking?.tickets?.flights?.code }}</span>
       </div>
-      <div>
+      <div class="booking-row">
         <span class="label">Classe:</span>
         <span class="value">{{ booking?.tickets?.type }}</span>
       </div>
-      <div>
-        <button mat-stroked-button color="primary" (click)="downloadBooking(booking.id)">
-          <mat-icon *ngIf="downloadingId !== booking.id">download</mat-icon>
-          <span *ngIf="downloadingId === booking.id">Caricamento...</span>
-          Scarica dettagli
+      <div class="booking-row booking-actions">
+        <button mat-raised-button color="accent"
+                class="download-btn"
+                (click)="downloadBooking(booking.id)"
+                [disabled]="downloadingId === booking.id">
+          <mat-icon class="download-icon" *ngIf="downloadingId !== booking.id">download</mat-icon>
+          <img *ngIf="downloadingId === booking.id" src="assets/Loading_icon.gif" alt="Loading..." width="22" height="22" style="vertical-align: middle; margin-right: 6px;" />
+          <span>{{ downloadingId === booking.id ? 'Download...' : 'Scarica dettagli' }}</span>
         </button>
       </div>
-      <hr *ngIf="i < bookings.length - 1">
+      <mat-divider *ngIf="i < bookings.length - 1"></mat-divider>
     </div>
-    <div>
+    <div class="trip-status">
+      <mat-icon color="primary" style="vertical-align: middle;">event_available</mat-icon>
       <span class="label">Stato viaggio:</span>
-      <span class="value">{{ trip?.isActive ? 'Attivo' : 'Concluso' }}</span>
+      <span class="value status" [ngClass]="{'active': trip?.isActive, 'ended': !trip?.isActive}">
+        {{ trip?.isActive ? 'Attivo' : 'Concluso' }}
+      </span>
     </div>
   </mat-card-content>
 </mat-card>

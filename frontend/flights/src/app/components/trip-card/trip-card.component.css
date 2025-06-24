@@ -1,14 +1,73 @@
 .trip-card {
-  margin-bottom: 32px;
+  margin: 24px auto;
+  max-width: 700px;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px #0002;
+  background: #fafcff;
+  padding: 16px;
+}
+
+.booking-block {
+  padding: 18px 0 8px 0;
+}
+
+.booking-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.label {
+  font-weight: 500;
+  color: #1976d2;
+  min-width: 110px;
+  display: inline-block;
+}
+
+.value {
+  color: #333;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.code {
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  background: #e3f2fd;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 1.05em;
+}
+
+.booking-actions {
+  margin-top: 10px;
+}
+
+.trip-status {
+  margin-top: 18px;
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status.active {
+  color: #388e3c;
+  font-weight: 600;
+}
+
+.status.ended {
+  color: #b71c1c;
+  font-weight: 600;
+}
+
+mat-divider {
+  margin: 18px 0 0 0;
 }
 
 .fullscreen-loading {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(255,255,255,1);
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(255,255,255,0.85);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -22,4 +81,21 @@
   gap: 18px;
   font-size: 1.2em;
   color: #1976d2;
+}
+
+.download-btn {
+  min-width: 170px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+}
+
+.download-btn[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.download-icon {
+  margin-right: 8px;
+  vertical-align: middle;
 }

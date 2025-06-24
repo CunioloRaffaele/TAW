@@ -4,10 +4,11 @@ import { MatCardModule } from '@angular/material/card';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
 @Component({
   selector: 'app-trip-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule],
+  imports: [CommonModule, MatCardModule, MatIconModule, MatDividerModule],
   templateUrl: './trip-card.component.html',
   styleUrls: ['./trip-card.component.css'],
 })
@@ -44,6 +45,18 @@ export class TripCardComponent {
             },
           });
       }
+      // Fetch localDepartureDate from /api/bookings/booking/:id
+      this.http
+        .get<any>(`${environment.apiUrl}/api/bookings/booking/${booking.id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt_token')}`,
+          },
+        })
+        .subscribe({
+          next: (res) => {
+            this.bookings[i].localDepartureDate = res.localDepartureDate;
+          }
+        });
     });
   }
 
