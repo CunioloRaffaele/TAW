@@ -12,7 +12,6 @@
       </button>
     </div>
 
-    <!-- Popup aggiunta rotta -->
     <div class="add-route-dialog" *ngIf="showAddDialog">
       <h3>Aggiungi una rotta</h3>
       <form [formGroup]="addRouteForm" (ngSubmit)="onAddRoute()">
@@ -48,7 +47,6 @@
       </form>
     </div>
 
-    <!-- Popup creazione rotta -->
     <div class="add-route-dialog" *ngIf="showCreateDialog">
       <h3>Crea una nuova rotta</h3>
       <form [formGroup]="createRouteForm" (ngSubmit)="onCreateRoute()">
@@ -94,7 +92,6 @@
       Nessuna rotta associata.
     </div>
 
-    <!-- LISTA DELLE ROTTE SOTTO IL BOX DI AGGIUNTA -->
     <div *ngIf="!loading && routes.length > 0" class="routes-list">
       <app-route-card
         *ngFor="let route of routes"

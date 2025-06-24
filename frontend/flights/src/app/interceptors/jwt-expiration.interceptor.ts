@@ -9,7 +9,6 @@ export class JwtExpiryInterceptor implements HttpInterceptor {
     if (token && this.isJwtExpired(token)) {
       alert('Session expired. Please log in again.');
       localStorage.removeItem('jwt_token');
-      // Optionally, redirect to login page here
       return throwError(() => new Error('JWT expired'));
     }
     return next.handle(req);

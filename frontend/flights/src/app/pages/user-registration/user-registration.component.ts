@@ -37,7 +37,7 @@ export class UserRegistrationComponent {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router // <--- aggiungi il Router
+    private router: Router 
   ) {
     this.registrationForm = this.fb.group({
       name: ['', Validators.required],
@@ -67,11 +67,9 @@ export class UserRegistrationComponent {
       this.registrationForm.value
     ).subscribe({
       next: (res) => {
-        // Login automatico
         localStorage.setItem('jwt_token', res.token);
         const role = this.getRoleFromToken(res.token);
         this.loading = false;
-        // Redirect in base al ruolo
         if (role === 1) {
           this.router.navigate(['/admin-dashboard']);
         } else if (role === 2) {
@@ -81,10 +79,6 @@ export class UserRegistrationComponent {
         }
       },
       error: (err) => {
-        // Stampa sempre la risposta del backend in console per debug
-        console.error('Errore dal backend:', err);
-
-        // Mostra il messaggio corretto a schermo
         if (err.error) {
           if (typeof err.error === 'string') {
             try {

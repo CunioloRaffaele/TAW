@@ -7,14 +7,12 @@
       {{ getUserName() || 'Profilo' }}
     </button>
     <mat-menu #userMenu="matMenu">
-      <!-- Cerca il bottone o elemento per il profilo nella toolbar -->
       <div *ngIf="getRoleFromToken() === 0" mat-menu-item>
         <button mat-menu-item (click)="goToProfile()">
           <mat-icon>account_circle</mat-icon>
           Profilo
         </button>
       </div>
-      <!-- SOLO per admin -->
       <button *ngIf="!isCurrentRoute('/')" mat-menu-item routerLink="/">
         <mat-icon>home</mat-icon>
         Homepage

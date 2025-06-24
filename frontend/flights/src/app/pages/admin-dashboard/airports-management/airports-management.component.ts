@@ -36,7 +36,7 @@ export class AirportsManagementComponent implements OnInit {
   airports: Airport[] = [];
   loading = false;
   error: string | null = null;
-  sortBy: 'name' = 'name'; // Solo sort per nome
+  sortBy: 'name' = 'name'; 
   sortDir: 'asc' | 'desc' = 'asc';
   constructor(private http: HttpClient) {}
 
@@ -63,11 +63,10 @@ export class AirportsManagementComponent implements OnInit {
 
   setSort(sort: 'name') {
     if (this.sortBy === sort) {
-      // Se clicchi di nuovo sullo stesso, alterna la direzione
       this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortBy = sort;
-      this.sortDir = 'asc'; // resetta a crescente quando cambi campo
+      this.sortDir = 'asc'; 
     }
   }
 

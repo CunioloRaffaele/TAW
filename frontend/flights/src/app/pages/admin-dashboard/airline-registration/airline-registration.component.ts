@@ -69,7 +69,6 @@ export class AirlineRegistrationComponent {
       next: (res) => {
         this.inviteCode = res.invitationCode;
         const airlineName = this.inviteForm.value.name;
-        // Genera l’URL per la compagnia
         this.enrollmentUrl = `${window.location.origin}/airline-enrollment/${this.inviteCode}/${encodeURIComponent(airlineName)}`;
         this.loading = false;
       },

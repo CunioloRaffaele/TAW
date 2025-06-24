@@ -55,13 +55,13 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: center; /* centra verticalmente il prezzo totale */
+  justify-content: center; 
   flex: 0 0 auto;
   min-width: 70px;
   margin-left: 8px;
   gap: 0;
   margin-top: 0;
-  height: 100%; /* assicura l'allineamento verticale */
+  height: 100%; 
 }
 
 .flight-segment-row {
@@ -151,7 +151,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end; /* allinea il prezzo a destra nella colonna */
+  justify-content: flex-end; 
   gap: 6px;
   font-size: 1.15em;
   font-weight: 700;
@@ -257,10 +257,10 @@
 }
 
 .flight-segment-price.right {
-  display: none !important; /* nasconde eventuali prezzi segmentati */
+  display: none !important; 
 }
 
-/* Migliora la responsività per mobile */
+
 @media (max-width: 700px) {
   .flight-prices-col {
     align-items: stretch;

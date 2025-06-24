@@ -67,7 +67,6 @@ export class AirlineEnrollmentComponent {
       next: () => {
         this.success = true;
         this.loading = false;
-        // Redirect alla pagina di login airline
         this.router.navigate(['/airline-login']);
       },
       error: (err) => {

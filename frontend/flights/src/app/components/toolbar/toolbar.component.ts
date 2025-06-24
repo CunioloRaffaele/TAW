@@ -61,7 +61,7 @@ export class ToolbarComponent {
   isCurrentRoute(route: string): boolean {
     const current = this.router.url.split('?')[0].replace(/\/$/, '');
     const target = route.replace(/\/$/, '');
-    if (target === '') return current === ''; // homepage
+    if (target === '') return current === '';
     return current.startsWith(target);
   }
 

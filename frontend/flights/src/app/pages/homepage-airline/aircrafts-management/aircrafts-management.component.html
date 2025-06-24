@@ -6,7 +6,6 @@
       <mat-icon>add</mat-icon>
       Aggiungi aereo
     </button>
-    <!-- Popup aggiunta aereo -->
     <div class="add-aircraft-dialog" *ngIf="showAddAircraftDialog">
       <h3>Aggiungi un nuovo aereo</h3>
       <form [formGroup]="addAircraftForm" (ngSubmit)="onAddAircraft()">

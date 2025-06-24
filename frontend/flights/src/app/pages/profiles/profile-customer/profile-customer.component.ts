@@ -59,9 +59,6 @@ export class ProfileCustomerComponent {
             this.tripsId.push(data[i].id);
           }
 
-          // Import forkJoin at the top of the file
-
-          // Create array of requests for each trip ID
           const tripRequests = this.tripsId.map(tripId => 
             this.http.get<any>(`${environment.apiUrl}/api/bookings/trips/${tripId}`, {
               headers: {
@@ -70,7 +67,7 @@ export class ProfileCustomerComponent {
             })
           );
 
-          // Execute all requests in parallel and wait for all to complete
+          
           if (this.tripsId.length > 0) {
             forkJoin(tripRequests).subscribe({
               next: (tripDetails) => {

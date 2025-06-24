@@ -37,7 +37,6 @@ export const routes: Routes = [
       { path: '', redirectTo: 'airline-registration', pathMatch: 'full' }
     ]
   },
-  { path: 'homepage', component: HomepageComponent }, 
   {
     path: 'airline-enrollment',
     redirectTo: '/forbidden',

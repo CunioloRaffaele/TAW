@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./flight-list.component.css']
 })
 export class FlightListComponent implements OnChanges {
-  @Input() flights: any[][] = []; // Ogni elemento: [andataSegments, ritornoSegments?]
+  @Input() flights: any[][] = []; 
   @Output() hoverRoute = new EventEmitter<any>();
   @Output() leaveRoute = new EventEmitter<void>();
   @Input() classType: string = 'ECONOMY';

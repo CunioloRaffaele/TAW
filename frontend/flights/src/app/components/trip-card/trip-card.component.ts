@@ -15,7 +15,7 @@ import { MatDividerModule } from '@angular/material/divider';
 export class TripCardComponent {
   @Input() trip: any;
   bookings: any[] = [];
-  downloadingId: number | null = null; // Add this line
+  downloadingId: number | null = null; 
 
   constructor(private http: HttpClient) {}
   ngOnInit() {
@@ -61,7 +61,7 @@ export class TripCardComponent {
   }
 
   downloadBooking(bookingId: number) {
-    this.downloadingId = bookingId; // Set loading
+    this.downloadingId = bookingId; 
     const token = localStorage.getItem('jwt_token');
     this.http
       .get(`${environment.apiUrl}/api/bookings/booking/${bookingId}/download`, {
@@ -76,10 +76,10 @@ export class TripCardComponent {
           a.download = `booking_${bookingId}.pdf`;
           a.click();
           window.URL.revokeObjectURL(url);
-          this.downloadingId = null; // Reset loading
+          this.downloadingId = null; 
         },
         error: () => {
-          this.downloadingId = null; // Reset loading on error
+          this.downloadingId = null; 
         }
       });
   }

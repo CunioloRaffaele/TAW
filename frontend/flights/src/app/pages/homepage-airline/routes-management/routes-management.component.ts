@@ -122,7 +122,6 @@ export class RoutesManagementComponent implements OnInit {
       .subscribe({
         next: (res: any) => {
           this.stats = res.stats;
-          // Ora aggiorna le rotte con le statistiche
           if (this.routes && this.routes.length > 0) {
             this.routes = this.routes.map((route) => {
               const key = `${route.route_departure}-${route.route_destination}`;
@@ -209,7 +208,7 @@ export class RoutesManagementComponent implements OnInit {
         next: (res) => {
           this.routes = res.routes;
           this.loading = false;
-          this.loadStats(); // <-- carica le statistiche solo dopo aver caricato le rotte
+          this.loadStats(); 
         },
         error: (err) => {
           this.error =

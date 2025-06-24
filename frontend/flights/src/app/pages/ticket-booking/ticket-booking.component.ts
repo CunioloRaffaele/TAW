@@ -91,7 +91,6 @@ export class TicketBookingComponent implements OnInit {
   }
 
   loadTicketAndSeats(flightUUID: string, type: 'andata' | 'ritorno') {
-    // 1. Carica i ticket disponibili per la classe scelta
     this.http.get<any[]>(`/api/bookings/tickets/${flightUUID}`).subscribe(ticketRes => {
       const found = ticketRes?.find(t => (t.type || '').toUpperCase() === this.classType.toUpperCase());
       if (type === 'andata') {
@@ -109,7 +108,6 @@ export class TicketBookingComponent implements OnInit {
       }
       this.updateTotalIfReady();
     });
-    // 2. Carica i posti disponibili
     this.http.get<any[]>(`/api/bookings/seats/${flightUUID}`).subscribe((seatsRes: any[] = []) => {
       const seats = (seatsRes || []).map(seat => ({
         ...seat,
@@ -133,9 +131,8 @@ export class TicketBookingComponent implements OnInit {
     }
   }
 
-  // Ogni volta che cambiano extra o posti, chiama questa funzione:
+  
   calculateTotal() {
-    // Usa sempre il prezzo base come partenza
     let total = this.baseTotal;
 
     // Extra globali
@@ -145,7 +142,7 @@ export class TicketBookingComponent implements OnInit {
     this.totalPrice = total;
   }
 
-  // Se cambi i posti o i prezzi dei voli, aggiorna anche il base:
+  
   updateBaseTotal() {
     let base = 0;
     if (this.priceAndata != null) base += this.priceAndata * this.selectedSeatsAndata.length;
@@ -154,7 +151,7 @@ export class TicketBookingComponent implements OnInit {
     this.calculateTotal();
   }
 
-  // Call this after selecting/deselecting a seat
+  
   onSeatSelectionChange() {
     this.calculateTotal();
   }
@@ -233,9 +230,7 @@ export class TicketBookingComponent implements OnInit {
             extras: selectedExtra ? [selectedExtra] : []
           });
         }
-        // Fai la POST per ogni passeggero
         try {
-          // eslint-disable-next-line no-await-in-loop
           const res = await this.http.post<any>(
             `${apiUrl}/api/bookings/trips`,
             { tickets },
@@ -263,7 +258,7 @@ export class TicketBookingComponent implements OnInit {
   selectGlobalExtra(type: 'baggage' | 'lounge' | 'none') {
     this.extraBaggageSelected = type === 'baggage';
     this.airportLoungeSelected = type === 'lounge';
-    this.globalExtra = type; // Aggiorna anche il globalExtra!
+    this.globalExtra = type; 
     this.calculateTotal();
   }
 }

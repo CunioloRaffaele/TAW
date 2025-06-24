@@ -1,19 +1,3 @@
-/*
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { UserCardComponent } from '../../../components/user-card/user-card.component';
-
-@Component({
-  selector: 'app-users-management',
-  standalone: true,
-  imports: [CommonModule, MatCardModule, UserCardComponent],
-  templateUrl: './users-management.component.html',
-  styleUrls: ['./users-management.component.css']
-})
-export class UsersManagementComponent { }
-
-*/
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -37,9 +21,9 @@ interface User {
     MatCardModule,
     UserCardComponent,
     MatProgressSpinnerModule,
-    HttpClientModule // Aggiunto qui
+    HttpClientModule 
   ],
-  providers: [], // Rimosso provideHttpClient da qui
+  providers: [], 
   templateUrl: './users-management.component.html',
   styleUrls: ['./users-management.component.css']
 })
@@ -58,7 +42,7 @@ export class UsersManagementComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    // Assicuriamoci di inviare l'Authorization header
+    
     const headers = {
       'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
     };
@@ -88,7 +72,6 @@ export class UsersManagementComponent implements OnInit {
       .subscribe({
         next: (response) => {
           console.log('Utente eliminato:', response.message);
-          // Rimuovi l'utente dalla lista locale senza ricaricare tutto
           this.users = this.users.filter(user => user.id !== userId);
           this.loading = false;
         },

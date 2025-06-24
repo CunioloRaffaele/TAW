@@ -54,7 +54,6 @@ export class AirlinesManagementComponent implements OnInit {
 
   deleteAirline(airlineName: string): void {
     this.loading = true;
-    // Sostituisci con il vero endpoint di DELETE se disponibile
     this.http.delete<{ message: string }>(`${environment.apiUrl}/api/airlines/airlines/${encodeURIComponent(airlineName)}`)
       .subscribe({
         next: () => {

@@ -16,8 +16,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./flight-card.component.css']
 })
 export class FlightCardComponent implements OnInit, OnChanges {
-  // RIMUOVI flight
-  // @Input() flight: any;
+  
   @Input() andataSegments: any[] = [];
   @Input() ritornoSegments: any[] = [];
   @Input() set classType(value: string) {
@@ -237,9 +236,8 @@ export class FlightCardComponent implements OnInit, OnChanges {
     return total;
   }
 
-  /**
-   * Calcola il prezzo totale per roundtrip multi-leg (somma tutti i segmenti di andata e ritorno)
-   */
+  
+  //Calcola il prezzo totale per roundtrip multi-leg (somma tutti i segmenti di andata e ritorno)
   getRoundTripMultiLegTotalPrice(): number | null {
     const andata = this.getAndataTotalPrice();
     const ritorno = this.getRitornoTotalPrice();
@@ -250,10 +248,9 @@ export class FlightCardComponent implements OnInit, OnChanges {
     return total;
   }
 
-  /**
-   * Calcola il prezzo totale di una lista di segmenti (multi-leg o single-leg)
-   * Non logga warning se loadingPrice è true (evita spam in fase di fetch)
-   */
+  
+  //Calcola il prezzo totale di una lista di segmenti (multi-leg o single-leg)
+  //Non logga warning se loadingPrice è true (evita spam in fase di fetch)
   private getSegmentsTotalPrice(segments: any[]): number | null {
     if (!Array.isArray(segments)) return null;
     let total = 0;
@@ -266,17 +263,13 @@ export class FlightCardComponent implements OnInit, OnChanges {
     return total;
   }
 
-  /**
-   * Somma i prezzi di tutti i segmenti di andata (multi-leg o single-leg)
-   */
+  //Somma i prezzi di tutti i segmenti di andata (multi-leg o single-leg)
   getAndataTotalPrice(): number | null {
     const total = this.getSegmentsTotalPrice(this.andataSegments);
     return total;
   }
 
-  /**
-   * Somma i prezzi di tutti i segmenti di ritorno (multi-leg o single-leg)
-   */
+  //Somma i prezzi di tutti i segmenti di ritorno (multi-leg o single-leg)
   getRitornoTotalPrice(): number | null {
     const total = this.getSegmentsTotalPrice(this.ritornoSegments);
     return total;

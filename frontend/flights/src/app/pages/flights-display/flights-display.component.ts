@@ -52,7 +52,6 @@ export class FlightsDisplayComponent {
     this.error = null;
 
     try {
-      // 1. Chiedi la rotta
       const pathRes = await this.http.get<any>(
         `${environment.apiUrl}/api/navigate/routes/path?from=${this.searchData.from}&to=${this.searchData.to}`
       ).toPromise();
@@ -81,7 +80,6 @@ export class FlightsDisplayComponent {
             classType: this.searchData.classType
           };
           const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
-          // Per sola andata (loadFlights), uniforma così:
           if (res.flights && res.flights.length > 0) {
             this.flights = res.flights.map((f: any) => [Array.isArray(f) ? f : [f]]);
           } else {
@@ -102,12 +100,11 @@ export class FlightsDisplayComponent {
               destination: steps[1]
             }],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: this.addDays(this.searchData.departureDate, 180), // 6 mesi
+            searchEndDateLOCAL: this.addDays(this.searchData.departureDate, 180), 
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
           const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
-          // Per sola andata (loadFlights), uniforma così:
           if (res.flights && res.flights.length > 0) {
             this.flights = res.flights.map((f: any) => [Array.isArray(f) ? f : [f]]);
           } else {
@@ -121,12 +118,11 @@ export class FlightsDisplayComponent {
               { departure: steps[1], destination: steps[2] }
             ],
             searchStartDateLOCAL: this.searchData.departureDate,
-            searchEndDateLOCAL: this.addDays(this.searchData.departureDate, 180), // 6 mesi
+            searchEndDateLOCAL: this.addDays(this.searchData.departureDate, 180),
             passengers: this.searchData.passengers,
             classType: this.searchData.classType
           };
           const res = await this.http.post<any>(`${environment.apiUrl}/api/navigate/flights/search`, body).toPromise();
-          // Per sola andata (loadFlights), uniforma così:
           if (res.flights && res.flights.length > 0) {
             this.flights = res.flights.map((f: any) => [Array.isArray(f) ? f : [f]]);
           } else {
@@ -175,7 +171,7 @@ export class FlightsDisplayComponent {
       const stepsR = pathRitorno?.steps;
       const stepsCountR = pathRitorno?.stepsCount;
 
-      // Se "solo voli diretti", mostra solo se entrambi sono diretti
+      // Se solo voli diretti mostra solo se entrambi sono diretti
       if (this.searchData.directOnly) {
         if (stepsCountA === 2 && stepsCountR === 2) {
           const bodyAndata = {
@@ -200,7 +196,7 @@ export class FlightsDisplayComponent {
             this.flights = [];
             for (const andata of andataRes.flights) {
               for (const ritorno of ritornoRes.flights) {
-                // Ogni "andata" e "ritorno" può essere un oggetto (diretto) o un array (multi-leg)
+                // Ogni andata e ritorno può essere un oggetto (diretto) o un array (multi-leg)
                 this.flights.push([
                   Array.isArray(andata) ? andata : [andata],
                   Array.isArray(ritorno) ? ritorno : [ritorno]
@@ -253,7 +249,7 @@ export class FlightsDisplayComponent {
             this.flights = [];
             for (const andata of andataRes.flights) {
               for (const ritorno of ritornoRes.flights) {
-                // Ogni "andata" e "ritorno" può essere un oggetto (diretto) o un array (multi-leg)
+                // Ogni andata e ritorno può essere un oggetto (diretto) o un array (multi-leg)
                 this.flights.push([
                   Array.isArray(andata) ? andata : [andata],
                   Array.isArray(ritorno) ? ritorno : [ritorno]

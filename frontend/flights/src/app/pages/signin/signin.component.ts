@@ -74,10 +74,6 @@ export class SigninComponent {
         }
       },
       error: (err) => {
-        // Stampa sempre la risposta del backend in console per debug
-        console.error('Errore dal backend:', err);
-
-        // Mostra il messaggio corretto a schermo
         if (err.error) {
           if (typeof err.error === 'string') {
             try {
