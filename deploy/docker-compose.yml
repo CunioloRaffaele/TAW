@@ -24,10 +24,10 @@ services:
       - db
     command: npm run easyStart
 
-#  frontend:
-#    build:
-#      context: ../frontend
-#      dockerfile: ../deploy/frontend/Dockerfile
-#    container_name: frontend
-#    ports:
-#      - "80:80"
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../deploy/frontend/Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
