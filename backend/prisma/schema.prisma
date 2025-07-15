@@ -23,7 +23,7 @@ model airlines {
   name      String      @id @db.VarChar(255)
   password  String      @db.VarChar(255)
   country   String      @db.VarChar(100)
-  motto     String?     @default("Fly with us, fly safe and snug <3") @db.VarChar(300)
+  motto     String?     @default("Fly with us, FlySafe and snug <3") @db.VarChar(300)
   enrolled  Boolean?    @default(false)
   aircrafts aircrafts[]
   flights   flights[]
@@ -41,6 +41,8 @@ model airports {
   time_zone                           String   @db.VarChar
   routes_routes_departureToairports   routes[] @relation("routes_departureToairports")
   routes_routes_destinationToairports routes[] @relation("routes_destinationToairports")
+
+  @@index([name], map: "airport_name")
 }
 
 model bljwts {
@@ -93,6 +95,7 @@ model routes {
   uses                                  uses[]
 
   @@id([departure, destination])
+  @@index([departure, destination], map: "routes_peers")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -107,7 +110,7 @@ model seats {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model tickets {
   code       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type       String?    @db.VarChar(50)
+  type       String?    @db.VarChar(25)
   price      Float?
   fligt_code String?    @db.Uuid
   bookings   bookings[]
@@ -130,6 +133,8 @@ model users {
   password String  @db.VarChar(255)
   role     Int?    @default(0)
   trips    trips[]
+
+  @@index([email], map: "user_email")
 }
 
 model uses {

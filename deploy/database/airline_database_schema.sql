@@ -25,7 +25,9 @@ CREATE TABLE IF NOT EXISTS Airports (
     country VARCHAR(100) NOT NULL,
     lat DOUBLE PRECISION NOT NULL,
     lan DOUBLE PRECISION NOT NULL,
-    time_zone VARCHAR NOT NULL
+    time_zone VARCHAR NOT NULL,
+    CHECK (lat BETWEEN -90 AND 90),
+    CHECK (lan BETWEEN -180 AND 180)
 );
 
 -- Create Aircrafts Table
@@ -101,7 +103,7 @@ CREATE TABLE IF NOT EXISTS Tickets (
     --    code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    type VARCHAR(50),
+    type VARCHAR(25),
     price DOUBLE PRECISION,
     fligt_code UUID,
 	CHECK (type IN ('ECONOMY', 'BUSINESS', 'BASE', 'DELUXE', 'LUXURY')),
@@ -139,6 +141,16 @@ CREATE TABLE IF NOT EXISTS Bookings (
     FOREIGN KEY (trip_id) REFERENCES Trips(id) ON UPDATE CASCADE ON DELETE SET NULL,
     FOREIGN KEY (extras_id) REFERENCES Extras(id) ON UPDATE CASCADE ON DELETE SET NULL
 );
+
+
+-- INDEXES
+CREATE INDEX IF NOT EXISTS user_email ON Users(email);
+
+CREATE INDEX IF NOT EXISTS routes_peers ON Routes(departure, destination);
+
+CREATE INDEX IF NOT EXISTS airport_name ON Airports(name);
+
+
 
 -- Funzione generica per creare una funzione trigger se non esiste già
 -- Esempio di utilizzo: SELECT create_trigger_function_if_not_exists('filter_zombies', 'RETURN NEW;');
@@ -225,6 +237,81 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+-- < Generate seats from aircrafts insertion>
+-- create function first
+SELECT create_trigger_function_if_not_exists('generate_seats', 'RETURN NEW;');
+-- define then
+CREATE OR REPLACE TRIGGER seats_generator
+AFTER INSERT ON Aircrafts
+FOR EACH ROW
+EXECUTE FUNCTION generate_seats();
+
+CREATE OR REPLACE FUNCTION generate_seats() RETURNS TRIGGER AS $$
+DECLARE
+    row_letter char(1);
+    seat_number integer;
+    seats_per_row integer := 8;
+    current_row integer := 1;
+    seat_position varchar(4);
+BEGIN
+    -- Per ogni posto fino alla capacità massima
+    FOR seat_counter IN 1..NEW.seats_capacity LOOP
+        -- Calcola la lettera della fila (A, B, C, ...)
+        row_letter := chr(64 + current_row); -- 65 è il codice ASCII per 'A'
+        
+        -- Calcola il numero del posto nella fila (1-8)
+        seat_number := 1 + ((seat_counter - 1) % seats_per_row);
+        
+        -- Crea la posizione del posto (es: A1, B3, C7)
+        seat_position := row_letter || seat_number::text;
+        
+        -- Inserisci il nuovo posto
+        INSERT INTO Seats (postion, aircraft_id)
+        VALUES (seat_position, NEW.id);
+        
+        -- Se abbiamo raggiunto l'ultimo posto della fila, passa alla prossima
+        IF seat_number = seats_per_row THEN
+            current_row := current_row + 1;
+        END IF;
+    END LOOP;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- < Limit two bookings (flights and therefore tickets bought) per trip
+-- create function first
+SELECT create_trigger_function_if_not_exists('limit_bookings_per_trip', 'RETURN NEW;');
+-- define then
+CREATE TRIGGER limit_bookings_per_trip_trigger
+BEFORE INSERT OR UPDATE ON Bookings
+FOR EACH ROW
+EXECUTE FUNCTION limit_bookings_per_trip();
+
+CREATE OR REPLACE FUNCTION limit_bookings_per_trip() RETURNS TRIGGER AS $$
+DECLARE
+    bookings_count INTEGER;
+BEGIN
+    IF NEW.trip_id IS NOT NULL THEN
+        SELECT COUNT(*) INTO bookings_count FROM Bookings WHERE trip_id = NEW.trip_id;
+        IF TG_OP = 'INSERT' THEN
+            IF bookings_count >= 2 THEN
+                RAISE EXCEPTION 'Non puoi avere più di 2 bookings per lo stesso trip_id (%).', NEW.trip_id;
+            END IF;
+        ELSIF TG_OP = 'UPDATE' THEN
+            -- Se si cambia trip_id, controlla il nuovo valore
+            IF (NEW.trip_id <> OLD.trip_id) AND (bookings_count >= 2) THEN
+                RAISE EXCEPTION 'Non puoi avere più di 2 bookings per lo stesso trip_id (%).', NEW.trip_id;
+            END IF;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 
 
 -- populate database for testing
@@ -507,121 +594,4 @@ INSERT INTO blJWTs (jwt) VALUES
 ('jwt3'),
 ('jwt4');
 
-
--- Funzione generica per creare una funzione trigger se non esiste già
--- Esempio di utilizzo: SELECT create_trigger_function_if_not_exists('filter_zombies', 'RETURN NEW;');
-
-CREATE OR REPLACE FUNCTION create_trigger_function_if_not_exists(func_name text, func_body text)
-RETURNS void AS $$
-DECLARE
-    exists boolean;
-BEGIN
-    SELECT EXISTS (
-        SELECT 1 FROM pg_proc WHERE proname = func_name
-    ) INTO exists;
-
-    IF NOT exists THEN
-        EXECUTE format(
-            'CREATE FUNCTION %I() RETURNS TRIGGER AS $f$ BEGIN %s END; $f$ LANGUAGE plpgsql;',
-            func_name, func_body
-        );
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-
--- TRIGGERS
-
--- < Remove bookings that aren't useful to users and airlines >
--- create function first
-SELECT create_trigger_function_if_not_exists('filter_zombies', 'RETURN NEW;');
--- define then
-CREATE OR REPLACE TRIGGER  unused_booking
-AFTER INSERT OR UPDATE ON Bookings
-FOR EACH ROW
-EXECUTE FUNCTION filter_zombies();
-
-
-CREATE OR REPLACE FUNCTION filter_zombies() RETURNS TRIGGER AS $$
-BEGIN
-	IF NEW.seat_id IS NULL AND NEW.trip_id IS NULL AND NEW.ticket_code IS NULL THEN
-        DELETE FROM Bookings WHERE id = NEW.id;
-        RETURN NULL; -- annulla la riga inserita/aggiornata
-    END IF;
-	RETURN NEW;---for now
-END;
-$$ LANGUAGE plpgsql;
-
--- < Generate seats from aircrafts insertion>
--- create function first
-SELECT create_trigger_function_if_not_exists('generate_seats', 'RETURN NEW;');
--- define then
-CREATE OR REPLACE TRIGGER seats_generator
-AFTER INSERT ON Aircrafts
-FOR EACH ROW
-EXECUTE FUNCTION generate_seats();
-
-CREATE OR REPLACE FUNCTION generate_seats() RETURNS TRIGGER AS $$
-DECLARE
-    row_letter char(1);
-    seat_number integer;
-    seats_per_row integer := 8;
-    current_row integer := 1;
-    seat_position varchar(4);
-BEGIN
-    -- Per ogni posto fino alla capacità massima
-    FOR seat_counter IN 1..NEW.seats_capacity LOOP
-        -- Calcola la lettera della fila (A, B, C, ...)
-        row_letter := chr(64 + current_row); -- 65 è il codice ASCII per 'A'
-        
-        -- Calcola il numero del posto nella fila (1-8)
-        seat_number := 1 + ((seat_counter - 1) % seats_per_row);
-        
-        -- Crea la posizione del posto (es: A1, B3, C7)
-        seat_position := row_letter || seat_number::text;
-        
-        -- Inserisci il nuovo posto
-        INSERT INTO Seats (postion, aircraft_id)
-        VALUES (seat_position, NEW.id);
-        
-        -- Se abbiamo raggiunto l'ultimo posto della fila, passa alla prossima
-        IF seat_number = seats_per_row THEN
-            current_row := current_row + 1;
-        END IF;
-    END LOOP;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-
--- < Limit two bookings (flights and therefore tickets bought) per trip
--- create function first
-SELECT create_trigger_function_if_not_exists('limit_bookings_per_trip', 'RETURN NEW;');
--- define then
-CREATE TRIGGER limit_bookings_per_trip_trigger
-BEFORE INSERT OR UPDATE ON Bookings
-FOR EACH ROW
-EXECUTE FUNCTION limit_bookings_per_trip();
-
-CREATE OR REPLACE FUNCTION limit_bookings_per_trip() RETURNS TRIGGER AS $$
-DECLARE
-    bookings_count INTEGER;
-BEGIN
-    IF NEW.trip_id IS NOT NULL THEN
-        SELECT COUNT(*) INTO bookings_count FROM Bookings WHERE trip_id = NEW.trip_id;
-        IF TG_OP = 'INSERT' THEN
-            IF bookings_count >= 2 THEN
-                RAISE EXCEPTION 'Non puoi avere più di 2 bookings per lo stesso trip_id (%).', NEW.trip_id;
-            END IF;
-        ELSIF TG_OP = 'UPDATE' THEN
-            -- Se si cambia trip_id, controlla il nuovo valore
-            IF (NEW.trip_id <> OLD.trip_id) AND (bookings_count >= 2) THEN
-                RAISE EXCEPTION 'Non puoi avere più di 2 bookings per lo stesso trip_id (%).', NEW.trip_id;
-            END IF;
-        END IF;
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 

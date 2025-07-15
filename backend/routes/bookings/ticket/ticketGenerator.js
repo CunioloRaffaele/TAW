@@ -4,11 +4,36 @@ const path = require('path');
 const QRCode = require('qrcode');
 
 
-let browserPromise = puppeteer.launch({
-    headless: true,
-    executablePath: '/usr/bin/chromium-browser',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-});
+let browserPromise = (() => {
+    // Detect the platform and set appropriate options
+    const os = require('os');
+    const platform = os.platform();
+    
+    let launchOptions = {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    };
+    
+    // Platform-specific browser configuration
+    if (platform === 'linux') {
+        // For Linux (Docker environments)
+        const fs = require('fs');
+        if (fs.existsSync('/usr/bin/chromium-browser')) {
+            launchOptions.executablePath = '/usr/bin/chromium-browser';
+        }
+    } else if (platform === 'darwin') {
+        // For macOS - try Chrome if bundled Chromium fails
+        const fs = require('fs');
+        const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+        if (fs.existsSync(chromePath)) {
+            // Let Puppeteer use bundled Chromium first, fallback to Chrome if needed
+            // Removing executablePath to let Puppeteer handle it automatically
+        }
+    }
+    // For Windows and other platforms, let Puppeteer find the browser automatically
+    
+    return puppeteer.launch(launchOptions);
+})();
 
 
 async function generateTicketPDF(ticketData) {
