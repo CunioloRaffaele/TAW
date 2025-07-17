@@ -100,8 +100,6 @@ CREATE TABLE IF NOT EXISTS Users (
 -- Create Tickets Table
 -- what are the standardized classes of a ticket? (arbitrary for us)
 CREATE TABLE IF NOT EXISTS Tickets (
-    --    code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
     code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     type VARCHAR(25),
     price DOUBLE PRECISION,
@@ -150,10 +148,12 @@ CREATE INDEX IF NOT EXISTS routes_peers ON Routes(departure, destination);
 
 CREATE INDEX IF NOT EXISTS airport_name ON Airports(name);
 
+CREATE INDEX IF NOT EXISTS expired_jwt ON blJWTs(jwt);
+
 
 
 -- Funzione generica per creare una funzione trigger se non esiste già
--- Esempio di utilizzo: SELECT create_trigger_function_if_not_exists('filter_zombies', 'RETURN NEW;');
+-- Esempio di utilizzo: SELECT create_trigger_function_if_not_exists('filter_zombie_bookings', 'RETURN NEW;');
 
 CREATE OR REPLACE FUNCTION create_trigger_function_if_not_exists(func_name text, func_body text)
 RETURNS void AS $$
@@ -178,15 +178,15 @@ $$ LANGUAGE plpgsql;
 
 -- < Remove bookings that aren't useful to users and airlines >
 -- create function first
-SELECT create_trigger_function_if_not_exists('filter_zombies', 'RETURN NEW;');
+SELECT create_trigger_function_if_not_exists('filter_zombie_bookings', 'RETURN NEW;');
 -- define then
 CREATE OR REPLACE TRIGGER  unused_booking
 AFTER INSERT OR UPDATE ON Bookings
 FOR EACH ROW
-EXECUTE FUNCTION filter_zombies();
+EXECUTE FUNCTION filter_zombie_bookings();
 
 
-CREATE OR REPLACE FUNCTION filter_zombies() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION filter_zombie_bookings() RETURNS TRIGGER AS $$
 BEGIN
 	IF NEW.seat_id IS NULL AND NEW.trip_id IS NULL AND NEW.ticket_code IS NULL THEN
         DELETE FROM Bookings WHERE id = NEW.id;
@@ -196,6 +196,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+-- < Remove flights that aren't useful to users and airlines >
+-- create function first
+SELECT create_trigger_function_if_not_exists('filter_zombie_flights', 'RETURN NEW;');
+-- define then
+CREATE OR REPLACE TRIGGER unused_flight
+AFTER INSERT OR UPDATE ON Flights
+FOR EACH ROW
+EXECUTE FUNCTION filter_zombie_flights();
+
+CREATE OR REPLACE FUNCTION filter_zombie_flights() RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.airline_name IS NULL THEN
+        DELETE FROM Flights WHERE code = NEW.code;
+        RETURN NULL; -- annulla la riga inserita/aggiornata
+    END IF;
+    RETURN NEW;---for now
+END;
+$$ LANGUAGE plpgsql;
+
 -- < Generate seats from aircrafts insertion>
 -- create function first
 SELECT create_trigger_function_if_not_exists('generate_seats', 'RETURN NEW;');
@@ -239,50 +259,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-
--- < Generate seats from aircrafts insertion>
--- create function first
-SELECT create_trigger_function_if_not_exists('generate_seats', 'RETURN NEW;');
--- define then
-CREATE OR REPLACE TRIGGER seats_generator
-AFTER INSERT ON Aircrafts
-FOR EACH ROW
-EXECUTE FUNCTION generate_seats();
-
-CREATE OR REPLACE FUNCTION generate_seats() RETURNS TRIGGER AS $$
-DECLARE
-    row_letter char(1);
-    seat_number integer;
-    seats_per_row integer := 8;
-    current_row integer := 1;
-    seat_position varchar(4);
-BEGIN
-    -- Per ogni posto fino alla capacità massima
-    FOR seat_counter IN 1..NEW.seats_capacity LOOP
-        -- Calcola la lettera della fila (A, B, C, ...)
-        row_letter := chr(64 + current_row); -- 65 è il codice ASCII per 'A'
-        
-        -- Calcola il numero del posto nella fila (1-8)
-        seat_number := 1 + ((seat_counter - 1) % seats_per_row);
-        
-        -- Crea la posizione del posto (es: A1, B3, C7)
-        seat_position := row_letter || seat_number::text;
-        
-        -- Inserisci il nuovo posto
-        INSERT INTO Seats (postion, aircraft_id)
-        VALUES (seat_position, NEW.id);
-        
-        -- Se abbiamo raggiunto l'ultimo posto della fila, passa alla prossima
-        IF seat_number = seats_per_row THEN
-            current_row := current_row + 1;
-        END IF;
-    END LOOP;
-    
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- < Limit two bookings (flights and therefore tickets bought) per trip
+-- < Limit two bookings (flights booked and therefore tickets bought) per trip
 -- create function first
 SELECT create_trigger_function_if_not_exists('limit_bookings_per_trip', 'RETURN NEW;');
 -- define then
