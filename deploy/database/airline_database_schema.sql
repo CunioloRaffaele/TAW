@@ -166,12 +166,12 @@ BEGIN
 
     IF NOT exists THEN
         EXECUTE format(
-            'CREATE FUNCTION %I() RETURNS TRIGGER AS $f$ BEGIN %s END; $f$ LANGUAGE plpgsql;',
+            'CREATE FUNCTION %I() RETURNS TRIGGER AS $f$ BEGIN %s END; $f$ LANGUAGE plpgsql SECURITY INVOKER;',
             func_name, func_body
         );
     END IF;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY INVOKER;
 
 
 -- TRIGGERS
@@ -194,7 +194,7 @@ BEGIN
     END IF;
 	RETURN NEW;---for now
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY INVOKER;
 
 
 -- < Remove flights that aren't useful to users and airlines >
@@ -214,7 +214,7 @@ BEGIN
     END IF;
     RETURN NEW;---for now
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY INVOKER;
 
 -- < Generate seats from aircrafts insertion>
 -- create function first
@@ -256,7 +256,7 @@ BEGIN
     
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY INVOKER;
 
 
 -- < Limit two bookings (flights booked and therefore tickets bought) per trip
@@ -287,7 +287,7 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY INVOKER;
 
 
 
@@ -571,4 +571,21 @@ INSERT INTO blJWTs (jwt) VALUES
 ('jwt3'),
 ('jwt4');
 
+
+
+-- < DATABASE ROLES AND PRIVILEGES >
+--  Only non sudo user that will interact with the database with a subset of privileges
+CREATE USER backend_user WITH PASSWORD 'alexander123';
+
+-- Concedi l'accesso USAGE allo schema (permette di accedervi, ma non leggere dati)
+GRANT USAGE ON SCHEMA public TO backend_user;
+
+-- Concedi SELECT, INSERT, UPDATE, DELETE su tutte le tabelle esistenti
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO backend_user;
+
+-- Concedi l’esecuzione delle funzioni
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO backend_user;
+
+-- NO PRIVILEGES GRANT/REVOKE
+-- careful on functions permissione: SECURITY INVOKER
 
