@@ -145,26 +145,11 @@
         <mxCell id="Q50AeV7Kv5rFn46oIAkc-1" value="Lan:double" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="Vh7ybCmycij3RCht1qAK-20" vertex="1">
           <mxGeometry y="220" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="kgwtjrE0FstHuXd1rFe7-4" value="BoughtBy" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="-180" y="660" width="80" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="kgwtjrE0FstHuXd1rFe7-5" value="BelongsTo" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="330" y="718" width="80" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="kgwtjrE0FstHuXd1rFe7-6" value="Use" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="570" y="500" width="40" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="kgwtjrE0FstHuXd1rFe7-11" value="SoldBy" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="370" y="390" width="60" height="30" as="geometry" />
-        </mxCell>
         <mxCell id="kgwtjrE0FstHuXd1rFe7-14" value="RefersTo" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="750" y="368" width="70" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="kgwtjrE0FstHuXd1rFe7-15" value="Choose" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="850" y="585" width="60" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="kgwtjrE0FstHuXd1rFe7-16" value="OptedFor" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-          <mxGeometry x="980" y="760" width="70" height="30" as="geometry" />
+        <mxCell id="kgwtjrE0FstHuXd1rFe7-15" value="ChoosenIn" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="840" y="585" width="80" height="30" as="geometry" />
         </mxCell>
         <mxCell id="kgwtjrE0FstHuXd1rFe7-17" value="Ticket" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
           <mxGeometry x="900" y="465" width="60" height="30" as="geometry" />
@@ -500,6 +485,21 @@
             <mxPoint x="1170" y="630" as="sourcePoint" />
             <mxPoint x="1150" y="630" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="MIx22FfydVjEeft8OLp_-54" value="Buy" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="-150" y="660" width="40" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MIx22FfydVjEeft8OLp_-55" value="UsedBy" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="540" y="500" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MIx22FfydVjEeft8OLp_-56" value="Have" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="340" y="710" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MIx22FfydVjEeft8OLp_-58" value="OptedFor" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="985" y="760" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MIx22FfydVjEeft8OLp_-59" value="Sell" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="350" y="390" width="40" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
