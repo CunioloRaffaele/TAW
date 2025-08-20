@@ -17,12 +17,16 @@ services:
     container_name: backend
     environment:
       DATABASE_URL: postgresql://postgres:123@db:5432/postgres
-      # should ovverride project's .env file and use docker network
+      FLASK_APP: app.py
+      FLASK_ENV: production
+      PORT: 3000
+      CHROMIUM_PATH: /usr/bin/chromium
+    # Sovrascrive il file .env del progetto e usa la rete docker
     ports:
       - "3000:3000"
     depends_on:
       - db
-    command: npm run easyStart
+    command: flask run --host=0.0.0.0 --port=3000
 
   frontend:
     build:

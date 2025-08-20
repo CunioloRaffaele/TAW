@@ -30,18 +30,23 @@ If you prefer to set up the project manually without Docker, follow these steps:
 2. **Install dependencies**:
    ```sh
    cd TAW/backend
-   npm install
-   cd TAW/frontend/flights
-   npm install
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
    ```
+
 3. **Set up the PostgreSQL database**:
     Use the provided schema in 'deploy/database/airline_database_schema.sql' to create the database structure.
     Database connection for Prisma ORM is configured in `backend/.env` file. Make sure to set the correct database URL.
 4. **Run the backend**:
     ```sh
-    cd TAW/backend
-    npm run easyStart
-    ```
+   cd ../../backend
+   export FLASK_APP=app.py
+   export FLASK_ENV=development
+   export PORT=3000
+   flask run --host=0.0.0.0 --port=3000
+   ```
+   
 5. **Run the frontend**:
     ```sh
     cd TAW/frontend/flights

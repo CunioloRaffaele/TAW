@@ -583,6 +583,9 @@ GRANT USAGE ON SCHEMA public TO backend_user;
 -- Concedi SELECT, INSERT, UPDATE, DELETE su tutte le tabelle esistenti
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO backend_user;
 
+-- Concedi USAGE e SELECT su tutte le sequenze esistenti nello schema public
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO backend_user;
+
 -- Concedi l’esecuzione delle funzioni
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO backend_user;
 

@@ -32,7 +32,7 @@ export class MapComponent implements AfterViewInit {
   }
 
   private loadAirports(): void {
-    const url = `${environment.apiUrl}/api/navigate/airports/`;
+    const url = `${environment.apiUrl}/api/navigate/airports`;
 
     // Set map bounds
     const southWest = L.latLng(-60, -170);

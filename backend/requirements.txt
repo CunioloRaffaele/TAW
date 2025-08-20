@@ -1,0 +1,10 @@
+sqlalchemy
+psycopg2-binary
+flask
+PyJWT
+bcrypt
+qrcode
+pyppeteer
+python-dotenv
+Pillow
+flask_cors
