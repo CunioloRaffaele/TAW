@@ -7,6 +7,7 @@ RUN apt-get update && \
         chromium \
         fonts-liberation \
         libasound2 \
+        libappindicator3-1 \
         libatk-bridge2.0-0 \
         libatk1.0-0 \
         libc6 \

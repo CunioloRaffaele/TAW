@@ -17,7 +17,8 @@ async def get_browser():
     platform = os.uname().sysname.lower()
     launch_options = {
         'headless': True,
-        'args': ['--no-sandbox', '--disable-setuid-sandbox']
+        'args': ['--no-sandbox', '--disable-setuid-sandbox'],
+        'executablePath': '/usr/bin/chromium'  # o '/usr/bin/chromium-browser'
     }
     if platform == 'linux':
         if Path('/usr/bin/chromium-browser').exists():
@@ -70,7 +71,7 @@ async def generate_ticket_pdf(ticket_data: dict) -> bytes:
     try:
         browser = await get_browser()
         page = await browser.newPage()
-        await page.setContent(html, timeout=0, waitUntil='domcontentloaded')
+        await page.setContent(html)
         await page.emulateMedia('print')
         pdf_bytes = await page.pdf(preferCSSPageSize=True, timeout=0, format='A4')
         await page.close()
