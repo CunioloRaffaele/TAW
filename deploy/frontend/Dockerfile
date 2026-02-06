@@ -20,6 +20,9 @@ COPY --from=build /app/dist/flights/browser /usr/share/nginx/html
 # Copy custom nginx config for Angular routing (optional)
 # COPY nginx.conf /etc/nginx/nginx.conf
 
+# CORRETTO:
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
