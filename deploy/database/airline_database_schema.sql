@@ -419,30 +419,58 @@ INSERT INTO Users (name, email, password, role) VALUES
 -- Insert flights for each airline with specific timing requirements relative to June 26, 2024 11:00
 INSERT INTO Flights (duration, aircraft_id, liftoff_date, route_departure, route_destination, airline_name) VALUES
 -- FlySafe flights
+/*
 (240, 5, '2025-06-25 06:00:00', 1, 2, 'FlySafe'),  -- Past flight (Dubai -> Frankfurt)
 (600, 6, '2025-06-26 08:00:00', 2, 1, 'FlySafe'),  -- In-progress flight (Frankfurt -> Dubai)
 (300, 7, '2025-07-01 10:00:00', 3, 9, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
 (300, 7, '2025-07-03 14:00:00', 9, 3, 'FlySafe'),  -- Future flight (Singapore -> Tokyo)
 (300, 6, '2025-07-03 13:00:00', 8, 5, 'FlySafe'),  
-(300, 5, '2025-07-05 17:00:00', 5, 1, 'FlySafe'), 
+(300, 5, '2025-07-05 17:00:00', 5, 1, 'FlySafe'), */
+
+-- ANDATA / RITORNO (disponibili)
+(300, 7, '2026-02-10 10:00:00', 3, 9, 'FlySafe'),  -- Singapore -> Tokyo
+(300, 7, '2026-02-18 14:00:00', 9, 3, 'FlySafe'),  -- Tokyo -> Singapore
+
+-- MULTI-LEG (disponibile)
+(300, 6, '2026-02-22 09:00:00', 8, 5, 'FlySafe'),  -- Los Angeles -> London
+(300, 5, '2026-02-22 16:30:00', 5, 1, 'FlySafe'),  -- London -> Dubai
 
 -- Emirates flights
-(360, 1, '2025-06-25 05:00:00', 1, 7, 'Emirates'), -- Past flight (Dubai -> New York)
+/*(360, 1, '2025-06-25 05:00:00', 1, 7, 'Emirates'), -- Past flight (Dubai -> New York)
 (840, 2, '2025-07-03 04:00:00', 7, 8, 'Emirates'), -- In-progress flight (New York -> Los Angeles)
-(420, 3, '2025-07-03 14:30:00', 8, 9, 'Emirates'), -- Future flight (Los Angeles -> Tokyo)
+(420, 3, '2025-07-03 14:30:00', 8, 9, 'Emirates'), -- Future flight (Los Angeles -> Tokyo)*/
+
+-- SOLO ANDATA (disponibile)
+(840, 2, '2026-02-12 04:00:00', 7, 8, 'Emirates'), -- New York -> Los Angeles
+
+-- MULTI-LEG (disponibile)
+(420, 3, '2026-02-13 14:30:00', 8, 9, 'Emirates'), -- Los Angeles -> Tokyo
+(390, 3, '2026-02-14 11:00:00', 9, 1, 'Emirates'), -- Tokyo -> Dubai
 
 -- Lufthansa flights
-(480, 13, '2025-06-24 20:00:00', 2, 12, 'Lufthansa'), -- Past flight (Frankfurt -> Toronto)
+/*(480, 13, '2025-06-24 20:00:00', 2, 12, 'Lufthansa'), -- Past flight (Frankfurt -> Toronto)
 (720, 14, '2025-06-26 07:00:00', 13, 14, 'Lufthansa'), -- In-progress flight (Beijing -> Istanbul)
-(350, 15, '2025-07-02 12:00:00', 14, 15, 'Lufthansa'), -- Future flight (Istanbul -> Amsterdam)
+(350, 15, '2025-07-02 12:00:00', 14, 15, 'Lufthansa'), -- Future flight (Istanbul -> Amsterdam)*/
+
+-- ANDATA / RITORNO (disponibili)
+(350, 15, '2026-02-09 12:00:00', 14, 15, 'Lufthansa'), -- Istanbul -> Amsterdam
+(360, 15, '2026-02-16 17:00:00', 15, 14, 'Lufthansa'), -- Amsterdam -> Istanbul
 
 -- Singapore Airlines flights
-(390, 9, '2025-06-24 18:00:00', 3, 1, 'Singapore Airlines'),  -- Past flight (Singapore -> Dubai)
+/*(390, 9, '2025-06-24 18:00:00', 3, 1, 'Singapore Airlines'),  -- Past flight (Singapore -> Dubai)
 (630, 10, '2025-06-25 22:00:00', 9, 3, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
 (630, 10, '2025-08-25 18:00:00', 3, 9, 'Singapore Airlines'), -- In-progress flight (Tokyo -> Singapore)
 (330, 11, '2025-08-27 09:00:00', 1, 3, 'Singapore Airlines'), -- Future flight (Dubai -> Singapore)
 (630, 10, '2025-08-27 18:00:00', 8, 7, 'Singapore Airlines'), 
-(330, 11, '2025-08-29 09:00:00', 7, 1, 'Singapore Airlines'); 
+(330, 11, '2025-08-29 09:00:00', 7, 1, 'Singapore Airlines'); */
+
+-- ANDATA / RITORNO (disponibili)
+(630, 10, '2026-02-11 22:00:00', 3, 9, 'Singapore Airlines'), -- Singapore -> Tokyo
+(630, 10, '2026-02-20 18:00:00', 9, 3, 'Singapore Airlines'), -- Tokyo -> Singapore
+
+-- MULTI-LEG FUTURO
+(330, 11, '2026-03-05 09:00:00', 1, 7, 'Singapore Airlines'), -- Dubai -> New York
+(330, 11, '2026-03-06 14:30:00', 7, 3, 'Singapore Airlines'); -- New York -> Singapore
 
 -- 9. Inserimento Tickets (dipende da Flights)
 INSERT INTO Tickets (type, price, fligt_code)
