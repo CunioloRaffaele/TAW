@@ -1,5 +1,6 @@
 from flask import Blueprint
 from . import controller
+from ORM.db import get_db
 from middlewares.auth import auth_required as authMiddleware
 from middlewares.validateJsonRequest import validate_json_request
 user_bp = Blueprint('users', __name__, url_prefix='/api/users')
@@ -27,7 +28,7 @@ def deleteAccount():
 @user_bp.get('/accounts')
 @authMiddleware
 def sudoListAccount():
-    return controller.sudoListAccounts()
+    return controller.sudoListAccount()
 
 @user_bp.delete('/accounts/<id>')
 @authMiddleware

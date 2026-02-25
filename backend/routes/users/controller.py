@@ -66,18 +66,19 @@ def getAccountInfo():
     }), 200
 
 def deleteAccount():
-    if not hasattr(g, 'jwt_token'):
+    user = getattr(request, 'jwt_token', None)
+    if not user:
         return jsonify({'error': 'Token is missing'}), 400
 
-    userId = g.jwt_token.get('userId')
+    userId = user.get('userId')
     token = getattr(request, 'jwt', None)
 
     with get_db() as db:
         try:
             # Delete user and blacklist token in a transaction
-            user = db.query(Users).filter(Users.id == userId).first()
-            if user:
-                db.delete(user)
+            user_obj = db.query(Users).filter(Users.id == userId).first()
+            if user_obj:
+                db.delete(user_obj)
             blacklisted = blJWTs(jwt=token)
             db.add(blacklisted)
             db.commit()
@@ -87,7 +88,8 @@ def deleteAccount():
             return jsonify({'error': f'Error deleting account or blacklisting token: {str(error)}'}), 500
 
 def sudoDeleteAccount(id):
-    if not hasattr(g, 'jwt_token') or g.jwt_token.get('role') != 1:
+    user = getattr(request, 'jwt_token', None)
+    if not user or user.get('role') != 1:
         return jsonify({'error': 'Only admin (role = 1) can delete accounts'}), 403
 
     try:
@@ -96,12 +98,12 @@ def sudoDeleteAccount(id):
         return jsonify({'error': 'Invalid account ID number'}), 500
 
     with get_db() as db:
-        user = db.query(Users).filter(Users.id == accountToDelete).first()
-        if not user:
+        user_to_delete = db.query(Users).filter(Users.id == accountToDelete).first()
+        if not user_to_delete:
             return jsonify({'error': 'User not found'}), 500
 
         try:
-            db.delete(user)
+            db.delete(user_to_delete)
             db.commit()
             return jsonify({'message': f'Account deleted identified by ID: {accountToDelete} successfully'}), 200
         except Exception as error:
@@ -109,7 +111,8 @@ def sudoDeleteAccount(id):
             return jsonify({'error': f'Error deleting account: {str(error)}'}), 500
 
 def sudoListAccount():
-    if not hasattr(g, 'jwt_token') or g.jwt_token.get('role') != 1:
+    user = getattr(request, 'jwt_token', None)
+    if not user or user.get('role') != 1:
         return jsonify({'error': 'Only admin (role = 1) can list accounts'}), 403
 
     with get_db() as db:
