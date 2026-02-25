@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment.prod';
 
 @Component({
   selector: 'app-ticket-booking',
@@ -185,7 +186,7 @@ export class TicketBookingComponent implements OnInit {
   async bookTickets() {
     this.bookingError = null;
     this.bookingResult = null;
-    const apiUrl = 'http://129.152.7.218:3000';
+    const apiUrl = environment.apiUrl;
     let selectedExtra: number | null = null;
     if (this.globalExtra === 'baggage') selectedExtra = 1;
     if (this.globalExtra === 'lounge') selectedExtra = 2;
